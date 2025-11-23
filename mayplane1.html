@@ -867,10 +867,9 @@
         }
 
         /* Settings Toggle */
-        .settings-toggle {
+        .settings-toggle, .help-toggle {
             position: absolute;
             top: 10px;
-            right: 10px;
             background-color: transparent;
             border: none;
             color: var(--text-color);
@@ -884,7 +883,15 @@
             z-index: 102;
         }
 
-        .settings-toggle:hover {
+        .settings-toggle {
+            right: 10px;
+        }
+
+        .help-toggle {
+            right: 50px;
+        }
+
+        .settings-toggle:hover, .help-toggle:hover {
             color: var(--primary-color);
         }
 
@@ -1165,6 +1172,92 @@
 
         .welcome-start-btn:active {
             transform: translateY(0);
+        }
+
+        /* Help Overlay */
+        .help-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        .help-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+            display: none;
+        }
+
+        .help-content {
+            background-color: var(--panel-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            max-width: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
+            border: 2px solid var(--secondary-color);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            pointer-events: auto;
+            position: relative;
+        }
+
+        .help-content::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .help-content::-webkit-scrollbar-track {
+            background: var(--cockpit-dark);
+            border-radius: 5px;
+        }
+
+        .help-content::-webkit-scrollbar-thumb {
+            background: var(--secondary-color);
+            border-radius: 5px;
+        }
+
+        .help-content h2 {
+            color: var(--secondary-color);
+            margin-top: 0;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+
+        .help-content h3 {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            border-bottom: 1px solid rgba(46, 204, 113, 0.3);
+            padding-bottom: 5px;
+            margin-top: 20px;
+        }
+
+        .help-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .help-close-btn:hover {
+            background: #c0392b;
         }
 
         /* Landing Destination Overlay */
@@ -1506,16 +1599,50 @@
     </style>
 </head>
 <body>
-    <!-- Welcome Overlay -->
+    <!-- Welcome Overlay (Minimal) -->
     <div class="welcome-overlay" id="welcomeOverlay">
         <div class="welcome-content">
-            <h2>✈️ Welcome to Music for Airplanes</h2>
-            <p style="font-size: 1.05rem; line-height: 1.6; margin-bottom: 20px;">An immersive generative ambient music experience inspired by Brian Eno's "Music for Airports". Your journey through the sky creates ever-evolving soundscapes, with flight as both metaphor and mechanism for musical exploration.</p>
+            <h2>✈️ Music for Airplanes</h2>
+            <p style="font-size: 1.1rem; line-height: 1.7; margin: 20px 0; text-align: center;">An immersive generative ambient music experience inspired by Brian Eno's "Music for Airports".</p>
 
-            <h3 style="color: var(--primary-color); margin-top: 20px; margin-bottom: 10px;">🎭 The Aviation Theme</h3>
+            <p style="font-size: 0.95rem; line-height: 1.6; margin: 15px 0; opacity: 0.9;">Your flight deck controls shape evolving soundscapes. Altitude affects cabin pressure (sound thinness), speed creates wind noise, engine hums beneath you. Each note nudges your plane, making music and flight one journey.</p>
+
+            <div class="keyboard-shortcuts" style="margin-top: 25px;">
+                <h3>Quick Start</h3>
+                <div class="shortcut">
+                    <span>Take Off / Land</span>
+                    <kbd>SPACE</kbd>
+                </div>
+                <div class="shortcut">
+                    <span>Show Full Help</span>
+                    <kbd>H</kbd>
+                </div>
+                <div class="shortcut">
+                    <span>Toggle Controls</span>
+                    <kbd>C</kbd>
+                </div>
+                <div class="shortcut">
+                    <span>Emergency Eject</span>
+                    <kbd>ESC</kbd>
+                </div>
+            </div>
+
+            <p style="margin-top: 20px; font-size: 0.95rem; text-align: center; opacity: 0.8;">Press <strong>H</strong> anytime for complete documentation and controls.</p>
+
+            <button class="welcome-start-btn" id="welcomeStartBtn" onclick="console.log('Button onclick fired'); if(typeof hideWelcomeOverlay === 'function') hideWelcomeOverlay();">Begin Flight</button>
+        </div>
+    </div>
+
+    <!-- Help Overlay (Comprehensive Documentation) -->
+    <div class="help-overlay hidden" id="helpOverlay">
+        <div class="help-content">
+            <button class="help-close-btn" id="helpCloseBtn">×</button>
+            <h2>📖 Flight Manual</h2>
+
+            <h3>🎭 The Aviation Theme</h3>
             <p style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px;">Everything is "in theme" - the cockpit controls aren't just UI, they're your flight deck. Altitude changes the sound's thinness (cabin pressure), speed creates wind noise, the engine hums beneath you. When you land, you arrive at real spaces with unique acoustics. Flight becomes a journey through sound itself.</p>
 
-            <h3 style="color: var(--primary-color); margin-top: 20px; margin-bottom: 10px;">🎵 How The Music Works</h3>
+            <h3>🎵 How The Music Works</h3>
             <div style="font-size: 0.9rem; line-height: 1.7; margin-bottom: 15px;">
                 <p style="margin-bottom: 10px;"><strong>Dual Sequencers:</strong> Two independent generative sequencers create interlocking melodic patterns. They select notes from scales and play them through sine wave oscillators, creating pure, ethereal tones.</p>
 
@@ -1526,7 +1653,7 @@
                 <p style="margin-bottom: 10px;"><strong>Plane as Instrument:</strong> Your plane's movement isn't just visual - each note played actually nudges the plane in a direction, creating a feedback loop where music influences flight and flight influences music.</p>
             </div>
 
-            <h3 style="color: var(--primary-color); margin-top: 20px; margin-bottom: 10px;">🎛️ Audio Effects Explained</h3>
+            <h3>🎛️ Audio Effects Explained</h3>
             <div style="font-size: 0.9rem; line-height: 1.7; margin-bottom: 15px;">
                 <p style="margin-bottom: 8px;"><strong>Reverb:</strong> Convolver-based reverb simulates acoustic space. Higher settings create cathedral-like expansiveness, lower settings feel intimate.</p>
 
@@ -1541,7 +1668,7 @@
                 <p style="margin-bottom: 8px;"><strong>Cabin Pressure (Altitude Filter):</strong> As you climb higher, a lowpass filter gradually dampens high frequencies (22kHz → 800Hz), simulating thinning air and muffled sound in the upper atmosphere.</p>
             </div>
 
-            <h3 style="color: var(--primary-color); margin-top: 20px; margin-bottom: 10px;">✨ Visual Systems</h3>
+            <h3>✨ Visual Systems</h3>
             <div style="font-size: 0.9rem; line-height: 1.7; margin-bottom: 15px;">
                 <p style="margin-bottom: 8px;"><strong>Note Circles:</strong> Expanding rings visualize each note played, with size and color responding to pitch and velocity.</p>
 
@@ -1554,7 +1681,7 @@
                 <p style="margin-bottom: 8px;"><strong>Drifting Clouds:</strong> Procedural cloud particles add depth and movement to the scene.</p>
             </div>
 
-            <h3 style="color: var(--primary-color); margin-top: 20px; margin-bottom: 10px;">🏛️ Landing Destinations</h3>
+            <h3>🏛️ Landing Destinations</h3>
             <p style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 10px;">When you land, choose from 6 unique spaces, each with distinct acoustic properties:</p>
             <div style="font-size: 0.85rem; line-height: 1.7; margin-bottom: 15px; padding-left: 15px;">
                 <p style="margin-bottom: 6px;"><strong>🏛️ Museum Gallery:</strong> Minimalist white space (Reverb 0.7, slower tempo) - spacious, contemplative</p>
@@ -1565,7 +1692,7 @@
                 <p style="margin-bottom: 6px;"><strong>🌊 Waterside Pavilion:</strong> Natural wood/water (Reverb 0.4, tranquil tempo) - open, serene</p>
             </div>
 
-            <h3 style="color: var(--primary-color); margin-top: 20px; margin-bottom: 10px;">🌤️ Atmospheric Settings</h3>
+            <h3>🌤️ Atmospheric Settings</h3>
             <p style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 10px;">Customize your landing atmosphere:</p>
             <div style="font-size: 0.85rem; line-height: 1.7; margin-bottom: 15px; padding-left: 15px;">
                 <p style="margin-bottom: 6px;"><strong>Time of Day:</strong> Dawn/Morning/Afternoon/Evening/Night - affects lighting color and tempo modifiers</p>
@@ -1573,7 +1700,7 @@
                 <p style="margin-bottom: 6px;"><strong>Season:</strong> Spring (blossoms) / Summer (dust) / Autumn (leaves) / Winter (snow) - unique particle types</p>
             </div>
 
-            <div class="keyboard-shortcuts" style="margin-top: 20px;">
+            <div class="keyboard-shortcuts" style="margin-top: 25px;">
                 <h3>⌨️ Keyboard Shortcuts</h3>
                 <div class="shortcut">
                     <span>Take Off / Land</span>
@@ -1592,7 +1719,7 @@
                     <kbd>F</kbd>
                 </div>
                 <div class="shortcut">
-                    <span>Randomize</span>
+                    <span>Randomize All</span>
                     <kbd>R</kbd>
                 </div>
                 <div class="shortcut">
@@ -1600,18 +1727,20 @@
                     <kbd>T</kbd>
                 </div>
                 <div class="shortcut">
+                    <span>View Flight Log</span>
+                    <kbd>L</kbd>
+                </div>
+                <div class="shortcut">
                     <span>Emergency Eject</span>
                     <kbd>ESC</kbd>
                 </div>
                 <div class="shortcut">
-                    <span>Show Help</span>
+                    <span>Toggle Help</span>
                     <kbd>H</kbd>
                 </div>
             </div>
 
-            <p style="margin-top: 20px; font-size: 0.9rem; opacity: 0.8; text-align: center;">Ready for takeoff? Your ambient journey awaits.</p>
-
-            <button class="welcome-start-btn" id="welcomeStartBtn" onclick="console.log('Button onclick fired'); if(typeof hideWelcomeOverlay === 'function') hideWelcomeOverlay();">Begin Flight</button>
+            <p style="margin-top: 25px; font-size: 0.9rem; opacity: 0.8; text-align: center;">Press H or ESC to close this help screen.</p>
         </div>
     </div>
 
@@ -1741,7 +1870,10 @@
             
             <!-- Emergency Eject Button -->
             <button class="emergency-eject" id="emergencyEject" title="Immediately stop all audio and reset system">Eject</button>
-            
+
+            <!-- Help Toggle -->
+            <button class="help-toggle" id="helpButton" title="Show Help (H)">?</button>
+
             <!-- Settings Toggle -->
             <button class="settings-toggle" id="settingsButton" title="Open Settings">⚙️</button>
             
@@ -2493,7 +2625,12 @@
     const darkModeToggle = document.getElementById('darkModeToggle');
     const safeLowFreqControl = document.getElementById('safeLowFreq');
     const limiterThresholdControl = document.getElementById('limiterThreshold');
-    
+
+    // Help overlay
+    const helpButton = document.getElementById('helpButton');
+    const helpOverlay = document.getElementById('helpOverlay');
+    const helpCloseBtn = document.getElementById('helpCloseBtn');
+
     // Emergency eject button
     const emergencyEjectBtn = document.getElementById('emergencyEject');
     
@@ -2530,10 +2667,10 @@
     
     // Predefined flight paths
     let movieFlightPaths = [
-        { start: { x: -10, y: 50 }, end: { x: 110, y: 50 }, duration: 40000 }, // Straight path
-        { start: { x: -10, y: 30 }, end: { x: 110, y: 70 }, duration: 50000 }, // Diagonal path
-        { start: { x: -10, y: 70 }, end: { x: 110, y: 30 }, duration: 50000 }, // Reverse diagonal
-        { start: { x: -10, y: 60 }, end: { x: 40, y: 40 }, next: { x: 110, y: 60 }, duration: 60000 } // Path with turn
+        { start: { x: 10, y: 50 }, end: { x: 90, y: 50 }, duration: 30000 }, // Straight path (visible)
+        { start: { x: 10, y: 30 }, end: { x: 90, y: 70 }, duration: 35000 }, // Diagonal path
+        { start: { x: 10, y: 70 }, end: { x: 90, y: 30 }, duration: 35000 }, // Reverse diagonal
+        { start: { x: 10, y: 60 }, end: { x: 50, y: 40 }, next: { x: 90, y: 60 }, duration: 40000 } // Path with turn
     ];
     
     // Movie-style flight path animation variables
@@ -3312,6 +3449,29 @@
         }
     }
 
+    // Help overlay functions
+    function showHelpOverlay() {
+        if (helpOverlay) {
+            helpOverlay.classList.remove('hidden');
+        }
+    }
+
+    function hideHelpOverlay() {
+        if (helpOverlay) {
+            helpOverlay.classList.add('hidden');
+        }
+    }
+
+    function toggleHelpOverlay() {
+        if (helpOverlay) {
+            if (helpOverlay.classList.contains('hidden')) {
+                showHelpOverlay();
+            } else {
+                hideHelpOverlay();
+            }
+        }
+    }
+
     // Initialize the application
     function init() {
         // Load user settings
@@ -3475,7 +3635,16 @@
         settingsButton.addEventListener('click', openSettings);
         saveSettingsBtn.addEventListener('click', saveSettings);
         closeSettingsBtn.addEventListener('click', closeSettings);
-        
+
+        // Help overlay
+        helpButton.addEventListener('click', showHelpOverlay);
+        helpCloseBtn.addEventListener('click', hideHelpOverlay);
+        helpOverlay.addEventListener('click', function(e) {
+            if (e.target === helpOverlay) {
+                hideHelpOverlay();
+            }
+        });
+
         // Dark mode toggle
         darkModeToggle.addEventListener('change', function() {
             if (this.checked) {
@@ -3611,13 +3780,18 @@
                     e.preventDefault();
                     showFlightLog();
                     break;
-                case 'escape':
-                    e.preventDefault();
-                    emergencyEject();
-                    break;
                 case 'h':
                     e.preventDefault();
-                    showWelcomeOverlay();
+                    toggleHelpOverlay();
+                    break;
+                case 'escape':
+                    e.preventDefault();
+                    // Close help overlay if it's open, otherwise emergency eject
+                    if (helpOverlay && !helpOverlay.classList.contains('hidden')) {
+                        hideHelpOverlay();
+                    } else {
+                        emergencyEject();
+                    }
                     break;
             }
         });
@@ -6241,25 +6415,45 @@ function startFlightVisualization() {
     isLanded = false;
     currentLandingSpace = null;
     landingParticles = [];
-    
-    // Show plane
+
+    // Reset path variables
+    pathStartTime = Date.now();
+    currentPath = 0;
+    pathProgress = 0;
+
+    // Show plane and ensure it has dimensions
     plane.style.display = 'block';
-    
+
+    // Position plane initially at starting position (visible on screen)
+    // Start at 20% from left, middle of screen for better visibility
+    if (flightCanvas && flightCanvas.width > 0) {
+        planePosition.x = 20; // Start 20% from left edge
+        planePosition.y = 50; // Middle vertically
+        const left = (planePosition.x / 100) * flightCanvas.width;
+        const top = (planePosition.y / 100) * flightCanvas.height;
+        plane.style.left = `${left - 70}px`; // 70 is half of plane width (140px)
+        plane.style.top = `${top - 35}px`;   // 35 is half of plane height (70px)
+        plane.style.transform = 'rotate(0deg)';
+        console.log('Plane positioned at:', left, top, 'Canvas dimensions:', flightCanvas.width, flightCanvas.height);
+    } else {
+        console.warn('flightCanvas not ready, dimensions:', flightCanvas ? flightCanvas.width : 'null');
+    }
+
     // Start plane animation
     requestAnimationFrame(animatePlane);
-    
+
     // Create the initial landscape
     createInitialLandscape();
-    
+
     // Draw landscape and stars
     drawLandscape();
     drawStars();
-    
+
     // Set up sequencers
     sequencer1 = new AmbientSequencer(1);
     sequencer1.start();
     sequencer1.selectPattern();
-    
+
     sequencer2 = new AmbientSequencer(2);
     setTimeout(() => {
         if (isFlying && sequencer2) {
@@ -7521,19 +7715,23 @@ class AmbientSequencer {
     }
 
     playNote() {
-        if (!isFlying || !audioContext) return;
+        if (!isFlying || !audioContext) {
+            if (!isFlying) console.log('Sequencer', this.id, ': Not flying, skipping note');
+            if (!audioContext) console.log('Sequencer', this.id, ': No audio context, skipping note');
+            return;
+        }
         if (!this.currentPattern) this.selectPattern();
 
         try {
             // Check if audio context is running
             if (audioContext.state !== 'running') {
-                console.warn('AudioContext not running, trying to resume...');
+                console.warn('Sequencer', this.id, ': AudioContext not running (state:', audioContext.state, '), trying to resume...');
                 audioContext.resume().then(() => {
-                    console.log('AudioContext resumed in playNote');
+                    console.log('Sequencer', this.id, ': AudioContext resumed in playNote');
                     // Try again after resuming
                     setTimeout(() => this.playNote(), 100);
                 }).catch(err => {
-                    console.error('Failed to resume AudioContext in playNote:', err);
+                    console.error('Sequencer', this.id, ': Failed to resume AudioContext in playNote:', err);
                 });
                 return;
             }
@@ -7596,6 +7794,11 @@ class AmbientSequencer {
 
             // Track note in flight log
             trackNotePlayed();
+
+            // Log successful note creation (only occasionally to avoid spam)
+            if (Math.random() < 0.1) {
+                console.log('Sequencer', this.id, ': Playing note at', frequency.toFixed(2), 'Hz, decay:', decayTime + 's');
+            }
 
             // Increment pattern index and occasionally randomize
             this.patternIndex++;
