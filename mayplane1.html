@@ -1450,8 +1450,32 @@
                                 </label>
                                 <div class="effect-label">Cabin Pressure <span class="led-indicator" id="compressorLed"></span></div>
                             </div>
+
+                            <div class="effect-switch">
+                                <label class="switch">
+                                    <input type="checkbox" id="engineToggle" checked>
+                                    <span class="slider-switch"></span>
+                                </label>
+                                <div class="effect-label">Engine Hum <span class="led-indicator led-on" id="engineLed"></span></div>
+                            </div>
+
+                            <div class="effect-switch">
+                                <label class="switch">
+                                    <input type="checkbox" id="windToggle" checked>
+                                    <span class="slider-switch"></span>
+                                </label>
+                                <div class="effect-label">Wind Noise <span class="led-indicator led-on" id="windLed"></span></div>
+                            </div>
+
+                            <div class="effect-switch">
+                                <label class="switch">
+                                    <input type="checkbox" id="altitudeFilterToggle" checked>
+                                    <span class="slider-switch"></span>
+                                </label>
+                                <div class="effect-label">Altitude Filter <span class="led-indicator led-on" id="altitudeFilterLed"></span></div>
+                            </div>
                         </div>
-                        
+
                         <!-- Filter Controls -->
                         <div id="filterControlsPanel">
                             <div class="control-group">
@@ -1662,7 +1686,20 @@
     // Compressor node
     let compressorNode = null;
     let isCompressorEnabled = false;
-    
+
+    // Immersive audio features
+    let engineOscillator = null;
+    let engineGain = null;
+    let windNoiseNode = null;
+    let windNoiseGain = null;
+    let windNoiseFilter = null;
+    let cabinPressureFilter = null;
+    let turbulenceTimeout = null;
+    let lastVelocity = { x: 0, y: 0 };
+    let isEngineEnabled = true;
+    let isWindEnabled = true;
+    let isCabinPressureEnabled = true;
+
     // LFO rate divisions (relative to BPM)
     const lfoDivisions = [
         { name: "1/16 Note", value: 4 },
@@ -1809,6 +1846,9 @@
     const filterToggle = document.getElementById('filterToggle');
     const lfoToggle = document.getElementById('lfoToggle');
     const compressorToggle = document.getElementById('compressorToggle');
+    const engineToggle = document.getElementById('engineToggle');
+    const windToggle = document.getElementById('windToggle');
+    const altitudeFilterToggle = document.getElementById('altitudeFilterToggle');
     
     // Filter controls
     const filterCutoffControl = document.getElementById('filterCutoff');
@@ -1859,6 +1899,12 @@
     let smoothedTrail = [];
     let MAX_TRAIL_POINTS = 200;
     let MAX_SMOOTHED_POINTS = 1000;
+
+    // New visual effects
+    let shootingStars = [];
+    let cloudParticles = [];
+    let contrailParticles = [];
+    let atmosphericGlow = { opacity: 0, radius: 0 };
     let elementPersistence = 0.5;
     let lastAnnouncementTime = 0;
     let cityLabelsVisible = true;
@@ -2623,12 +2669,23 @@
     
     // Welcome overlay functions
     function hideWelcomeOverlay() {
+        console.log('Hiding welcome overlay...');
         const welcomeOverlay = document.getElementById('welcomeOverlay');
         if (welcomeOverlay) {
             welcomeOverlay.classList.add('hidden');
             setTimeout(() => {
                 welcomeOverlay.style.display = 'none';
             }, 500);
+
+            // Initialize audio when welcome is dismissed
+            if (!audioContext || audioContext.state === 'closed') {
+                console.log('Initializing audio from welcome overlay...');
+                initializeAudio();
+            }
+
+            showStatus('Welcome aboard! Ready for takeoff.');
+        } else {
+            console.error('Welcome overlay element not found!');
         }
     }
 
@@ -2658,13 +2715,10 @@
         
         // Update UI with default values
         updateUIState();
-        
+
         // Initially hide plane
         plane.style.display = 'none';
-        
-        // Initialize audio on user interaction
-        document.addEventListener('click', initializeAudio, { once: true });
-        
+
         // Set initial UI state for effect panels
         document.getElementById('filterControlsPanel').style.display = 'none';
         document.getElementById('compressorControlsPanel').style.display = 'none';
@@ -2771,7 +2825,10 @@
         filterToggle.addEventListener('change', toggleFilter);
         lfoToggle.addEventListener('change', toggleLFO);
         compressorToggle.addEventListener('change', toggleCompressor);
-        
+        engineToggle.addEventListener('change', toggleEngine);
+        windToggle.addEventListener('change', toggleWind);
+        altitudeFilterToggle.addEventListener('change', toggleAltitudeFilter);
+
         // Filter controls
         filterCutoffControl.addEventListener('input', updateFilterCutoff);
         lfoRateControl.addEventListener('input', updateLfoRate);
@@ -3517,7 +3574,110 @@
             return false;
         }
     }
-    
+
+    // Setup engine hum
+    function setupEngineHum() {
+        try {
+            if (!audioContext) return false;
+
+            // Create oscillator for engine drone
+            engineOscillator = audioContext.createOscillator();
+            engineOscillator.type = 'sawtooth';
+            engineOscillator.frequency.setValueAtTime(55, audioContext.currentTime); // Low A note
+
+            // Create gain node for engine volume
+            engineGain = audioContext.createGain();
+            engineGain.gain.setValueAtTime(0.15, audioContext.currentTime);
+
+            // Create lowpass filter to make it more drone-like
+            const engineFilter = audioContext.createBiquadFilter();
+            engineFilter.type = 'lowpass';
+            engineFilter.frequency.setValueAtTime(200, audioContext.currentTime);
+            engineFilter.Q.setValueAtTime(1, audioContext.currentTime);
+
+            // Connect: oscillator -> filter -> gain -> master
+            engineOscillator.connect(engineFilter);
+            engineFilter.connect(engineGain);
+            engineGain.connect(masterGainNode);
+
+            // Start the oscillator
+            engineOscillator.start();
+
+            console.log('Engine hum initialized');
+            return true;
+        } catch (error) {
+            console.error('Error setting up engine hum:', error);
+            return false;
+        }
+    }
+
+    // Setup wind noise
+    function setupWindNoise() {
+        try {
+            if (!audioContext) return false;
+
+            // Create buffer for white noise
+            const bufferSize = audioContext.sampleRate * 2;
+            const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+
+            // Create buffer source
+            windNoiseNode = audioContext.createBufferSource();
+            windNoiseNode.buffer = noiseBuffer;
+            windNoiseNode.loop = true;
+
+            // Create bandpass filter for wind character
+            windNoiseFilter = audioContext.createBiquadFilter();
+            windNoiseFilter.type = 'bandpass';
+            windNoiseFilter.frequency.setValueAtTime(800, audioContext.currentTime);
+            windNoiseFilter.Q.setValueAtTime(0.5, audioContext.currentTime);
+
+            // Create gain node for wind volume
+            windNoiseGain = audioContext.createGain();
+            windNoiseGain.gain.setValueAtTime(0, audioContext.currentTime); // Start at 0, increase with velocity
+
+            // Connect: noise -> filter -> gain -> master
+            windNoiseNode.connect(windNoiseFilter);
+            windNoiseFilter.connect(windNoiseGain);
+            windNoiseGain.connect(masterGainNode);
+
+            // Start the noise
+            windNoiseNode.start();
+
+            console.log('Wind noise initialized');
+            return true;
+        } catch (error) {
+            console.error('Error setting up wind noise:', error);
+            return false;
+        }
+    }
+
+    // Setup cabin pressure filter (altitude-based)
+    function setupCabinPressureFilter() {
+        try {
+            if (!audioContext) return false;
+
+            // Create lowpass filter that will be controlled by altitude
+            cabinPressureFilter = audioContext.createBiquadFilter();
+            cabinPressureFilter.type = 'lowpass';
+            cabinPressureFilter.frequency.setValueAtTime(22050, audioContext.currentTime); // Start fully open
+            cabinPressureFilter.Q.setValueAtTime(0.7, audioContext.currentTime);
+
+            // This filter will be inserted in the audio chain
+            setupAudioChain();
+
+            console.log('Cabin pressure filter initialized');
+            return true;
+        } catch (error) {
+            console.error('Error setting up cabin pressure filter:', error);
+            return false;
+        }
+    }
+
     // Setup LFO
     function setupLFO() {
         try {
@@ -3987,7 +4147,118 @@
             }
         }
     }
-    
+
+    // Toggle engine hum
+    function toggleEngine() {
+        isEngineEnabled = engineToggle.checked;
+
+        // Update LED indicator
+        const engineLed = document.getElementById('engineLed');
+        engineLed.classList.toggle('led-on', isEngineEnabled);
+
+        if (isEngineEnabled) {
+            if (!engineOscillator && audioContext) {
+                setupEngineHum();
+            } else if (engineGain && audioContext) {
+                engineGain.gain.setValueAtTime(0.15, audioContext.currentTime);
+            }
+            showStatus('Engine hum enabled');
+        } else {
+            if (engineGain && audioContext) {
+                engineGain.gain.setValueAtTime(0, audioContext.currentTime);
+                showStatus('Engine hum disabled');
+            }
+        }
+    }
+
+    // Toggle wind noise
+    function toggleWind() {
+        isWindEnabled = windToggle.checked;
+
+        // Update LED indicator
+        const windLed = document.getElementById('windLed');
+        windLed.classList.toggle('led-on', isWindEnabled);
+
+        if (isWindEnabled) {
+            if (!windNoiseNode && audioContext) {
+                setupWindNoise();
+            }
+            showStatus('Wind noise enabled');
+        } else {
+            if (windNoiseGain && audioContext) {
+                windNoiseGain.gain.setValueAtTime(0, audioContext.currentTime);
+                showStatus('Wind noise disabled');
+            }
+        }
+    }
+
+    // Toggle altitude-based filter
+    function toggleAltitudeFilter() {
+        isCabinPressureEnabled = altitudeFilterToggle.checked;
+
+        // Update LED indicator
+        const altitudeFilterLed = document.getElementById('altitudeFilterLed');
+        altitudeFilterLed.classList.toggle('led-on', isCabinPressureEnabled);
+
+        if (isCabinPressureEnabled) {
+            if (!cabinPressureFilter && audioContext) {
+                setupCabinPressureFilter();
+            }
+            showStatus('Altitude filter enabled - sound changes with height');
+        } else {
+            if (cabinPressureFilter && audioContext) {
+                cabinPressureFilter.frequency.setValueAtTime(22050, audioContext.currentTime);
+                showStatus('Altitude filter disabled');
+            }
+        }
+    }
+
+    // Update immersive audio based on flight dynamics
+    function updateImmersiveAudio() {
+        if (!audioContext || !isFlying) return;
+
+        // Get current altitude (0-1) from control
+        const altitude = parseFloat(altitudeControl.value);
+
+        // Calculate velocity based on plane direction
+        const velocity = Math.sqrt(planeDirection.x * planeDirection.x + planeDirection.y * planeDirection.y);
+
+        // Update engine hum based on velocity
+        if (isEngineEnabled && engineOscillator && engineGain) {
+            // Engine frequency increases with speed (55Hz to 85Hz)
+            const engineFreq = 55 + velocity * 1500;
+            engineOscillator.frequency.setValueAtTime(engineFreq, audioContext.currentTime);
+
+            // Engine volume also increases slightly with speed
+            const engineVol = 0.12 + velocity * 1.5;
+            engineGain.gain.setValueAtTime(Math.min(engineVol, 0.25), audioContext.currentTime);
+        }
+
+        // Update wind noise based on velocity
+        if (isWindEnabled && windNoiseGain && windNoiseFilter) {
+            // Wind volume increases with speed
+            const windVol = velocity * 0.8;
+            windNoiseGain.gain.setValueAtTime(Math.min(windVol, 0.15), audioContext.currentTime);
+
+            // Wind filter frequency also changes with speed
+            const windFreq = 400 + velocity * 2000;
+            windNoiseFilter.frequency.setValueAtTime(windFreq, audioContext.currentTime);
+        }
+
+        // Update cabin pressure filter based on altitude
+        if (isCabinPressureEnabled && cabinPressureFilter) {
+            // Higher altitude = lower filter cutoff (thinner air, muffled sound)
+            // At altitude 0: full frequency (22050 Hz)
+            // At altitude 1: reduced frequency (800 Hz)
+            const filterFreq = 22050 - (altitude * 21250);
+            cabinPressureFilter.frequency.setValueAtTime(filterFreq, audioContext.currentTime);
+        }
+
+        // Store last velocity for future use
+        lastVelocity.x = planeDirection.x;
+        lastVelocity.y = planeDirection.y;
+    }
+
     // Apply filter preset
     function applyFilterPreset(e) {
         const presetName = e.target.value;
@@ -4563,11 +4834,22 @@ function continueWithTakeoff() {
         if (masterGainNode && audioContext) {
             masterGainNode.gain.setValueAtTime(0, audioContext.currentTime);
             masterGainNode.gain.linearRampToValueAtTime(
-                parseFloat(volumeControl.value), 
+                parseFloat(volumeControl.value),
                 audioContext.currentTime + 1
             );
         }
-        
+
+        // Initialize immersive audio features
+        if (isEngineEnabled && !engineOscillator) {
+            setupEngineHum();
+        }
+        if (isWindEnabled && !windNoiseNode) {
+            setupWindNoise();
+        }
+        if (isCabinPressureEnabled && !cabinPressureFilter) {
+            setupCabinPressureFilter();
+        }
+
         // To ensure the plane starts with enough momentum
         planeDirection.x = 0.02;
         planeDirection.y = 0.01;
@@ -4873,9 +5155,17 @@ function animatePlane() {
         trailCtx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
     }
     
+    // Update immersive audio based on flight dynamics
+    updateImmersiveAudio();
+
+    // Update and draw new visual effects
+    updateCloudParticles();
+    updateContrailParticles();
+    drawAtmosphericGlow();
+
     // Draw note visualization
     drawNoteVisualization();
-    
+
     // Draw permanent trail (if enabled)
     if (trailPermaMode && smoothedTrail.length > 0) {
         drawPermanentTrail();
@@ -5386,23 +5676,184 @@ function generateAnnouncement() {
 // Draw stars
 function drawStars() {
     starsCtx.clearRect(0, 0, starsCanvas.width, starsCanvas.height);
-    
+
     // Draw stars with twinkling effect
     stars.forEach(star => {
         // Update star twinkle
         star.opacity += star.twinkleSpeed * star.twinkleDir;
-        
+
         // Reverse direction if reached min/max opacity
         if (star.opacity >= 1 || star.opacity <= 0.1) {
             star.twinkleDir *= -1;
         }
-        
+
         // Draw the star
         starsCtx.fillStyle = adjustOpacity(star.color, star.opacity);
         starsCtx.beginPath();
         starsCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
         starsCtx.fill();
     });
+
+    // Randomly create shooting stars (1% chance per frame when flying at high altitude)
+    const altitude = parseFloat(altitudeControl.value);
+    if (isFlying && altitude > 0.7 && Math.random() < 0.01) {
+        shootingStars.push({
+            x: Math.random() * starsCanvas.width,
+            y: Math.random() * (starsCanvas.height * 0.5), // Top half of screen
+            length: 30 + Math.random() * 50,
+            speed: 5 + Math.random() * 10,
+            angle: Math.PI / 4 + Math.random() * Math.PI / 4, // Diagonal
+            opacity: 1,
+            brightness: 0.5 + Math.random() * 0.5
+        });
+    }
+
+    // Update and draw shooting stars
+    shootingStars = shootingStars.filter(star => {
+        star.x += Math.cos(star.angle) * star.speed;
+        star.y += Math.sin(star.angle) * star.speed;
+        star.opacity -= 0.02;
+
+        if (star.opacity > 0) {
+            // Draw shooting star as a gradient line
+            const gradient = starsCtx.createLinearGradient(
+                star.x, star.y,
+                star.x - Math.cos(star.angle) * star.length,
+                star.y - Math.sin(star.angle) * star.length
+            );
+            gradient.addColorStop(0, `rgba(255, 255, 255, ${star.opacity * star.brightness})`);
+            gradient.addColorStop(0.5, `rgba(200, 220, 255, ${star.opacity * star.brightness * 0.5})`);
+            gradient.addColorStop(1, `rgba(150, 180, 255, 0)`);
+
+            starsCtx.strokeStyle = gradient;
+            starsCtx.lineWidth = 2;
+            starsCtx.beginPath();
+            starsCtx.moveTo(star.x, star.y);
+            starsCtx.lineTo(
+                star.x - Math.cos(star.angle) * star.length,
+                star.y - Math.sin(star.angle) * star.length
+            );
+            starsCtx.stroke();
+            return true;
+        }
+        return false;
+    });
+}
+
+// Update and draw cloud particles
+function updateCloudParticles() {
+    if (!landscapeCtx || !landscapeCanvas) return;
+
+    // Generate new cloud particles (slower rate than stars)
+    if (isFlying && Math.random() < 0.02) {
+        cloudParticles.push({
+            x: -50,
+            y: 50 + Math.random() * (landscapeCanvas.height * 0.4),
+            size: 30 + Math.random() * 50,
+            speed: 0.5 + Math.random() * 1.5,
+            opacity: 0.1 + Math.random() * 0.2,
+            color: `rgba(255, 255, 255, ${0.1 + Math.random() * 0.15})`
+        });
+    }
+
+    // Update and draw cloud particles
+    cloudParticles = cloudParticles.filter(cloud => {
+        cloud.x += cloud.speed;
+
+        if (cloud.x < landscapeCanvas.width + 100) {
+            landscapeCtx.beginPath();
+            landscapeCtx.arc(cloud.x, cloud.y, cloud.size, 0, Math.PI * 2);
+            landscapeCtx.fillStyle = cloud.color;
+            landscapeCtx.fill();
+
+            // Add some blur effect
+            landscapeCtx.beginPath();
+            landscapeCtx.arc(cloud.x, cloud.y, cloud.size * 0.7, 0, Math.PI * 2);
+            landscapeCtx.fillStyle = `rgba(255, 255, 255, ${cloud.opacity * 0.5})`;
+            landscapeCtx.fill();
+
+            return true;
+        }
+        return false;
+    });
+}
+
+// Update and draw contrail particles
+function updateContrailParticles() {
+    if (!landscapeCtx || !landscapeCanvas || !isFlying) return;
+
+    // Get plane position in pixels
+    const planeX = (planePosition.x / 100) * landscapeCanvas.width;
+    const planeY = (planePosition.y / 100) * landscapeCanvas.height;
+
+    // Generate contrail particles behind the plane
+    if (Math.random() < 0.3) {
+        contrailParticles.push({
+            x: planeX,
+            y: planeY,
+            size: 2 + Math.random() * 4,
+            opacity: 0.6,
+            life: 1.0,
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: (Math.random() - 0.5) * 0.5
+        });
+    }
+
+    // Update and draw contrail particles
+    contrailParticles = contrailParticles.filter(particle => {
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.life -= 0.01;
+        particle.opacity = particle.life * 0.6;
+        particle.size *= 1.02; // Expand slightly
+
+        if (particle.life > 0) {
+            landscapeCtx.beginPath();
+            landscapeCtx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+            landscapeCtx.fillStyle = `rgba(200, 220, 255, ${particle.opacity})`;
+            landscapeCtx.fill();
+            return true;
+        }
+        return false;
+    });
+}
+
+// Draw atmospheric glow around plane
+function drawAtmosphericGlow() {
+    if (!landscapeCtx || !landscapeCanvas || !isFlying) return;
+
+    const altitude = parseFloat(altitudeControl.value);
+    const velocity = Math.sqrt(planeDirection.x * planeDirection.x + planeDirection.y * planeDirection.y);
+
+    // Glow increases at high altitude and high speed
+    const targetOpacity = (altitude * 0.3 + velocity * 5) * 0.3;
+    const targetRadius = 40 + altitude * 30 + velocity * 100;
+
+    // Smooth transitions
+    atmosphericGlow.opacity += (targetOpacity - atmosphericGlow.opacity) * 0.1;
+    atmosphericGlow.radius += (targetRadius - atmosphericGlow.radius) * 0.1;
+
+    if (atmosphericGlow.opacity > 0.05) {
+        const planeX = (planePosition.x / 100) * landscapeCanvas.width;
+        const planeY = (planePosition.y / 100) * landscapeCanvas.height;
+
+        // Draw glow
+        const gradient = landscapeCtx.createRadialGradient(
+            planeX, planeY, 0,
+            planeX, planeY, atmosphericGlow.radius
+        );
+        gradient.addColorStop(0, `rgba(150, 200, 255, ${atmosphericGlow.opacity})`);
+        gradient.addColorStop(0.5, `rgba(100, 150, 255, ${atmosphericGlow.opacity * 0.5})`);
+        gradient.addColorStop(1, 'rgba(50, 100, 200, 0)');
+
+        landscapeCtx.fillStyle = gradient;
+        landscapeCtx.fillRect(
+            planeX - atmosphericGlow.radius,
+            planeY - atmosphericGlow.radius,
+            atmosphericGlow.radius * 2,
+            atmosphericGlow.radius * 2
+        );
+    }
 }
 
 // Draw landscape
