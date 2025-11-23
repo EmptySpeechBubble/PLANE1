@@ -1614,7 +1614,7 @@
 
             <p style="margin-top: 20px; font-size: 0.95rem; text-align: center; opacity: 0.8;">Press <strong>H</strong> anytime for complete documentation and controls.</p>
 
-            <button class="welcome-start-btn" id="welcomeStartBtn">Begin Flight</button>
+            <button class="welcome-start-btn" id="welcomeStartBtn" onclick="window.hideWelcomeOverlay(); return false;">Begin Flight</button>
         </div>
     </div>
 
@@ -3549,7 +3549,8 @@
     }
     
     // Welcome overlay functions
-    function hideWelcomeOverlay() {
+    // Make hideWelcomeOverlay globally accessible for debugging
+    window.hideWelcomeOverlay = function hideWelcomeOverlay() {
         console.log('Hiding welcome overlay...');
         const welcomeOverlay = document.getElementById('welcomeOverlay');
         if (welcomeOverlay) {
@@ -3568,7 +3569,7 @@
         } else {
             console.error('Welcome overlay element not found!');
         }
-    }
+    };
 
     function showWelcomeOverlay() {
         const welcomeOverlay = document.getElementById('welcomeOverlay');
@@ -3835,18 +3836,43 @@
             }, 250);
         });
 
-        // Welcome overlay
+        // Welcome overlay - attach directly with multiple fallbacks
         const welcomeStartBtn = document.getElementById('welcomeStartBtn');
+        const welcomeOverlay = document.getElementById('welcomeOverlay');
+
         if (welcomeStartBtn) {
             console.log('Welcome button found, attaching listener');
+
+            // Primary click handler
             welcomeStartBtn.addEventListener('click', function(e) {
                 console.log('Welcome button clicked!');
                 e.preventDefault();
                 e.stopPropagation();
                 hideWelcomeOverlay();
+            }, { capture: true });
+
+            // Backup: also listen for any pointer events
+            welcomeStartBtn.addEventListener('pointerdown', function(e) {
+                console.log('Welcome button pointer down!');
+                hideWelcomeOverlay();
             });
+
+            // Make absolutely sure it's clickable
+            welcomeStartBtn.style.pointerEvents = 'auto';
+            welcomeStartBtn.style.cursor = 'pointer';
+
         } else {
             console.error('Welcome button NOT found!');
+        }
+
+        // Also allow clicking anywhere on the welcome overlay to dismiss it
+        if (welcomeOverlay) {
+            welcomeOverlay.addEventListener('click', function(e) {
+                if (e.target === welcomeOverlay || e.target.classList.contains('welcome-content')) {
+                    console.log('Welcome overlay clicked, hiding...');
+                    hideWelcomeOverlay();
+                }
+            });
         }
 
         // Landing destination system
