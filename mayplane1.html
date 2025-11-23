@@ -3654,7 +3654,13 @@
                 lastNode.connect(bassEQNode);
                 lastNode = bassEQNode;
             }
-            
+
+            // Connect cabin pressure filter if enabled (altitude-based)
+            if (cabinPressureFilter && isCabinPressureEnabled) {
+                lastNode.connect(cabinPressureFilter);
+                lastNode = cabinPressureFilter;
+            }
+
             // Connect filter if enabled
             if (filterNode && isFilterEnabled) {
                 lastNode.connect(filterNode);
@@ -4534,11 +4540,16 @@
         if (isCabinPressureEnabled) {
             if (!cabinPressureFilter && audioContext) {
                 setupCabinPressureFilter();
+            } else if (audioContext) {
+                // Rebuild audio chain to include the filter
+                setupAudioChain();
             }
             showStatus('Altitude filter enabled - sound changes with height');
         } else {
             if (cabinPressureFilter && audioContext) {
                 cabinPressureFilter.frequency.setValueAtTime(22050, audioContext.currentTime);
+                // Rebuild audio chain to remove the filter
+                setupAudioChain();
                 showStatus('Altitude filter disabled');
             }
         }
@@ -4546,7 +4557,7 @@
 
     // Update immersive audio based on flight dynamics
     function updateImmersiveAudio() {
-        if (!audioContext || !isFlying) return;
+        if (!audioContext || !isFlying || !altitudeControl) return;
 
         // Get current altitude (0-1) from control
         const altitude = parseFloat(altitudeControl.value);
@@ -5170,15 +5181,31 @@ function continueWithTakeoff() {
             );
         }
 
-        // Initialize immersive audio features
-        if (isEngineEnabled && !engineOscillator) {
-            setupEngineHum();
+        // Initialize or restart immersive audio features
+        if (isEngineEnabled) {
+            if (!engineOscillator) {
+                setupEngineHum();
+            } else if (engineGain && audioContext) {
+                // Fade back in if already exists
+                engineGain.gain.setValueAtTime(0, audioContext.currentTime);
+                engineGain.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 1);
+            }
         }
-        if (isWindEnabled && !windNoiseNode) {
-            setupWindNoise();
+        if (isWindEnabled) {
+            if (!windNoiseNode) {
+                setupWindNoise();
+            } else if (windNoiseGain && audioContext) {
+                // Wind starts at 0 and increases with velocity
+                windNoiseGain.gain.setValueAtTime(0, audioContext.currentTime);
+            }
         }
-        if (isCabinPressureEnabled && !cabinPressureFilter) {
-            setupCabinPressureFilter();
+        if (isCabinPressureEnabled) {
+            if (!cabinPressureFilter) {
+                setupCabinPressureFilter();
+            } else if (audioContext) {
+                // Reset filter to open when taking off
+                cabinPressureFilter.frequency.setValueAtTime(22050, audioContext.currentTime);
+            }
         }
 
         // To ensure the plane starts with enough momentum
@@ -5511,7 +5538,7 @@ function stopFlightVisualization() {
             lfoOscillator.stop();
             lfoOscillator.disconnect();
             lfoOscillator = null;
-            
+
             // Reset button state
             isLfoEnabled = false;
             lfoToggle.checked = false;
@@ -5519,6 +5546,20 @@ function stopFlightVisualization() {
         } catch (error) {
             console.error('Error stopping LFO:', error);
         }
+    }
+
+    // Fade out immersive audio effects when landing
+    if (audioContext) {
+        if (engineGain) {
+            engineGain.gain.linearRampToValueAtTime(0, audioContext.currentTime + 1);
+        }
+        if (windNoiseGain) {
+            windNoiseGain.gain.linearRampToValueAtTime(0, audioContext.currentTime + 1);
+        }
+    }
+
+    // Clean up immersive audio nodes (but keep them initialized for next takeoff)
+    // They'll be restarted in startFlightVisualization if toggles are still on
     }
     
     // Clear visualizations
@@ -6213,7 +6254,7 @@ function drawStars() {
     });
 
     // Randomly create shooting stars (1% chance per frame when flying at high altitude)
-    const altitude = parseFloat(altitudeControl.value);
+    const altitude = altitudeControl ? parseFloat(altitudeControl.value) : 1.0;
     if (isFlying && altitude > 0.7 && Math.random() < 0.01) {
         shootingStars.push({
             x: Math.random() * starsCanvas.width,
@@ -6377,9 +6418,9 @@ function drawAtmosphericGlow() {
 // Draw landscape
 function drawLandscape() {
     landscapeCtx.clearRect(0, 0, landscapeCanvas.width, landscapeCanvas.height);
-    
+
     // Draw sky gradient
-    const altitude = parseFloat(document.getElementById('altitude').value);
+    const altitude = altitudeControl ? parseFloat(altitudeControl.value) : 1.0;
     const skyColors = {
         top: altitude < 1 ? '#1a2f38' : (altitude > 1.5 ? '#0a1525' : '#1a2f38'),
         bottom: altitude < 1 ? '#2c3e50' : (altitude > 1.5 ? '#162740' : '#2c3e50')
