@@ -1012,6 +1012,22 @@
                 top: 5px;
                 right: 5px;
             }
+
+            /* Welcome content mobile adjustments */
+            .welcome-content {
+                max-width: 95vw;
+                max-height: 90vh;
+                padding: 20px;
+                font-size: 0.9rem;
+            }
+
+            .welcome-content h2 {
+                font-size: 1.3rem;
+            }
+
+            .welcome-content h3 {
+                font-size: 1rem;
+            }
         }
 
         /* Welcome Overlay */
@@ -1040,8 +1056,8 @@
             background-color: var(--panel-bg);
             padding: 30px;
             border-radius: var(--border-radius);
-            max-width: 600px;
-            max-height: 80vh;
+            max-width: 750px;
+            max-height: 85vh;
             overflow-y: auto;
             border: 2px solid var(--primary-color);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
@@ -1050,15 +1066,50 @@
             z-index: 3001;
         }
 
+        /* Custom scrollbar for welcome content */
+        .welcome-content::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .welcome-content::-webkit-scrollbar-track {
+            background: var(--cockpit-dark);
+            border-radius: 5px;
+        }
+
+        .welcome-content::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 5px;
+        }
+
+        .welcome-content::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-color);
+        }
+
         .welcome-content h2 {
             color: var(--primary-color);
             margin-top: 0;
             text-align: center;
+            font-size: 1.5rem;
+        }
+
+        .welcome-content h3 {
+            font-size: 1.1rem;
+            border-bottom: 1px solid rgba(52, 152, 219, 0.3);
+            padding-bottom: 5px;
         }
 
         .welcome-content p {
             line-height: 1.6;
             margin: 15px 0;
+        }
+
+        .welcome-content ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .welcome-content li {
+            margin: 8px 0;
         }
 
         .keyboard-shortcuts {
@@ -1276,9 +1327,70 @@
     <div class="welcome-overlay" id="welcomeOverlay">
         <div class="welcome-content">
             <h2>✈️ Welcome to Music for Airplanes</h2>
-            <p>Experience generative ambient music through flight. As your plane travels, it creates unique musical patterns influenced by different world scales and pioneering ambient composers.</p>
+            <p style="font-size: 1.05rem; line-height: 1.6; margin-bottom: 20px;">An immersive generative ambient music experience inspired by Brian Eno's "Music for Airports". Your journey through the sky creates ever-evolving soundscapes, with flight as both metaphor and mechanism for musical exploration.</p>
 
-            <div class="keyboard-shortcuts">
+            <h3 style="color: var(--primary-color); margin-top: 20px; margin-bottom: 10px;">🎭 The Aviation Theme</h3>
+            <p style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px;">Everything is "in theme" - the cockpit controls aren't just UI, they're your flight deck. Altitude changes the sound's thinness (cabin pressure), speed creates wind noise, the engine hums beneath you. When you land, you arrive at real spaces with unique acoustics. Flight becomes a journey through sound itself.</p>
+
+            <h3 style="color: var(--primary-color); margin-top: 20px; margin-bottom: 10px;">🎵 How The Music Works</h3>
+            <div style="font-size: 0.9rem; line-height: 1.7; margin-bottom: 15px;">
+                <p style="margin-bottom: 10px;"><strong>Dual Sequencers:</strong> Two independent generative sequencers create interlocking melodic patterns. They select notes from scales and play them through sine wave oscillators, creating pure, ethereal tones.</p>
+
+                <p style="margin-bottom: 10px;"><strong>Scale Systems:</strong> Choose from 8 flight routes (World Tour, Asia, Europe, Africa, Oceania, Americas, Impressionist, Minimalist), each with authentic musical scales - Japanese pentatonic, Arabic maqam, Indian raga, and more.</p>
+
+                <p style="margin-bottom: 10px;"><strong>Artist Influences:</strong> 12 compositional styles from ambient pioneers (Eno, Satie, Reich, Glass, Basinski, Budd, Sakamoto, etc.) subtly shape tempo, note patterns, and spatial character.</p>
+
+                <p style="margin-bottom: 10px;"><strong>Plane as Instrument:</strong> Your plane's movement isn't just visual - each note played actually nudges the plane in a direction, creating a feedback loop where music influences flight and flight influences music.</p>
+            </div>
+
+            <h3 style="color: var(--primary-color); margin-top: 20px; margin-bottom: 10px;">🎛️ Audio Effects Explained</h3>
+            <div style="font-size: 0.9rem; line-height: 1.7; margin-bottom: 15px;">
+                <p style="margin-bottom: 8px;"><strong>Reverb:</strong> Convolver-based reverb simulates acoustic space. Higher settings create cathedral-like expansiveness, lower settings feel intimate.</p>
+
+                <p style="margin-bottom: 8px;"><strong>Filter (Lowpass):</strong> Sculpts brightness by removing high frequencies. The LFO can modulate this automatically for swirling, evolving textures.</p>
+
+                <p style="margin-bottom: 8px;"><strong>Compressor:</strong> Smooths dynamics and adds subtle "glue" to the mix, creating cohesive sonic character.</p>
+
+                <p style="margin-bottom: 8px;"><strong>Engine Hum:</strong> A low sawtooth drone (55Hz) that pitch-shifts with your velocity - faster flight = higher pitch. Pure immersion.</p>
+
+                <p style="margin-bottom: 8px;"><strong>Wind Noise:</strong> Bandpass-filtered white noise that intensifies with speed, creating realistic flight atmosphere.</p>
+
+                <p style="margin-bottom: 8px;"><strong>Cabin Pressure (Altitude Filter):</strong> As you climb higher, a lowpass filter gradually dampens high frequencies (22kHz → 800Hz), simulating thinning air and muffled sound in the upper atmosphere.</p>
+            </div>
+
+            <h3 style="color: var(--primary-color); margin-top: 20px; margin-bottom: 10px;">✨ Visual Systems</h3>
+            <div style="font-size: 0.9rem; line-height: 1.7; margin-bottom: 15px;">
+                <p style="margin-bottom: 8px;"><strong>Note Circles:</strong> Expanding rings visualize each note played, with size and color responding to pitch and velocity.</p>
+
+                <p style="margin-bottom: 8px;"><strong>Shooting Stars:</strong> Rare meteors streak across the sky when flying above 70% altitude - look for them!</p>
+
+                <p style="margin-bottom: 8px;"><strong>Contrails:</strong> Your plane leaves a particle trail that expands and fades, mapping your journey through the soundscape.</p>
+
+                <p style="margin-bottom: 8px;"><strong>Atmospheric Glow:</strong> A dynamic radial gradient around your plane that intensifies with speed and altitude.</p>
+
+                <p style="margin-bottom: 8px;"><strong>Drifting Clouds:</strong> Procedural cloud particles add depth and movement to the scene.</p>
+            </div>
+
+            <h3 style="color: var(--primary-color); margin-top: 20px; margin-bottom: 10px;">🏛️ Landing Destinations</h3>
+            <p style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 10px;">When you land, choose from 6 unique spaces, each with distinct acoustic properties:</p>
+            <div style="font-size: 0.85rem; line-height: 1.7; margin-bottom: 15px; padding-left: 15px;">
+                <p style="margin-bottom: 6px;"><strong>🏛️ Museum Gallery:</strong> Minimalist white space (Reverb 0.7, slower tempo) - spacious, contemplative</p>
+                <p style="margin-bottom: 6px;"><strong>🏯 Traditional Machiya:</strong> Japanese townhouse (Reverb 0.3, calm tempo) - intimate, meditative</p>
+                <p style="margin-bottom: 6px;"><strong>🏢 Corporate Lobby:</strong> Modern glass/steel (Reverb 0.5, energetic tempo) - professional, bright</p>
+                <p style="margin-bottom: 6px;"><strong>🚉 Train Station:</strong> Quiet platform (Reverb 0.8, steady tempo) - expansive, patient</p>
+                <p style="margin-bottom: 6px;"><strong>🎓 University Building:</strong> Concrete/wood (Reverb 0.6, focused tempo) - academic, clear</p>
+                <p style="margin-bottom: 6px;"><strong>🌊 Waterside Pavilion:</strong> Natural wood/water (Reverb 0.4, tranquil tempo) - open, serene</p>
+            </div>
+
+            <h3 style="color: var(--primary-color); margin-top: 20px; margin-bottom: 10px;">🌤️ Atmospheric Settings</h3>
+            <p style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 10px;">Customize your landing atmosphere:</p>
+            <div style="font-size: 0.85rem; line-height: 1.7; margin-bottom: 15px; padding-left: 15px;">
+                <p style="margin-bottom: 6px;"><strong>Time of Day:</strong> Dawn/Morning/Afternoon/Evening/Night - affects lighting color and tempo modifiers</p>
+                <p style="margin-bottom: 6px;"><strong>Weather:</strong> Clear/Rain/Mist - adds animated particles and audio filtering</p>
+                <p style="margin-bottom: 6px;"><strong>Season:</strong> Spring (blossoms) / Summer (dust) / Autumn (leaves) / Winter (snow) - unique particle types</p>
+            </div>
+
+            <div class="keyboard-shortcuts" style="margin-top: 20px;">
                 <h3>⌨️ Keyboard Shortcuts</h3>
                 <div class="shortcut">
                     <span>Take Off / Land</span>
@@ -1314,14 +1426,7 @@
                 </div>
             </div>
 
-            <p><strong>Features:</strong></p>
-            <ul style="line-height: 1.8;">
-                <li>🌍 8 flight routes with world music scales</li>
-                <li>🎹 12 artist styles from pioneers like Brian Eno, Erik Satie, and more</li>
-                <li>🎛️ Full audio controls with effects and filters</li>
-                <li>🎨 Dynamic visuals that respond to the music</li>
-                <li>✈️ Plane movement influenced by generated notes</li>
-            </ul>
+            <p style="margin-top: 20px; font-size: 0.9rem; opacity: 0.8; text-align: center;">Ready for takeoff? Your ambient journey awaits.</p>
 
             <button class="welcome-start-btn" id="welcomeStartBtn" onclick="console.log('Button onclick fired'); if(typeof hideWelcomeOverlay === 'function') hideWelcomeOverlay();">Begin Flight</button>
         </div>
