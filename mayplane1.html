@@ -903,6 +903,7 @@
             display: none;
             border-left: 5px solid #8e44ad;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            pointer-events: auto;
         }
 
         #settingsPanel h3 {
@@ -1146,6 +1147,9 @@
             overflow-y: auto;
             border: 2px solid var(--primary-color);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            pointer-events: auto;
+            position: relative;
+            z-index: 2001;
         }
 
         .destinations-grid {
@@ -1163,6 +1167,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             text-align: center;
+            pointer-events: auto;
         }
 
         .destination-card:hover {
