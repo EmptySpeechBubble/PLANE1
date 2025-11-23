@@ -1670,6 +1670,8 @@
                 <p style="margin-bottom: 8px;"><strong>Rain Ambience:</strong> Filtered pink noise through reverb creates soothing rainfall sounds. Perfect for peaceful, meditative flights through gentle weather.</p>
 
                 <p style="margin-bottom: 8px;"><strong>Distant Thunder:</strong> Low-frequency rumbles with dynamic filtering simulate thunder in the distance. Periodic rolls add drama and atmosphere, occurring every 15-45 seconds when enabled.</p>
+
+                <p style="margin-bottom: 8px;"><strong>Musical Particles:</strong> When landed, seasonal particles (blossoms, leaves, snow, dust) play notes from your selected scale as they fall and touch down. Inspired by falling leaves generative music. Musical particles glow softly and create gentle rustling sounds when they collide. Control attack/release, gravity, and musical density.</p>
             </div>
 
             <h3>✨ Visual Systems</h3>
@@ -2107,6 +2109,46 @@
                                 </label>
                                 <div class="effect-label">Distant Thunder <span class="led-indicator" id="thunderLed"></span></div>
                             </div>
+
+                            <div class="effect-switch">
+                                <label class="switch">
+                                    <input type="checkbox" id="musicalParticlesToggle">
+                                    <span class="slider-switch"></span>
+                                </label>
+                                <div class="effect-label">Musical Particles <span class="led-indicator" id="musicalParticlesLed"></span></div>
+                            </div>
+                        </div>
+
+                        <!-- Musical Particles Controls -->
+                        <div id="musicalParticlesControlsPanel" style="display: none; margin-top: 15px;">
+                            <div class="control-group">
+                                <label class="control-label">Particle Attack:</label>
+                                <div class="slider-container">
+                                    <input type="range" id="particleAttackControl" class="slider" min="0.01" max="1" step="0.01" value="0.1">
+                                    <span id="particleAttackValue" class="slider-value">0.1s</span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">Particle Release:</label>
+                                <div class="slider-container">
+                                    <input type="range" id="particleReleaseControl" class="slider" min="0.1" max="5" step="0.1" value="2.0">
+                                    <span id="particleReleaseValue" class="slider-value">2.0s</span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">Particle Gravity:</label>
+                                <div class="slider-container">
+                                    <input type="range" id="particleGravityControl" class="slider" min="0.5" max="3" step="0.1" value="1.5">
+                                    <span id="particleGravityValue" class="slider-value">1.5</span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">Musical Density:</label>
+                                <div class="slider-container">
+                                    <input type="range" id="particleDensityControl" class="slider" min="0" max="1" step="0.05" value="0.3">
+                                    <span id="particleDensityValue" class="slider-value">30%</span>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Filter Controls -->
@@ -2346,6 +2388,12 @@
     let isCabinPressureEnabled = true;
     let isRainEnabled = false;
     let isThunderEnabled = false;
+    let isMusicalParticlesEnabled = false;
+    let particleAttack = 0.1;
+    let particleRelease = 2.0;
+    let particleGravity = 1.5;
+    let particleDensity = 0.3; // 0-1, controls how many particles are musical
+    let groundY = 0; // Will be set based on canvas height
 
     // LFO rate divisions (relative to BPM)
     const lfoDivisions = [
@@ -2630,6 +2678,11 @@
     const altitudeFilterToggle = document.getElementById('altitudeFilterToggle');
     const rainToggle = document.getElementById('rainToggle');
     const thunderToggle = document.getElementById('thunderToggle');
+    const musicalParticlesToggle = document.getElementById('musicalParticlesToggle');
+    const particleAttackControl = document.getElementById('particleAttackControl');
+    const particleReleaseControl = document.getElementById('particleReleaseControl');
+    const particleGravityControl = document.getElementById('particleGravityControl');
+    const particleDensityControl = document.getElementById('particleDensityControl');
     
     // Filter controls
     const filterCutoffControl = document.getElementById('filterCutoff');
@@ -3640,6 +3693,28 @@
         altitudeFilterToggle.addEventListener('change', toggleAltitudeFilter);
         rainToggle.addEventListener('change', toggleRain);
         thunderToggle.addEventListener('change', toggleThunder);
+        musicalParticlesToggle.addEventListener('change', toggleMusicalParticles);
+
+        // Musical particles controls
+        particleAttackControl.addEventListener('input', function() {
+            particleAttack = parseFloat(this.value);
+            document.getElementById('particleAttackValue').textContent = particleAttack.toFixed(2) + 's';
+        });
+
+        particleReleaseControl.addEventListener('input', function() {
+            particleRelease = parseFloat(this.value);
+            document.getElementById('particleReleaseValue').textContent = particleRelease.toFixed(1) + 's';
+        });
+
+        particleGravityControl.addEventListener('input', function() {
+            particleGravity = parseFloat(this.value);
+            document.getElementById('particleGravityValue').textContent = particleGravity.toFixed(1);
+        });
+
+        particleDensityControl.addEventListener('input', function() {
+            particleDensity = parseFloat(this.value);
+            document.getElementById('particleDensityValue').textContent = Math.floor(particleDensity * 100) + '%';
+        });
 
         // Filter controls
         filterCutoffControl.addEventListener('input', updateFilterCutoff);
@@ -5362,6 +5437,27 @@
         }
     }
 
+    // Toggle musical particles
+    function toggleMusicalParticles() {
+        isMusicalParticlesEnabled = musicalParticlesToggle.checked;
+
+        // Update LED indicator
+        const musicalParticlesLed = document.getElementById('musicalParticlesLed');
+        musicalParticlesLed.classList.toggle('led-on', isMusicalParticlesEnabled);
+
+        // Show/hide controls panel
+        const controlsPanel = document.getElementById('musicalParticlesControlsPanel');
+        if (controlsPanel) {
+            controlsPanel.style.display = isMusicalParticlesEnabled ? 'block' : 'none';
+        }
+
+        if (isMusicalParticlesEnabled) {
+            showStatus('Musical particles enabled - land to hear them!');
+        } else {
+            showStatus('Musical particles disabled');
+        }
+    }
+
     // Update immersive audio based on flight dynamics
     function updateImmersiveAudio() {
         if (!audioContext || !isFlying || !altitudeControl) return;
@@ -6651,16 +6747,110 @@ function initializeLandingParticles(particleType, count) {
     landingParticles = [];
     if (count === 0) return;
 
+    // Set ground level based on canvas height
+    groundY = (landscapeCanvas?.height || 600) * 0.85; // 85% down the screen
+
+    // Get current scale notes for musical particles
+    const scaleNotes = destinations[currentDestination]?.harmonicNotes || destinations.worldTour.harmonicNotes;
+
     for (let i = 0; i < count; i++) {
+        const isMusical = isMusicalParticlesEnabled && Math.random() < particleDensity;
+        const note = isMusical ? scaleNotes[Math.floor(Math.random() * scaleNotes.length)][Math.floor(Math.random() * scaleNotes[0].length)] : null;
+
         landingParticles.push({
             x: Math.random() * (landscapeCanvas?.width || 800),
-            y: Math.random() * (landscapeCanvas?.height || 600),
+            y: Math.random() * -200, // Start above screen
             vx: (Math.random() - 0.5) * 2,
-            vy: Math.random() * 2 + 1,
+            vy: Math.random() * 0.5 + 0.5, // Initial fall speed
             size: Math.random() * 3 + 1,
             opacity: Math.random() * 0.5 + 0.3,
-            type: particleType
+            type: particleType,
+            isMusical: isMusical,
+            note: note,
+            hasPlayed: false,
+            resting: false,
+            fadeTime: 0,
+            gravity: isMusical ? particleGravity : 1.0,
+            sway: Math.random() * Math.PI * 2, // For swaying motion
+            swaySpeed: 0.02 + Math.random() * 0.03,
+            collisionCooldown: 0
         });
+    }
+}
+
+// Play a note for a particle
+function playParticleNote(particle) {
+    if (!audioContext || !particle.isMusical || !particle.note) return;
+
+    try {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(particle.note, audioContext.currentTime);
+
+        // Pan based on x position
+        const panValue = ((particle.x / (landscapeCanvas?.width || 800)) - 0.5) * 2;
+        const panNode = audioContext.createStereoPanner();
+        panNode.pan.setValueAtTime(panValue, audioContext.currentTime);
+
+        // Velocity based on fall speed
+        const velocity = Math.min(1, particle.vy / 5) * 0.3; // Quieter than main notes
+
+        // Soft attack and decay like falling leaves
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(velocity, audioContext.currentTime + particleAttack);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + particleRelease);
+
+        // Connect: oscillator -> gain -> pan -> master
+        oscillator.connect(gainNode);
+        gainNode.connect(panNode);
+        panNode.connect(masterGainNode);
+
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + particleRelease);
+
+        particle.hasPlayed = true;
+
+        // Log occasionally
+        if (Math.random() < 0.1) {
+            console.log('Particle landed:', particle.type, 'note:', particle.note.toFixed(2) + 'Hz');
+        }
+    } catch (error) {
+        console.error('Error playing particle note:', error);
+    }
+}
+
+// Play rustle sound for particle collision
+function playParticleRustle(particle) {
+    if (!audioContext || !isMusicalParticlesEnabled) return;
+
+    try {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        const filterNode = audioContext.createBiquadFilter();
+
+        oscillator.type = 'triangle';
+        const rustleFreq = 800 + Math.random() * 1200; // 800-2000 Hz
+        oscillator.frequency.setValueAtTime(rustleFreq, audioContext.currentTime);
+
+        filterNode.type = 'bandpass';
+        filterNode.frequency.setValueAtTime(rustleFreq, audioContext.currentTime);
+        filterNode.Q.setValueAtTime(5, audioContext.currentTime);
+
+        const rustleAmp = 0.02 + Math.random() * 0.03; // Very quiet
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(rustleAmp, audioContext.currentTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+
+        oscillator.connect(filterNode);
+        filterNode.connect(gainNode);
+        gainNode.connect(masterGainNode);
+
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.1);
+    } catch (error) {
+        console.error('Error playing rustle:', error);
     }
 }
 
@@ -6668,21 +6858,99 @@ function initializeLandingParticles(particleType, count) {
 function drawLandingParticles() {
     if (!isLanded || !landscapeCtx || !landscapeCanvas || landingParticles.length === 0) return;
 
-    landingParticles.forEach(particle => {
-        particle.x += particle.vx;
-        particle.y += particle.vy;
+    // Collision detection map
+    const collisionMap = {};
 
-        // Wrap particles
-        if (particle.y > landscapeCanvas.height) particle.y = 0;
-        if (particle.x < 0) particle.x = landscapeCanvas.width;
-        if (particle.x > landscapeCanvas.width) particle.x = 0;
+    landingParticles.forEach((particle, index) => {
+        if (particle.resting) {
+            // Resting particles fade out slowly
+            particle.fadeTime += 0.01;
+            particle.opacity = Math.max(0, particle.opacity - 0.002);
+
+            // Respawn particle when fully faded
+            if (particle.opacity <= 0) {
+                // Reinitialize with new properties
+                const scaleNotes = destinations[currentDestination]?.harmonicNotes || destinations.worldTour.harmonicNotes;
+                const isMusical = isMusicalParticlesEnabled && Math.random() < particleDensity;
+                const note = isMusical ? scaleNotes[Math.floor(Math.random() * scaleNotes.length)][Math.floor(Math.random() * scaleNotes[0].length)] : null;
+
+                particle.x = Math.random() * landscapeCanvas.width;
+                particle.y = -Math.random() * 200;
+                particle.vy = Math.random() * 0.5 + 0.5;
+                particle.opacity = Math.random() * 0.5 + 0.3;
+                particle.isMusical = isMusical;
+                particle.note = note;
+                particle.hasPlayed = false;
+                particle.resting = false;
+                particle.fadeTime = 0;
+                particle.sway = Math.random() * Math.PI * 2;
+            }
+        } else {
+            // Apply gravity
+            particle.vy += particle.gravity * 0.05;
+
+            // Apply swaying motion (like wind)
+            particle.sway += particle.swaySpeed;
+            const swayForce = Math.sin(particle.sway) * 0.5;
+            particle.vx = swayForce;
+
+            // Update position
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+
+            // Wrap horizontally
+            if (particle.x < 0) particle.x = landscapeCanvas.width;
+            if (particle.x > landscapeCanvas.width) particle.x = 0;
+
+            // Check if particle has landed
+            if (particle.y >= groundY && !particle.hasPlayed) {
+                particle.resting = true;
+                particle.vy = 0;
+                particle.y = groundY;
+
+                // Play note if musical
+                if (particle.isMusical) {
+                    playParticleNote(particle);
+                }
+            }
+
+            // Collision detection (for rustling)
+            if (!particle.resting && particle.collisionCooldown === 0) {
+                const gridX = Math.floor(particle.x / 10);
+                const gridY = Math.floor(particle.y / 10);
+                const key = `${gridX},${gridY}`;
+
+                if (collisionMap[key]) {
+                    // Collision detected
+                    playParticleRustle(particle);
+                    particle.collisionCooldown = 10;
+                } else {
+                    collisionMap[key] = true;
+                }
+            }
+
+            if (particle.collisionCooldown > 0) {
+                particle.collisionCooldown--;
+            }
+        }
 
         // Draw based on type
         landscapeCtx.globalAlpha = particle.opacity;
+
+        // Musical particles glow slightly
+        if (particle.isMusical && !particle.resting) {
+            landscapeCtx.shadowBlur = 3;
+            landscapeCtx.shadowColor = particle.type === 'snow' ? '#ffffff' :
+                particle.type === 'leaf' ? '#ffa500' :
+                particle.type === 'blossom' ? '#ff69b4' :
+                '#ffffff';
+        }
+
         landscapeCtx.fillStyle = particle.type === 'snow' ? '#ffffff' :
             particle.type === 'rain' ? '#88aacc' :
             particle.type === 'leaf' ? '#d4a574' :
             particle.type === 'blossom' ? '#ffccdd' :
+            particle.type === 'dust' ? '#e0c090' :
             '#e0e0e0';
 
         if (particle.type === 'rain') {
@@ -6692,7 +6960,10 @@ function drawLandingParticles() {
             landscapeCtx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
             landscapeCtx.fill();
         }
+
+        landscapeCtx.shadowBlur = 0;
     });
+
     landscapeCtx.globalAlpha = 1.0;
 }
 
