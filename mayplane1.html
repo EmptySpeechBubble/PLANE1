@@ -1267,6 +1267,189 @@
             border-color: var(--primary-color);
         }
 
+        /* Flight Log Overlay */
+        .flight-log-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 2500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        .flight-log-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .flight-log-panel {
+            background: linear-gradient(to bottom, #1a2f38 0%, #2c3e50 100%);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 3px solid var(--primary-color);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+            pointer-events: auto;
+            position: relative;
+            z-index: 2501;
+            font-family: 'Courier New', monospace;
+        }
+
+        .flight-log-header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .flight-log-header h2 {
+            color: var(--secondary-color);
+            margin: 0;
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .flight-log-number {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            margin-top: 5px;
+        }
+
+        .log-section {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid var(--primary-color);
+            border-radius: 4px;
+        }
+
+        .log-section h3 {
+            color: var(--secondary-color);
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .log-entry {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 15px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(52, 152, 219, 0.2);
+            font-size: 0.9rem;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-label {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .log-value {
+            color: var(--text-color);
+        }
+
+        .log-timeline {
+            margin: 10px 0;
+        }
+
+        .timeline-event {
+            padding: 10px;
+            margin: 8px 0;
+            background-color: rgba(46, 204, 113, 0.1);
+            border-left: 3px solid var(--secondary-color);
+            font-size: 0.85rem;
+        }
+
+        .event-time {
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .event-description {
+            color: var(--text-color);
+        }
+
+        .log-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background-color: rgba(52, 152, 219, 0.2);
+            padding: 12px;
+            border-radius: 4px;
+            text-align: center;
+            border: 1px solid var(--primary-color);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .log-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .log-action-btn {
+            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .log-action-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .log-action-btn.secondary {
+            background-color: var(--danger-color);
+        }
+
+        .log-action-btn.secondary:hover {
+            background-color: #c0392b;
+        }
+
         /* Tooltip Styles */
         [data-tooltip] {
             position: relative;
@@ -1510,9 +1693,16 @@
         </div>
     </div>
 
+    <!-- Flight Log Overlay -->
+    <div class="flight-log-overlay hidden" id="flightLogOverlay">
+        <div class="flight-log-panel" id="flightLogPanel">
+            <!-- Content will be dynamically generated -->
+        </div>
+    </div>
+
     <div class="container">
         <h1>Music for Airplanes</h1>
-        
+
         <div class="flight-display" id="flightContainer">
             <!-- Sky Gradient Elements -->
             <div id="skyGradientTop"></div>
@@ -1636,6 +1826,7 @@
                             <button id="randomizeAll" class="control-button full" data-tooltip="Randomize destination and artist (R)">Randomize All</button>
                             <button id="toggleUI" class="control-button" data-tooltip="Hide/show plane and UI elements (U)">Hide UI</button>
                             <button id="clearTrail" class="control-button danger" data-tooltip="Clear the visual trail (T)">Clear Trail</button>
+                            <button id="flightLogBtn" class="control-button" data-tooltip="View flight log and session details (L)">Flight Log</button>
                         </div>
                         
                         <div class="control-group">
@@ -2017,6 +2208,26 @@
     let isLanded = false;
     let landingParticles = [];
 
+    // Flight log tracking system
+    let flightLog = {
+        flightNumber: null,
+        departureTime: null,
+        arrivalTime: null,
+        totalFlightTime: 0,
+        events: [],
+        destinations: [],
+        artists: [],
+        effectsUsed: [],
+        notesPlayed: 0,
+        citiesVisited: new Set(),
+        altitudeRange: { min: 1.0, max: 1.0 },
+        currentSegmentStart: null,
+        currentDestination: null,
+        currentArtistName: null
+    };
+    let flightSessionActive = false;
+    let logCounter = 1;
+
     // Destination spaces data
     const destinationSpaces = {
         museum: {
@@ -2230,6 +2441,7 @@
     const randomizeAllButton = document.getElementById('randomizeAll');
     const toggleUIButton = document.getElementById('toggleUI');
     const clearTrailButton = document.getElementById('clearTrail');
+    const flightLogBtn = document.getElementById('flightLogBtn');
     
     // Flight controls
     const altitudeControl = document.getElementById('altitude');
@@ -3209,6 +3421,7 @@
         randomizeAllButton.addEventListener('click', randomizeAll);
         toggleUIButton.addEventListener('click', toggleUI);
         clearTrailButton.addEventListener('click', clearTrail);
+        flightLogBtn.addEventListener('click', showFlightLog);
         
         // Flight control sliders
         altitudeControl.addEventListener('input', updateAltitude);
@@ -3393,6 +3606,10 @@
                 case 't':
                     e.preventDefault();
                     clearTrail();
+                    break;
+                case 'l':
+                    e.preventDefault();
+                    showFlightLog();
                     break;
                 case 'escape':
                     e.preventDefault();
@@ -4241,11 +4458,14 @@
     function updateAltitude() {
         const altitudeValue = parseFloat(altitudeControl.value);
         let altitudeText = "Cruising";
-        
+
         if (altitudeValue < 0.8) altitudeText = "Low Altitude";
         else if (altitudeValue > 1.2) altitudeText = "High Altitude";
-        
+
         document.getElementById('altitudeValue').textContent = altitudeText;
+
+        // Track altitude in flight log
+        trackAltitude(altitudeValue);
         
         // Update altitude needle in gauge
         const altDegrees = ((altitudeValue - 0.5) / 1.5) * 360; // Map 0.5-2.0 to 0-360
@@ -4968,10 +5188,13 @@
         updateReverb();
     }
 
+    // Track artist change in flight log
+    trackArtistChange(currentArtistName);
+
     // Show status message
     showStatus(`Now playing music inspired by ${currentArtistName}.`);
 }
-        
+
 // Change destination
 function changeDestination(destId) {
     // Update destination name
@@ -5046,7 +5269,10 @@ function changeDestination(destId) {
             fadeOutAnnouncement();
         }, 7000);
     }
-    
+
+    // Track destination change in flight log
+    trackDestinationChange(currentDestinationName);
+
     // Show status message
     showStatus(`Flight route changed to ${currentDestinationName}.`);
 }
@@ -5335,7 +5561,10 @@ function continueWithTakeoff() {
         // To ensure the plane starts with enough momentum
         planeDirection.x = 0.02;
         planeDirection.y = 0.01;
-        
+
+        // Start flight log session
+        startFlightLog();
+
         // Display initial announcement
         const announcementElement = document.getElementById('announcement');
         const announcementText = document.getElementById('announcementText');
@@ -5393,6 +5622,9 @@ function completeLanding(spaceKey) {
 
         const space = destinationSpaces[spaceKey];
         showStatus(`Landing at ${space.name}...`);
+
+        // End flight log session
+        endFlightLog(space.name);
 
         // Hide the selector
         hideLandingSelector();
@@ -5530,6 +5762,414 @@ function applyLandingAtmosphere(spaceKey) {
     animateLandedState();
 
     console.log(`Landed at ${space.name} - ${time.name}, ${weather.name}, ${season.name}`);
+}
+
+// ============================================
+// FLIGHT LOG SYSTEM
+// ============================================
+
+// Start a new flight log session
+function startFlightLog() {
+    flightSessionActive = true;
+    const now = new Date();
+
+    flightLog = {
+        flightNumber: `MA${String(logCounter).padStart(4, '0')}`,
+        departureTime: now,
+        arrivalTime: null,
+        totalFlightTime: 0,
+        events: [],
+        destinations: [],
+        artists: [],
+        effectsUsed: [],
+        notesPlayed: 0,
+        citiesVisited: new Set(),
+        altitudeRange: { min: 1.0, max: 1.0 },
+        currentSegmentStart: now,
+        currentDestination: currentDestinationName,
+        currentArtistName: currentArtistName
+    };
+
+    logCounter++;
+
+    // Log takeoff event
+    addLogEvent('takeoff', `Departed on flight to ${currentDestinationName}, cabin music by ${currentArtistName}`);
+
+    // Track initial destination and artist
+    flightLog.destinations.push({
+        name: currentDestinationName,
+        startTime: now,
+        duration: 0
+    });
+
+    flightLog.artists.push({
+        name: currentArtistName,
+        startTime: now,
+        duration: 0
+    });
+}
+
+// End the flight log session
+function endFlightLog(landingLocation) {
+    if (!flightSessionActive) return;
+
+    const now = new Date();
+    flightLog.arrivalTime = now;
+    flightLog.totalFlightTime = Math.floor((now - flightLog.departureTime) / 1000);
+
+    // Update last destination duration
+    if (flightLog.destinations.length > 0) {
+        const lastDest = flightLog.destinations[flightLog.destinations.length - 1];
+        lastDest.duration = Math.floor((now - lastDest.startTime) / 1000);
+    }
+
+    // Update last artist duration
+    if (flightLog.artists.length > 0) {
+        const lastArtist = flightLog.artists[flightLog.artists.length - 1];
+        lastArtist.duration = Math.floor((now - lastArtist.startTime) / 1000);
+    }
+
+    // Log landing event
+    addLogEvent('landing', `Arrived at ${landingLocation || 'destination'}`);
+
+    flightSessionActive = false;
+}
+
+// Add an event to the flight log
+function addLogEvent(eventType, description, details = {}) {
+    const now = new Date();
+    const timestamp = flightSessionActive && flightLog.departureTime
+        ? Math.floor((now - flightLog.departureTime) / 1000)
+        : 0;
+
+    flightLog.events.push({
+        type: eventType,
+        timestamp: timestamp,
+        description: description,
+        time: now,
+        details: details
+    });
+}
+
+// Track destination change
+function trackDestinationChange(newDestination) {
+    if (!flightSessionActive) return;
+
+    const now = new Date();
+
+    // Close out previous destination
+    if (flightLog.destinations.length > 0) {
+        const lastDest = flightLog.destinations[flightLog.destinations.length - 1];
+        lastDest.duration = Math.floor((now - lastDest.startTime) / 1000);
+    }
+
+    // Add new destination
+    flightLog.destinations.push({
+        name: newDestination,
+        startTime: now,
+        duration: 0
+    });
+
+    flightLog.currentDestination = newDestination;
+    addLogEvent('destination_change', `Route changed to ${newDestination}`);
+}
+
+// Track artist change
+function trackArtistChange(newArtist) {
+    if (!flightSessionActive) return;
+
+    const now = new Date();
+
+    // Close out previous artist
+    if (flightLog.artists.length > 0) {
+        const lastArtist = flightLog.artists[flightLog.artists.length - 1];
+        lastArtist.duration = Math.floor((now - lastArtist.startTime) / 1000);
+    }
+
+    // Add new artist
+    flightLog.artists.push({
+        name: newArtist,
+        startTime: now,
+        duration: 0
+    });
+
+    flightLog.currentArtistName = newArtist;
+    addLogEvent('artist_change', `Cabin music changed to ${newArtist}`);
+}
+
+// Track altitude changes
+function trackAltitude(altitude) {
+    if (!flightSessionActive) return;
+
+    if (altitude < flightLog.altitudeRange.min) {
+        flightLog.altitudeRange.min = altitude;
+    }
+    if (altitude > flightLog.altitudeRange.max) {
+        flightLog.altitudeRange.max = altitude;
+    }
+}
+
+// Track note play
+function trackNotePlayed() {
+    if (flightSessionActive) {
+        flightLog.notesPlayed++;
+    }
+}
+
+// Format duration in seconds to readable format
+function formatDuration(seconds) {
+    if (seconds < 60) {
+        return `${seconds}s`;
+    } else if (seconds < 3600) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}m ${secs}s`;
+    } else {
+        const hours = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+        return `${hours}h ${mins}m ${secs}s`;
+    }
+}
+
+// Format timestamp for display
+function formatTimestamp(date) {
+    if (!date) return 'N/A';
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
+}
+
+// Format relative timestamp
+function formatRelativeTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `+${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+// Generate the flight log HTML
+function generateFlightLog() {
+    const panel = document.getElementById('flightLogPanel');
+    if (!panel) return;
+
+    // Build the log HTML
+    let html = `
+        <div class="flight-log-header">
+            <h2>✈ FLIGHT LOG: ${flightLog.flightNumber || 'N/A'}</h2>
+            <button onclick="hideFlightLog()" class="log-close-btn">✕</button>
+        </div>
+
+        <div class="log-content">
+            <!-- Flight Summary -->
+            <div class="log-section">
+                <h3>FLIGHT SUMMARY</h3>
+                <div class="log-info-grid">
+                    <div class="log-info-item">
+                        <span class="log-label">Departure Time:</span>
+                        <span class="log-value">${formatTimestamp(flightLog.departureTime)}</span>
+                    </div>
+                    <div class="log-info-item">
+                        <span class="log-label">Arrival Time:</span>
+                        <span class="log-value">${formatTimestamp(flightLog.arrivalTime)}</span>
+                    </div>
+                    <div class="log-info-item">
+                        <span class="log-label">Total Flight Time:</span>
+                        <span class="log-value">${formatDuration(flightLog.totalFlightTime)}</span>
+                    </div>
+                    <div class="log-info-item">
+                        <span class="log-label">Status:</span>
+                        <span class="log-value">${flightSessionActive ? 'IN FLIGHT' : 'COMPLETED'}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="log-section">
+                <h3>FLIGHT STATISTICS</h3>
+                <div class="log-stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">NOTES PLAYED</div>
+                        <div class="stat-value">${flightLog.notesPlayed}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">ROUTES FLOWN</div>
+                        <div class="stat-value">${flightLog.destinations.length}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">CABIN ARTISTS</div>
+                        <div class="stat-value">${flightLog.artists.length}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">ALTITUDE RANGE</div>
+                        <div class="stat-value">${flightLog.altitudeRange.min.toFixed(2)} - ${flightLog.altitudeRange.max.toFixed(2)}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Destinations -->
+            <div class="log-section">
+                <h3>FLIGHT ROUTES</h3>
+    `;
+
+    if (flightLog.destinations.length > 0) {
+        flightLog.destinations.forEach((dest, index) => {
+            html += `
+                <div class="timeline-event">
+                    <div class="event-marker">${index + 1}</div>
+                    <div class="event-content">
+                        <div class="event-title">${dest.name}</div>
+                        <div class="event-detail">Duration: ${formatDuration(dest.duration)}</div>
+                    </div>
+                </div>
+            `;
+        });
+    } else {
+        html += `<div class="log-empty">No routes recorded</div>`;
+    }
+
+    html += `
+            </div>
+
+            <!-- Artists / Music -->
+            <div class="log-section">
+                <h3>CABIN MUSIC PROGRAM</h3>
+    `;
+
+    if (flightLog.artists.length > 0) {
+        flightLog.artists.forEach((artist, index) => {
+            html += `
+                <div class="timeline-event">
+                    <div class="event-marker">♫</div>
+                    <div class="event-content">
+                        <div class="event-title">${artist.name}</div>
+                        <div class="event-detail">Duration: ${formatDuration(artist.duration)}</div>
+                    </div>
+                </div>
+            `;
+        });
+    } else {
+        html += `<div class="log-empty">No music program recorded</div>`;
+    }
+
+    html += `
+            </div>
+
+            <!-- Events Timeline -->
+            <div class="log-section">
+                <h3>FLIGHT EVENTS</h3>
+    `;
+
+    if (flightLog.events.length > 0) {
+        flightLog.events.forEach((event, index) => {
+            const eventIcon = event.type === 'takeoff' ? '🛫' :
+                            event.type === 'landing' ? '🛬' :
+                            event.type === 'destination_change' ? '🗺' :
+                            event.type === 'artist_change' ? '♫' : '•';
+
+            html += `
+                <div class="timeline-event">
+                    <div class="event-time">${formatRelativeTime(event.timestamp)}</div>
+                    <div class="event-marker">${eventIcon}</div>
+                    <div class="event-content">
+                        <div class="event-description">${event.description}</div>
+                    </div>
+                </div>
+            `;
+        });
+    } else {
+        html += `<div class="log-empty">No events recorded</div>`;
+    }
+
+    html += `
+            </div>
+        </div>
+
+        <div class="log-actions">
+            <button onclick="downloadFlightLog()" class="log-action-btn">Download Log</button>
+            <button onclick="hideFlightLog()" class="log-action-btn">Close</button>
+        </div>
+    `;
+
+    panel.innerHTML = html;
+}
+
+// Show the flight log overlay
+function showFlightLog() {
+    generateFlightLog();
+    const overlay = document.getElementById('flightLogOverlay');
+    if (overlay) {
+        overlay.classList.remove('hidden');
+    }
+}
+
+// Hide the flight log overlay
+function hideFlightLog() {
+    const overlay = document.getElementById('flightLogOverlay');
+    if (overlay) {
+        overlay.classList.add('hidden');
+    }
+}
+
+// Download flight log as text file
+function downloadFlightLog() {
+    let logText = `═══════════════════════════════════════════════════════════════\n`;
+    logText += `            MUSIC FOR AIRPLANES - FLIGHT LOG\n`;
+    logText += `═══════════════════════════════════════════════════════════════\n\n`;
+    logText += `Flight Number: ${flightLog.flightNumber || 'N/A'}\n`;
+    logText += `Departure Time: ${formatTimestamp(flightLog.departureTime)}\n`;
+    logText += `Arrival Time: ${formatTimestamp(flightLog.arrivalTime)}\n`;
+    logText += `Total Flight Time: ${formatDuration(flightLog.totalFlightTime)}\n`;
+    logText += `Status: ${flightSessionActive ? 'IN FLIGHT' : 'COMPLETED'}\n\n`;
+
+    logText += `───────────────────────────────────────────────────────────────\n`;
+    logText += `FLIGHT STATISTICS\n`;
+    logText += `───────────────────────────────────────────────────────────────\n`;
+    logText += `Notes Played: ${flightLog.notesPlayed}\n`;
+    logText += `Routes Flown: ${flightLog.destinations.length}\n`;
+    logText += `Cabin Artists: ${flightLog.artists.length}\n`;
+    logText += `Altitude Range: ${flightLog.altitudeRange.min.toFixed(2)} - ${flightLog.altitudeRange.max.toFixed(2)}\n\n`;
+
+    logText += `───────────────────────────────────────────────────────────────\n`;
+    logText += `FLIGHT ROUTES\n`;
+    logText += `───────────────────────────────────────────────────────────────\n`;
+    flightLog.destinations.forEach((dest, index) => {
+        logText += `${index + 1}. ${dest.name} - Duration: ${formatDuration(dest.duration)}\n`;
+    });
+    logText += `\n`;
+
+    logText += `───────────────────────────────────────────────────────────────\n`;
+    logText += `CABIN MUSIC PROGRAM\n`;
+    logText += `───────────────────────────────────────────────────────────────\n`;
+    flightLog.artists.forEach((artist, index) => {
+        logText += `${index + 1}. ${artist.name} - Duration: ${formatDuration(artist.duration)}\n`;
+    });
+    logText += `\n`;
+
+    logText += `───────────────────────────────────────────────────────────────\n`;
+    logText += `FLIGHT EVENTS\n`;
+    logText += `───────────────────────────────────────────────────────────────\n`;
+    flightLog.events.forEach((event) => {
+        logText += `[${formatRelativeTime(event.timestamp)}] ${event.description}\n`;
+    });
+    logText += `\n`;
+
+    logText += `═══════════════════════════════════════════════════════════════\n`;
+    logText += `End of Flight Log\n`;
+    logText += `═══════════════════════════════════════════════════════════════\n`;
+
+    // Create and download file
+    const blob = new Blob([logText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `FlightLog_${flightLog.flightNumber}_${formatTimestamp(flightLog.departureTime).replace(/:/g, '-')}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showStatus('Flight log downloaded');
 }
 
 // Animation loop for landed state
@@ -6953,6 +7593,9 @@ class AmbientSequencer {
 
             // Store for potential future management
             activeOscillators.push(oscillator);
+
+            // Track note in flight log
+            trackNotePlayed();
 
             // Increment pattern index and occasionally randomize
             this.patternIndex++;
