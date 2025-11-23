@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Music for Airplanes - Cockpit Edition</title>
+    <title>Music for Airplanes</title>
     <style>
         :root {
             --primary-color: #3498db;
@@ -1012,9 +1012,214 @@
                 right: 5px;
             }
         }
+
+        /* Welcome Overlay */
+        .welcome-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        .welcome-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .welcome-content {
+            background-color: var(--panel-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .welcome-content h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+            text-align: center;
+        }
+
+        .welcome-content p {
+            line-height: 1.6;
+            margin: 15px 0;
+        }
+
+        .keyboard-shortcuts {
+            background-color: var(--cockpit-dark);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin: 15px 0;
+        }
+
+        .keyboard-shortcuts h3 {
+            color: var(--secondary-color);
+            margin-top: 0;
+            font-size: 1rem;
+        }
+
+        .shortcut {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+
+        .shortcut kbd {
+            background-color: var(--cockpit-light);
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--panel-border);
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+
+        .welcome-start-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .welcome-start-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .welcome-start-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Tooltip Styles */
+        [data-tooltip] {
+            position: relative;
+        }
+
+        [data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-5px);
+            background-color: rgba(0, 0, 0, 0.9);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 1000;
+            border: 1px solid var(--panel-border);
+        }
+
+        [data-tooltip]:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-10px);
+        }
+
+        /* Smooth transitions for control changes */
+        .artist-selector,
+        .destination-button {
+            transition: all 0.3s ease;
+        }
+
+        .destination-button:active {
+            transform: scale(0.95);
+        }
+
+        /* Status message improvements */
+        #statusMessage {
+            transition: opacity 0.3s ease;
+        }
+
+        .status-fade {
+            animation: statusFade 0.5s ease;
+        }
+
+        @keyframes statusFade {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
     </style>
 </head>
 <body>
+    <!-- Welcome Overlay -->
+    <div class="welcome-overlay" id="welcomeOverlay">
+        <div class="welcome-content">
+            <h2>✈️ Welcome to Music for Airplanes</h2>
+            <p>Experience generative ambient music through flight. As your plane travels, it creates unique musical patterns influenced by different world scales and pioneering ambient composers.</p>
+
+            <div class="keyboard-shortcuts">
+                <h3>⌨️ Keyboard Shortcuts</h3>
+                <div class="shortcut">
+                    <span>Take Off / Land</span>
+                    <kbd>SPACE</kbd>
+                </div>
+                <div class="shortcut">
+                    <span>Toggle Flight Controls</span>
+                    <kbd>C</kbd>
+                </div>
+                <div class="shortcut">
+                    <span>Toggle UI</span>
+                    <kbd>U</kbd>
+                </div>
+                <div class="shortcut">
+                    <span>Full Screen</span>
+                    <kbd>F</kbd>
+                </div>
+                <div class="shortcut">
+                    <span>Randomize</span>
+                    <kbd>R</kbd>
+                </div>
+                <div class="shortcut">
+                    <span>Clear Trail</span>
+                    <kbd>T</kbd>
+                </div>
+                <div class="shortcut">
+                    <span>Emergency Eject</span>
+                    <kbd>ESC</kbd>
+                </div>
+                <div class="shortcut">
+                    <span>Show Help</span>
+                    <kbd>H</kbd>
+                </div>
+            </div>
+
+            <p><strong>Features:</strong></p>
+            <ul style="line-height: 1.8;">
+                <li>🌍 8 flight routes with world music scales</li>
+                <li>🎹 12 artist styles from pioneers like Brian Eno, Erik Satie, and more</li>
+                <li>🎛️ Full audio controls with effects and filters</li>
+                <li>🎨 Dynamic visuals that respond to the music</li>
+                <li>✈️ Plane movement influenced by generated notes</li>
+            </ul>
+
+            <button class="welcome-start-btn" id="welcomeStartBtn">Begin Flight</button>
+        </div>
+    </div>
+
     <div class="container">
         <h1>Music for Airplanes</h1>
         
@@ -1134,13 +1339,13 @@
                         <div class="cockpit-panel-title">Flight Deck</div>
                         
                         <div class="control-buttons">
-                            <button id="takeoff" class="control-button primary">Take Off</button>
-                            <button id="land" class="control-button danger">Land</button>
-                            <button id="testAudio" class="control-button">Test Audio</button>
-                            <button id="fullscreenBtn" class="control-button">Full Screen</button>
-                            <button id="randomizeAll" class="control-button full">Randomize All</button>
-                            <button id="toggleUI" class="control-button">Hide UI</button>
-                            <button id="clearTrail" class="control-button danger">Clear Trail</button>
+                            <button id="takeoff" class="control-button primary" data-tooltip="Start audio engine and begin flight (SPACE)">Take Off</button>
+                            <button id="land" class="control-button danger" data-tooltip="Stop all audio and land plane (SPACE)">Land</button>
+                            <button id="testAudio" class="control-button" data-tooltip="Play a test tone to check audio">Test Audio</button>
+                            <button id="fullscreenBtn" class="control-button" data-tooltip="Toggle fullscreen mode (F)">Full Screen</button>
+                            <button id="randomizeAll" class="control-button full" data-tooltip="Randomize destination and artist (R)">Randomize All</button>
+                            <button id="toggleUI" class="control-button" data-tooltip="Hide/show plane and UI elements (U)">Hide UI</button>
+                            <button id="clearTrail" class="control-button danger" data-tooltip="Clear the visual trail (T)">Clear Trail</button>
                         </div>
                         
                         <div class="control-group">
@@ -2416,6 +2621,27 @@
         return color;
     }
     
+    // Welcome overlay functions
+    function hideWelcomeOverlay() {
+        const welcomeOverlay = document.getElementById('welcomeOverlay');
+        if (welcomeOverlay) {
+            welcomeOverlay.classList.add('hidden');
+            setTimeout(() => {
+                welcomeOverlay.style.display = 'none';
+            }, 500);
+        }
+    }
+
+    function showWelcomeOverlay() {
+        const welcomeOverlay = document.getElementById('welcomeOverlay');
+        if (welcomeOverlay) {
+            welcomeOverlay.style.display = 'flex';
+            setTimeout(() => {
+                welcomeOverlay.classList.remove('hidden');
+            }, 10);
+        }
+    }
+
     // Initialize the application
     function init() {
         // Load user settings
@@ -2612,6 +2838,59 @@
             window.resizeTimeout = setTimeout(function() {
                 resizeCanvases();
             }, 250);
+        });
+
+        // Welcome overlay
+        const welcomeStartBtn = document.getElementById('welcomeStartBtn');
+        if (welcomeStartBtn) {
+            welcomeStartBtn.addEventListener('click', hideWelcomeOverlay);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Prevent shortcuts when typing in input fields
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') {
+                return;
+            }
+
+            switch(e.key.toLowerCase()) {
+                case ' ':
+                    e.preventDefault();
+                    if (isFlying) {
+                        land();
+                    } else {
+                        takeOff();
+                    }
+                    break;
+                case 'c':
+                    e.preventDefault();
+                    toggleCockpit();
+                    break;
+                case 'u':
+                    e.preventDefault();
+                    toggleUI();
+                    break;
+                case 'f':
+                    e.preventDefault();
+                    toggleFullScreen();
+                    break;
+                case 'r':
+                    e.preventDefault();
+                    randomizeAll();
+                    break;
+                case 't':
+                    e.preventDefault();
+                    clearTrail();
+                    break;
+                case 'escape':
+                    e.preventDefault();
+                    emergencyEject();
+                    break;
+                case 'h':
+                    e.preventDefault();
+                    showWelcomeOverlay();
+                    break;
+            }
         });
     }
     
@@ -3951,6 +4230,9 @@
         reverbControl.value = artistStyles[artistId].reverb;
         updateReverb();
     }
+
+    // Show status message
+    showStatus(`Now playing music inspired by ${currentArtistName}.`);
 }
         
 // Change destination
@@ -4976,8 +5258,14 @@ function showCityWithNote() {
 function showStatus(message) {
     const statusMessage = document.getElementById('statusMessage');
     if (statusMessage) {
+        // Add fade animation for better visual feedback
+        statusMessage.classList.add('status-fade');
         statusMessage.innerHTML = message;
-        
+
+        setTimeout(() => {
+            statusMessage.classList.remove('status-fade');
+        }, 500);
+
         // Log to console as well for debugging
         console.log(`Status: ${message.replace(/<[^>]*>/g, '')}`);
     }
@@ -5690,7 +5978,6 @@ if (document.readyState === 'interactive' || document.readyState === 'complete')
     console.log('Document already loaded, initializing immediately');
     init();
 }
-    }
 </script>
     </body>
     </html>
