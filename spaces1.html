@@ -1,0 +1,3140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Spaces - Ambient Musical Environment</title>
+    <style>
+        :root {
+            --primary-color: #9BA4B4;
+            --secondary-color: #F0F5F9;
+            --accent-color: #C9D6DF;
+            --dark-bg: #1E1E24;
+            --panel-bg: rgba(30, 30, 36, 0.85);
+            --text-color: #F0F5F9;
+            --border-radius: 4px;
+            --transition-speed: 0.3s;
+        }
+
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, "Helvetica Neue", "Yu Gothic", "Meiryo", sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Squarespace integration fix */
+        #spaces-app {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scene-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Header */
+        header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px 20px;
+            box-sizing: border-box;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            font-weight: 300;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .japanese-title {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-left: 8px;
+        }
+
+        /* Controls */
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background-color: var(--panel-bg);
+            border-radius: var(--border-radius);
+            z-index: 100;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-button {
+            background-color: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--accent-color);
+            border-radius: var(--border-radius);
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+        }
+
+        .control-button:hover {
+            background-color: var(--accent-color);
+            color: var(--dark-bg);
+        }
+
+        .control-button.active {
+            background-color: var(--accent-color);
+            color: var(--dark-bg);
+        }
+
+        /* Panels */
+        .panel {
+            position: absolute;
+            background-color: var(--panel-bg);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            display: none;
+            min-width: 200px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .panel h2 {
+            font-size: 1rem;
+            font-weight: 300;
+            margin-top: 0;
+            margin-bottom: 0;
+            letter-spacing: 1px;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0 5px;
+            opacity: 0.7;
+        }
+
+        .close-button:hover {
+            opacity: 1;
+        }
+
+        .space-panel {
+            top: 80px;
+            left: 20px;
+        }
+
+        .time-panel {
+            top: 80px;
+            right: 20px;
+        }
+
+        .parameters-panel {
+            bottom: 80px;
+            left: 20px;
+        }
+
+        .info-panel {
+            bottom: 80px;
+            right: 20px;
+            max-width: 300px;
+        }
+
+        .debug-panel {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 80%;
+            max-height: 80%;
+            overflow-y: auto;
+            z-index: 200;
+        }
+
+        /* Options */
+        .option-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .option-button {
+            background-color: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--accent-color);
+            border-radius: var(--border-radius);
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all var(--transition-speed);
+        }
+
+        .option-button:hover, .option-button.active {
+            background-color: var(--accent-color);
+            color: var(--dark-bg);
+        }
+
+        /* Sliders */
+        .slider-group {
+            margin-bottom: 10px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+
+        .slider-value {
+            opacity: 0.8;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            -webkit-appearance: none;
+            background: var(--accent-color);
+            border-radius: var(--border-radius);
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--text-color);
+            cursor: pointer;
+        }
+
+        /* Info Content */
+        .info-content {
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .info-content p {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        /* UI Toggle */
+        .ui-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--accent-color);
+            border-radius: var(--border-radius);
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            z-index: 100;
+            transition: all var(--transition-speed);
+        }
+
+        .ui-toggle:hover {
+            background-color: var(--accent-color);
+            color: var(--dark-bg);
+        }
+
+        .ui-hidden .panel, .ui-hidden .controls, .ui-hidden header {
+            display: none;
+        }
+
+        /* Status Indicator */
+        .status {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            padding: 8px 12px;
+            background-color: var(--panel-bg);
+            border-radius: var(--border-radius);
+            font-size: 0.85rem;
+            backdrop-filter: blur(5px);
+            z-index: 101;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .status.visible {
+            opacity: 1;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--dark-bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s;
+        }
+
+        .loading-screen h1 {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+
+        .loading-bar {
+            width: 200px;
+            height: 2px;
+            background-color: var(--accent-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0;
+            background-color: var(--text-color);
+            transition: width 0.5s;
+        }
+
+        .start-button {
+            margin-top: 30px;
+            background-color: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--accent-color);
+            border-radius: var(--border-radius);
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            display: none;
+        }
+
+        .start-button:hover {
+            background-color: var(--accent-color);
+            color: var(--dark-bg);
+        }
+
+        /* Audio status indicator */
+        .audio-status {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+            background-color: #e74c3c;
+        }
+
+        .audio-status.active {
+            background-color: #2ecc71;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        /* Debug info */
+        .debug-info {
+            font-family: monospace;
+            font-size: 0.8rem;
+            white-space: pre-wrap;
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 8px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: var(--border-radius);
+        }
+
+        /* Fullscreen button */
+        .fullscreen-button {
+            position: absolute;
+            top: 20px;
+            right: 120px;
+            background-color: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--accent-color);
+            border-radius: var(--border-radius);
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            z-index: 100;
+            transition: all var(--transition-speed);
+        }
+
+        .fullscreen-button:hover {
+            background-color: var(--accent-color);
+            color: var(--dark-bg);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .controls {
+                width: 90%;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .panel {
+                max-width: 80%;
+            }
+            
+            .space-panel, .time-panel {
+                top: 80px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            
+            .time-panel {
+                top: 220px;
+            }
+            
+            .parameters-panel, .info-panel {
+                bottom: 80px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            
+            .info-panel {
+                bottom: 220px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="spaces-app">
+        <div class="container">
+            <div class="loading-screen">
+                <h1>Spaces <span class="japanese-title">空間</span></h1>
+                <div class="loading-bar">
+                    <div class="loading-progress" id="loadingProgress"></div>
+                </div>
+                <button class="start-button" id="startButton">Begin Experience</button>
+            </div>
+            
+            <header>
+                <h1>Spaces <span class="japanese-title">空間</span></h1>
+                <div class="audio-indicator">
+                    <span class="audio-status" id="audioStatus"></span>
+                    <span id="audioStatusText">Audio: initializing</span>
+                </div>
+            </header>
+            
+            <div class="scene-container">
+                <canvas id="architecturalCanvas"></canvas>
+                <canvas id="effectsCanvas"></canvas>
+            </div>
+            
+            <div class="controls">
+                <button class="control-button" id="spaceButton">Space</button>
+                <button class="control-button" id="timeButton">Time</button>
+                <button class="control-button" id="parametersButton">Parameters</button>
+                <button class="control-button" id="infoButton">Info</button>
+                <button class="control-button" id="playButton">Pause</button>
+                <button class="control-button" id="debugButton">Debug</button>
+            </div>
+            
+            <div class="panel space-panel" id="spacePanel">
+                <div class="panel-header">
+                    <h2>Architectural Space</h2>
+                    <button class="close-button" data-panel="spacePanel">×</button>
+                </div>
+                <div class="option-list">
+                    <button class="option-button active" data-space="museum">Museum Gallery</button>
+                    <button class="option-button" data-space="machiya">Traditional Machiya</button>
+                    <button class="option-button" data-space="lobby">Corporate Lobby</button>
+                    <button class="option-button" data-space="station">Train Station</button>
+                    <button class="option-button" data-space="university">University Building</button>
+                    <button class="option-button" data-space="pavilion">Waterside Pavilion</button>
+                </div>
+            </div>
+            
+            <div class="panel time-panel" id="timePanel">
+                <div class="panel-header">
+                    <h2>Time & Season</h2>
+                    <button class="close-button" data-panel="timePanel">×</button>
+                </div>
+                <div class="option-list">
+                    <button class="option-button" data-time="dawn">Dawn</button>
+                    <button class="option-button active" data-time="morning">Morning</button>
+                    <button class="option-button" data-time="afternoon">Afternoon</button>
+                    <button class="option-button" data-time="evening">Evening</button>
+                    <button class="option-button" data-time="night">Night</button>
+                </div>
+                <h2>Weather</h2>
+                <div class="option-list">
+                    <button class="option-button active" data-weather="clear">Clear</button>
+                    <button class="option-button" data-weather="rain">Rain</button>
+                    <button class="option-button" data-weather="mist">Mist</button>
+                </div>
+                <h2>Season</h2>
+                <div class="option-list">
+                    <button class="option-button" data-season="spring">Spring</button>
+                    <button class="option-button active" data-season="summer">Summer</button>
+                    <button class="option-button" data-season="autumn">Autumn</button>
+                    <button class="option-button" data-season="winter">Winter</button>
+                </div>
+            </div>
+            
+            <div class="panel parameters-panel" id="parametersPanel">
+                <div class="panel-header">
+                    <h2>Sound Parameters</h2>
+                    <button class="close-button" data-panel="parametersPanel">×</button>
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Volume</span>
+                        <span class="slider-value" id="volumeValue">70%</span>
+                    </div>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="70">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Reverb</span>
+                        <span class="slider-value" id="reverbValue">40%</span>
+                    </div>
+                    <input type="range" id="reverbSlider" min="0" max="100" value="40">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Ma (間)</span>
+                        <span class="slider-value" id="maValue">50%</span>
+                    </div>
+                    <input type="range" id="maSlider" min="0" max="100" value="50">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Tempo</span>
+                        <span class="slider-value" id="tempoValue">60 BPM</span>
+                    </div>
+                    <input type="range" id="tempoSlider" min="30" max="90" value="60">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Harmony</span>
+                        <span class="slider-value" id="harmonyValue">50%</span>
+                    </div>
+                    <input type="range" id="harmonySlider" min="0" max="100" value="50">
+                </div>
+                <h2>Visual Parameters</h2>
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Light Intensity</span>
+                        <span class="slider-value" id="lightValue">60%</span>
+                    </div>
+                    <input type="range" id="lightSlider" min="0" max="100" value="60">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Camera Movement</span>
+                        <span class="slider-value" id="cameraValue">50%</span>
+                    </div>
+                    <input type="range" id="cameraSlider" min="0" max="100" value="50">
+                </div>
+                <button id="forceAudioStart" class="option-button" style="margin-top: 20px; background-color: #3498db;">Force Audio Start</button>
+                <button id="testTone" class="option-button" style="margin-top: 10px; background-color: #9b59b6;">Play Test Tone</button>
+            </div>
+            
+            <div class="panel info-panel" id="infoPanel">
+                <div class="panel-header">
+                    <h2>About This Experience</h2>
+                    <button class="close-button" data-panel="infoPanel">×</button>
+                </div>
+                <div class="info-content">
+                    <p>This application is inspired by Hiroshi Yoshimura and Japanese environmental music (Kankyō Ongaku) from 1980-1990.</p>
+                    <p>The generative ambient sounds and minimalist architectural spaces create a meditative environment that reflects the harmony between sound and space that characterized Yoshimura's work.</p>
+                    <p>Each architectural space has unique acoustic properties and visual elements that interact with the generated music.</p>
+                    <p>Use the controls to explore different spaces, times of day, weather conditions, and seasons. Each environment alters the musical patterns and soundscape. For the full experience, use headphones and allow the space to evolve over time.</p>
+                    <p><strong>Not hearing any sound?</strong> Click the "Force Audio Start" button in the Parameters panel, or try the "Play Test Tone" button to verify audio is working.</p>
+                </div>
+            </div>
+            
+            <div class="panel debug-panel" id="debugPanel">
+                <div class="panel-header">
+                    <h2>Debug Information</h2>
+                    <button class="close-button" data-panel="debugPanel">×</button>
+                </div>
+                <div class="info-content">
+                    <div>
+                        <button id="logAudioInfo" class="option-button">Log Audio State</button>
+                        <button id="forceNewContext" class="option-button">Create New Audio Context</button>
+                    </div>
+                    <div class="debug-info" id="debugInfo">
+                        Waiting for debug information...
+                    </div>
+                </div>
+            </div>
+            
+            <button class="ui-toggle" id="uiToggle">Hide UI</button>
+            <button class="fullscreen-button" id="fullscreenButton">Fullscreen</button>
+            <div class="status" id="statusMessage"></div>
+        </div>
+    </div>
+
+    <script>
+        // =====================
+        // Global Variables
+        // =====================
+        let audioContext = null;
+        let masterGainNode = null;
+        let reverbNode = null;
+        let dryGainNode = null;
+        let wetGainNode = null;
+        let filterNode = null;
+        let compressorNode = null;
+        let activeOscillators = [];
+        let activeBassOscillators = [];
+        let fieldRecordingNodes = {};
+        let isPlaying = false;
+        let uiVisible = true;
+        let currentSpace = 'museum';
+        let currentTime = 'morning';
+        let currentWeather = 'clear';
+        let currentSeason = 'summer';
+        let sequencer = null;
+        let bassSequencer = null;
+        let cameraPosition = { x: 0.5, y: 0.5, z: 0.5 };
+        let cameraTarget = { x: 0.5, y: 0.5, z: 0.5 };
+        let lightPosition = { x: 0.5, y: 0.5, z: 0.5 };
+        let lightIntensity = 0.6;
+        let cameraMovementSpeed = 0.5;
+        let harmonyLevel = 0.5;
+        let animationFrameId = null;
+        let debugLog = [];
+        let lastNoteTime = 0;
+        let currentSoundModifier = 1.0;
+        let currentChord = 0;
+        let chordProgression = [0, 3, 4, 0]; // I - IV - V - I
+        let melodyPhrase = [];
+        let phraseLength = 8;
+        
+        // Element references
+        const architecturalCanvas = document.getElementById('architecturalCanvas');
+        const effectsCanvas = document.getElementById('effectsCanvas');
+        const architecturalCtx = architecturalCanvas.getContext('2d');
+        const effectsCtx = effectsCanvas.getContext('2d');
+        const audioStatus = document.getElementById('audioStatus');
+        const audioStatusText = document.getElementById('audioStatusText');
+        const debugInfo = document.getElementById('debugInfo');
+
+        // Control elements
+        const spaceButton = document.getElementById('spaceButton');
+        const timeButton = document.getElementById('timeButton');
+        const parametersButton = document.getElementById('parametersButton');
+        const infoButton = document.getElementById('infoButton');
+        const debugButton = document.getElementById('debugButton');
+        const playButton = document.getElementById('playButton');
+        const uiToggle = document.getElementById('uiToggle');
+        const fullscreenButton = document.getElementById('fullscreenButton');
+        const statusMessage = document.getElementById('statusMessage');
+        const logAudioInfo = document.getElementById('logAudioInfo');
+        const forceNewContext = document.getElementById('forceNewContext');
+        const forceAudioStart = document.getElementById('forceAudioStart');
+        const testTone = document.getElementById('testTone');
+
+        // Panels
+        const spacePanel = document.getElementById('spacePanel');
+        const timePanel = document.getElementById('timePanel');
+        const parametersPanel = document.getElementById('parametersPanel');
+        const infoPanel = document.getElementById('infoPanel');
+        const debugPanel = document.getElementById('debugPanel');
+
+        // Parameter controls
+        const volumeSlider = document.getElementById('volumeSlider');
+        const reverbSlider = document.getElementById('reverbSlider');
+        const maSlider = document.getElementById('maSlider');
+        const tempoSlider = document.getElementById('tempoSlider');
+        const harmonySlider = document.getElementById('harmonySlider');
+        const lightSlider = document.getElementById('lightSlider');
+        const cameraSlider = document.getElementById('cameraSlider');
+        const volumeValue = document.getElementById('volumeValue');
+        const reverbValue = document.getElementById('reverbValue');
+        const maValue = document.getElementById('maValue');
+        const tempoValue = document.getElementById('tempoValue');
+        const harmonyValue = document.getElementById('harmonyValue');
+        const lightValue = document.getElementById('lightValue');
+        const cameraValue = document.getElementById('cameraValue');
+
+        // Loading screen elements
+        const loadingScreen = document.querySelector('.loading-screen');
+        const loadingProgress = document.getElementById('loadingProgress');
+        const startButton = document.getElementById('startButton');
+
+        // =====================
+        // Enhanced Musical Scales
+        // =====================
+        const musicalScales = {
+            museum: {
+                scales: [
+                    { name: "C Major Pentatonic", notes: [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25] },
+                    { name: "A Minor Pentatonic", notes: [220.00, 261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33] },
+                    { name: "G Suspended", notes: [196.00, 220.00, 293.66, 329.63, 392.00, 440.00, 587.33, 659.25] }
+                ],
+                chords: [
+                    [261.63, 329.63, 392.00], // C Major
+                    [293.66, 349.23, 440.00], // D Minor
+                    [329.63, 392.00, 493.88], // E Minor
+                    [349.23, 440.00, 523.25], // F Major
+                    [392.00, 493.88, 587.33], // G Major
+                    [220.00, 261.63, 329.63], // A Minor
+                ]
+            },
+            machiya: {
+                scales: [
+                    { name: "Japanese In", notes: [261.63, 277.18, 349.23, 392.00, 415.30, 523.25, 554.37, 698.46] },
+                    { name: "Japanese Hirajoshi", notes: [261.63, 293.66, 349.23, 392.00, 440.00, 523.25, 587.33, 698.46] },
+                    { name: "Japanese Akebono", notes: [196.00, 220.00, 261.63, 293.66, 349.23, 392.00, 440.00, 523.25] }
+                ],
+                chords: [
+                    [261.63, 349.23, 392.00], // Sus chord
+                    [277.18, 392.00, 415.30], // Minor chord
+                    [349.23, 415.30, 523.25], // Sus chord
+                    [392.00, 523.25, 587.33], // Sus chord
+                ]
+            },
+            lobby: {
+                scales: [
+                    { name: "Modern Jazz", notes: [246.94, 261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88] },
+                    { name: "Lydian Mode", notes: [261.63, 293.66, 329.63, 369.99, 392.00, 440.00, 493.88, 523.25] },
+                    { name: "Whole Tone", notes: [261.63, 293.66, 329.63, 369.99, 415.30, 466.16, 523.25, 587.33] }
+                ],
+                chords: [
+                    [261.63, 329.63, 392.00, 493.88], // CMaj7
+                    [293.66, 369.99, 440.00, 523.25], // D7
+                    [329.63, 415.30, 493.88, 587.33], // Em7
+                    [349.23, 440.00, 523.25, 659.25], // FMaj7
+                ]
+            },
+            station: {
+                scales: [
+                    { name: "G Minor", notes: [196.00, 220.00, 233.08, 261.63, 293.66, 311.13, 349.23, 392.00] },
+                    { name: "G Phrygian", notes: [196.00, 207.65, 233.08, 261.63, 293.66, 311.13, 349.23, 392.00] },
+                    { name: "Ambient Scale", notes: [174.61, 196.00, 220.00, 261.63, 293.66, 329.63, 392.00, 440.00] }
+                ],
+                chords: [
+                    [196.00, 233.08, 293.66], // Gm
+                    [174.61, 207.65, 261.63], // Eb
+                    [220.00, 261.63, 329.63], // Am
+                    [233.08, 293.66, 349.23], // Bb
+                ]
+            },
+            university: {
+                scales: [
+                    { name: "Academic", notes: [246.94, 261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88] },
+                    { name: "Contemplative", notes: [220.00, 246.94, 261.63, 293.66, 329.63, 349.23, 392.00, 440.00] },
+                    { name: "Study Mode", notes: [196.00, 220.00, 246.94, 261.63, 293.66, 329.63, 349.23, 392.00] }
+                ],
+                chords: [
+                    [246.94, 293.66, 349.23], // G Major
+                    [261.63, 329.63, 392.00], // C Major
+                    [220.00, 261.63, 329.63], // A Minor
+                    [293.66, 349.23, 440.00], // D Minor
+                ]
+            },
+            pavilion: {
+                scales: [
+                    { name: "Water Flow", notes: [196.00, 220.00, 246.94, 261.63, 293.66, 329.63, 349.23, 392.00] },
+                    { name: "Reflective", notes: [174.61, 196.00, 220.00, 246.94, 261.63, 277.18, 293.66, 329.63] },
+                    { name: "Mist Tones", notes: [185.00, 207.65, 220.00, 246.94, 277.18, 293.66, 329.63, 349.23] }
+                ],
+                chords: [
+                    [196.00, 246.94, 293.66], // G7sus
+                    [174.61, 220.00, 261.63], // F6
+                    [220.00, 277.18, 329.63], // Am7
+                    [246.94, 293.66, 349.23], // Bm7b5
+                ]
+            }
+        };
+
+        // Enhanced sound character settings
+        const soundCharacters = {
+            museum: {
+                oscillatorTypes: ['sine', 'triangle'],
+                filterFrequency: 2000,
+                filterQ: 1,
+                attackRange: [0.2, 0.4],
+                decayRange: [2.0, 4.0],
+                melodyPatterns: ['ascending', 'descending', 'arch'],
+                rhythmicDensity: 0.3
+            },
+            machiya: {
+                oscillatorTypes: ['sine', 'triangle', 'sawtooth'],
+                filterFrequency: 1200,
+                filterQ: 2,
+                attackRange: [0.3, 0.6],
+                decayRange: [1.5, 3.5],
+                melodyPatterns: ['pentatonic', 'interval_jumps'],
+                rhythmicDensity: 0.4
+            },
+            lobby: {
+                oscillatorTypes: ['sine', 'triangle'],
+                filterFrequency: 3000,
+                filterQ: 0.5,
+                attackRange: [0.1, 0.3],
+                decayRange: [1.0, 2.5],
+                melodyPatterns: ['jazz_runs', 'chromatic'],
+                rhythmicDensity: 0.5
+            },
+            station: {
+                oscillatorTypes: ['sine', 'triangle', 'sawtooth'],
+                filterFrequency: 1800,
+                filterQ: 1.5,
+                attackRange: [0.1, 0.2],
+                decayRange: [2.0, 3.0],
+                melodyPatterns: ['repetitive', 'minimal'],
+                rhythmicDensity: 0.6
+            },
+            university: {
+                oscillatorTypes: ['sine', 'triangle'],
+                filterFrequency: 2200,
+                filterQ: 1.0,
+                attackRange: [0.2, 0.3],
+                decayRange: [1.8, 3.2],
+                melodyPatterns: ['contemplative', 'sparse'],
+                rhythmicDensity: 0.25
+            },
+            pavilion: {
+                oscillatorTypes: ['sine', 'triangle'],
+                filterFrequency: 1500,
+                filterQ: 2.5,
+                attackRange: [0.4, 0.7],
+                decayRange: [3.0, 5.0],
+                melodyPatterns: ['flowing', 'circular'],
+                rhythmicDensity: 0.35
+            }
+        };
+
+        // Enhanced field recordings
+        const fieldRecordings = {
+            quiet_footsteps: {
+                baseFrequency: 80,
+                volumeRange: [0.03, 0.08],
+                intervalRange: [2.0, 5.0],
+                harmonics: [1, 2, 3]
+            },
+            distant_voices: {
+                baseFrequency: 220,
+                volumeRange: [0.02, 0.05],
+                intervalRange: [3.0, 8.0],
+                harmonics: [1, 1.5, 2]
+            },
+            air_conditioning: {
+                baseFrequency: 100,
+                volumeRange: [0.02, 0.04],
+                intervalRange: [0, 0],
+                harmonics: [1, 1.25, 1.5]
+            },
+            wooden_creaks: {
+                baseFrequency: 150,
+                volumeRange: [0.03, 0.07],
+                intervalRange: [4.0, 12.0],
+                harmonics: [1, 2.5, 4]
+            },
+            distant_wind_chimes: {
+                baseFrequency: 800,
+                volumeRange: [0.02, 0.06],
+                intervalRange: [5.0, 15.0],
+                harmonics: [1, 2, 3, 4]
+            },
+            paper_rustle: {
+                baseFrequency: 500,
+                volumeRange: [0.01, 0.03],
+                intervalRange: [6.0, 10.0],
+                harmonics: [1, 3, 5]
+            },
+            distant_elevator: {
+                baseFrequency: 60,
+                volumeRange: [0.02, 0.05],
+                intervalRange: [8.0, 20.0],
+                harmonics: [1, 2]
+            },
+            footsteps_marble: {
+                baseFrequency: 120,
+                volumeRange: [0.03, 0.06],
+                intervalRange: [1.5, 4.0],
+                harmonics: [1, 2, 4]
+            },
+            distant_announcement: {
+                baseFrequency: 300,
+                volumeRange: [0.03, 0.08],
+                intervalRange: [10.0, 25.0],
+                harmonics: [1, 1.5, 2, 3]
+            },
+            train_arrival: {
+                baseFrequency: 50,
+                volumeRange: [0.04, 0.1],
+                intervalRange: [15.0, 40.0],
+                harmonics: [1, 1.5, 2, 2.5]
+            },
+            quiet_station: {
+                baseFrequency: 80,
+                volumeRange: [0.02, 0.04],
+                intervalRange: [0, 0],
+                harmonics: [1, 2]
+            },
+            page_turning: {
+                baseFrequency: 400,
+                volumeRange: [0.01, 0.03],
+                intervalRange: [3.0, 8.0],
+                harmonics: [1, 3, 5, 7]
+            },
+            chair_movement: {
+                baseFrequency: 150,
+                volumeRange: [0.03, 0.08],
+                intervalRange: [5.0, 15.0],
+                harmonics: [1, 2, 3]
+            },
+            water_lapping: {
+                baseFrequency: 120,
+                volumeRange: [0.04, 0.08],
+                intervalRange: [1.0, 3.0],
+                harmonics: [1, 1.5, 2, 3]
+            },
+            distant_birds: {
+                baseFrequency: 1200,
+                volumeRange: [0.02, 0.05],
+                intervalRange: [4.0, 12.0],
+                harmonics: [1, 2, 3, 4, 5]
+            },
+            gentle_breeze: {
+                baseFrequency: 200,
+                volumeRange: [0.03, 0.06],
+                intervalRange: [0, 0],
+                harmonics: [1, 1.5, 2]
+            }
+        };
+
+        // Architectural space definitions
+        const spaces = {
+            museum: {
+                name: "Museum Gallery",
+                description: "A minimalist white gallery space with high ceilings and filtered natural light",
+                reverb: 0.7,
+                tempoModifier: 0.9,
+                colors: {
+                    walls: "#f5f5f5",
+                    floor: "#e5e5e5",
+                    ceiling: "#ffffff",
+                    accent: "#d0d0d0"
+                },
+                fieldRecordings: ["quiet_footsteps", "distant_voices", "air_conditioning"],
+                elements: [
+                    { type: "wall", x: 0, y: 0, width: 1, height: 0.8 },
+                    { type: "wall", x: 0, y: 0, width: 0.8, height: 1 },
+                    { type: "window", x: 0.8, y: 0.3, width: 0.2, height: 0.4 },
+                    { type: "ceiling", x: 0, y: 0, width: 1, height: 0.1 }
+                ]
+            },
+            machiya: {
+                name: "Traditional Machiya",
+                description: "A traditional Japanese townhouse with wooden structure and paper screens",
+                reverb: 0.3,
+                tempoModifier: 0.8,
+                colors: {
+                    walls: "#8c7a6b",
+                    floor: "#73614e",
+                    ceiling: "#5e4e3f",
+                    accent: "#c7beb5"
+                },
+                fieldRecordings: ["wooden_creaks", "distant_wind_chimes", "paper_rustle"],
+                elements: [
+                    { type: "floor", x: 0, y: 0.8, width: 1, height: 0.2 },
+                    { type: "wall", x: 0, y: 0, width: 0.3, height: 0.8 },
+                    { type: "shoji", x: 0.3, y: 0.2, width: 0.4, height: 0.6 },
+                    { type: "wall", x: 0.7, y: 0, width: 0.3, height: 0.8 }
+                ]
+            },
+            lobby: {
+                name: "Corporate Lobby",
+                description: "A modern corporate space with glass, steel and geometric forms",
+                reverb: 0.5,
+                tempoModifier: 1.1,
+                colors: {
+                    walls: "#d9d9d9",
+                    floor: "#f0f0f0",
+                    ceiling: "#ffffff",
+                    accent: "#a0a0a0"
+                },
+                fieldRecordings: ["air_conditioning", "distant_elevator", "footsteps_marble"],
+                elements: [
+                    { type: "floor", x: 0, y: 0.9, width: 1, height: 0.1 },
+                    { type: "wall", x: 0, y: 0, width: 0.1, height: 0.9 },
+                    { type: "glass", x: 0.1, y: 0.1, width: 0.8, height: 0.8 },
+                    { type: "wall", x: 0.9, y: 0, width: 0.1, height: 0.9 }
+                ]
+            },
+            station: {
+                name: "Train Station",
+                description: "A quiet Japanese train station with distant sounds and clean architecture",
+                reverb: 0.8,
+                tempoModifier: 1.0,
+                colors: {
+                    walls: "#e0e0e0",
+                    floor: "#c0c0c0",
+                    ceiling: "#f2f2f2",
+                    accent: "#a9a9a9"
+                },
+                fieldRecordings: ["distant_announcement", "train_arrival", "quiet_station"],
+                elements: [
+                    { type: "platform", x: 0, y: 0.7, width: 1, height: 0.3 },
+                    { type: "track", x: 0, y: 0.6, width: 1, height: 0.1 },
+                    { type: "ceiling", x: 0, y: 0, width: 1, height: 0.2 },
+                    { type: "pillars", x: 0.2, y: 0.2, width: 0.6, height: 0.5 }
+                ]
+            },
+            university: {
+                name: "University Building",
+                description: "A modernist university space with concrete and wood elements",
+                reverb: 0.6,
+                tempoModifier: 1.0,
+                colors: {
+                    walls: "#d6d6d6",
+                    floor: "#a8a8a8",
+                    ceiling: "#f5f5f5",
+                    accent: "#b3b3b3"
+                },
+                fieldRecordings: ["distant_voices", "page_turning", "chair_movement"],
+                elements: [
+                    { type: "wall", x: 0, y: 0, width: 1, height: 0.2 },
+                    { type: "window", x: 0.1, y: 0.2, width: 0.8, height: 0.4 },
+                    { type: "floor", x: 0, y: 0.6, width: 1, height: 0.4 },
+                    { type: "stairs", x: 0.6, y: 0.4, width: 0.3, height: 0.2 }
+                ]
+            },
+            pavilion: {
+                name: "Waterside Pavilion",
+                description: "A minimalist pavilion beside water with natural wood and openness",
+                reverb: 0.4,
+                tempoModifier: 0.7,
+                colors: {
+                    walls: "#c9b18f",
+                    floor: "#8c7a6b",
+                    ceiling: "#d8c9b6",
+                    accent: "#e6dfd3"
+                },
+                fieldRecordings: ["water_lapping", "distant_birds", "gentle_breeze"],
+                elements: [
+                    { type: "platform", x: 0, y: 0.7, width: 1, height: 0.3 },
+                    { type: "water", x: 0, y: 0.9, width: 1, height: 0.1 },
+                    { type: "roof", x: 0.2, y: 0.1, width: 0.6, height: 0.2 },
+                    { type: "pillars", x: 0.25, y: 0.3, width: 0.5, height: 0.4 }
+                ]
+            }
+        };
+
+        // Time & weather definitions remain the same
+        const timeSettings = {
+            dawn: {
+                name: "Dawn",
+                lightColor: "#e8c9a9",
+                lightIntensity: 0.4,
+                ambientColor: "#4d5e72",
+                tempoModifier: 0.8,
+                soundModifier: 0.8,
+                filterModifier: 0.7
+            },
+            morning: {
+                name: "Morning",
+                lightColor: "#f2e6d8",
+                lightIntensity: 0.7,
+                ambientColor: "#8ba0bc",
+                tempoModifier: 1.0,
+                soundModifier: 1.0,
+                filterModifier: 1.0
+            },
+            afternoon: {
+                name: "Afternoon",
+                lightColor: "#ffffff",
+                lightIntensity: 1.0,
+                ambientColor: "#a3cdfd",
+                tempoModifier: 1.1,
+                soundModifier: 1.1,
+                filterModifier: 1.2
+            },
+            evening: {
+                name: "Evening",
+                lightColor: "#ffc38a",
+                lightIntensity: 0.5,
+                ambientColor: "#6d5b78",
+                tempoModifier: 0.9,
+                soundModifier: 0.9,
+                filterModifier: 0.9
+            },
+            night: {
+                name: "Night",
+                lightColor: "#a8c0ff",
+                lightIntensity: 0.2,
+                ambientColor: "#29293d",
+                tempoModifier: 0.7,
+                soundModifier: 0.7,
+                filterModifier: 0.6
+            }
+        };
+
+        const weatherSettings = {
+            clear: {
+                name: "Clear",
+                particleCount: 0,
+                soundModifier: 1.0,
+                visualEffect: "none",
+                filterModifier: 1.0
+            },
+            rain: {
+                name: "Rain",
+                particleCount: 200,
+                soundModifier: 0.9,
+                visualEffect: "raindrops",
+                filterModifier: 0.8
+            },
+            mist: {
+                name: "Mist",
+                particleCount: 50,
+                soundModifier: 0.8,
+                visualEffect: "fog",
+                filterModifier: 0.7
+            }
+        };
+
+        const seasonSettings = {
+            spring: {
+                name: "Spring",
+                colorModifier: { r: 0, g: 10, b: 0 },
+                particleType: "blossom",
+                soundModifier: 1.1,
+                toneModifier: 1.1
+            },
+            summer: {
+                name: "Summer",
+                colorModifier: { r: 0, g: 0, b: 10 },
+                particleType: "dust",
+                soundModifier: 1.0,
+                toneModifier: 1.0
+            },
+            autumn: {
+                name: "Autumn",
+                colorModifier: { r: 10, g: 0, b: -10 },
+                particleType: "leaf",
+                soundModifier: 0.9,
+                toneModifier: 0.9
+            },
+            winter: {
+                name: "Winter",
+                colorModifier: { r: -10, g: -10, b: 10 },
+                particleType: "snow",
+                soundModifier: 0.8,
+                toneModifier: 0.8
+            }
+        };
+
+        // Visualization elements
+        let particles = [];
+        let lightRays = [];
+        let shadowPatterns = [];
+
+        // =====================
+        // Debug Functions
+        // =====================
+        function addDebugLog(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            debugLog.unshift(logEntry);
+            
+            if (debugLog.length > 50) {
+                debugLog.pop();
+            }
+            
+            updateDebugInfo();
+            console.log(message);
+        }
+        
+        function updateDebugInfo() {
+            if (debugInfo) {
+                debugInfo.textContent = debugLog.join('\n');
+            }
+        }
+        
+        function logAudioState() {
+            if (!audioContext) {
+                addDebugLog("Audio Context: Not created");
+                return;
+            }
+            
+            addDebugLog(`Audio Context State: ${audioContext.state}`);
+            addDebugLog(`Sample Rate: ${audioContext.sampleRate} Hz`);
+            addDebugLog(`Current Time: ${audioContext.currentTime.toFixed(2)}s`);
+            addDebugLog(`Base Latency: ${(audioContext.baseLatency || 0).toFixed(4)}s`);
+            addDebugLog(`Active Oscillators: ${activeOscillators.length}`);
+            addDebugLog(`Active Bass Oscillators: ${activeBassOscillators.length}`);
+            addDebugLog(`Current Sound Modifier: ${currentSoundModifier.toFixed(2)}`);
+            addDebugLog(`Current Chord: ${currentChord}`);
+            addDebugLog(`Harmony Level: ${harmonyLevel.toFixed(2)}`);
+            
+            if (sequencer) {
+                addDebugLog(`Sequencer: Active`);
+                addDebugLog(`  Tempo: ${sequencer.tempo.toFixed(1)} BPM`);
+                addDebugLog(`  Ma value: ${sequencer.maValue.toFixed(2)}`);
+                addDebugLog(`  Phrase position: ${sequencer.phrasePosition}/${phraseLength}`);
+            }
+            
+            if (masterGainNode) {
+                addDebugLog(`Master Gain: ${masterGainNode.gain.value.toFixed(2)}`);
+            }
+            
+            if (filterNode) {
+                addDebugLog(`Filter Frequency: ${filterNode.frequency.value.toFixed(0)} Hz`);
+                addDebugLog(`Filter Q: ${filterNode.Q.value.toFixed(2)}`);
+            }
+            
+            addDebugLog(`Current Space: ${currentSpace}`);
+            addDebugLog(`Current Time: ${currentTime}`);
+            addDebugLog(`Current Weather: ${currentWeather}`);
+            addDebugLog(`Current Season: ${currentSeason}`);
+            addDebugLog(`Is Playing: ${isPlaying}`);
+        }
+        
+        function updateAudioStatusIndicator() {
+            if (!audioContext) {
+                audioStatus.classList.remove('active');
+                audioStatusText.textContent = 'Audio: Not initialized';
+                return;
+            }
+            
+            if (audioContext.state === 'running') {
+                audioStatus.classList.add('active');
+                audioStatusText.textContent = 'Audio: Active';
+            } else if (audioContext.state === 'suspended') {
+                audioStatus.classList.remove('active');
+                audioStatusText.textContent = 'Audio: Suspended - Click to resume';
+            } else {
+                audioStatus.classList.remove('active');
+                audioStatusText.textContent = `Audio: ${audioContext.state}`;
+            }
+        }
+
+        // =====================
+        // Initialization
+        // =====================
+        function init() {
+            addDebugLog("Initializing application...");
+            
+            simulateLoading();
+            setupEventListeners();
+            resizeCanvases();
+            
+            uiVisible = true;
+            document.querySelector('.container').classList.remove('ui-hidden');
+            
+            randomizeCameraPosition(true);
+        }
+
+        function randomizeCameraPosition(initial = false) {
+            if (initial) {
+                cameraPosition = { x: 0.5, y: 0.5, z: 0.5 };
+                cameraTarget = { x: 0.5, y: 0.5, z: 0.5 };
+            } else {
+                cameraTarget = {
+                    x: 0.2 + Math.random() * 0.6,
+                    y: 0.2 + Math.random() * 0.6,
+                    z: 0.3 + Math.random() * 0.4
+                };
+            }
+        }
+
+        function simulateLoading() {
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 5;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    loadingComplete();
+                }
+                loadingProgress.style.width = `${progress}%`;
+            }, 100);
+        }
+
+        function loadingComplete() {
+            addDebugLog("Loading complete");
+            startButton.style.display = 'block';
+            startButton.addEventListener('click', startExperience);
+        }
+
+        function startExperience() {
+            addDebugLog("Starting experience");
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                
+                initializeAudio();
+                initializeParticles();
+                startAnimation();
+                
+                showStatus("Welcome to Spaces");
+                
+                setTimeout(() => {
+                    tryToResumeAudioContext();
+                }, 1000);
+                
+                setInterval(updateAudioStatusIndicator, 1000);
+                
+                setInterval(() => {
+                    if (Math.random() < 0.3) {
+                        randomizeCameraPosition();
+                    }
+                }, 10000);
+            }, 1000);
+        }
+
+        function setupEventListeners() {
+            // Control buttons
+            spaceButton.addEventListener('click', () => togglePanel(spacePanel));
+            timeButton.addEventListener('click', () => togglePanel(timePanel));
+            parametersButton.addEventListener('click', () => togglePanel(parametersPanel));
+            infoButton.addEventListener('click', () => togglePanel(infoPanel));
+            debugButton.addEventListener('click', () => togglePanel(debugPanel));
+            playButton.addEventListener('click', togglePlayback);
+            uiToggle.addEventListener('click', toggleUI);
+            fullscreenButton.addEventListener('click', toggleFullscreen);
+            
+            // Space selection
+            document.querySelectorAll('#spacePanel .option-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    selectSpace(e.target.dataset.space);
+                });
+            });
+            
+            // Time selection
+            document.querySelectorAll('#timePanel [data-time]').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    selectTime(e.target.dataset.time);
+                });
+            });
+            
+            // Weather selection
+            document.querySelectorAll('#timePanel [data-weather]').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    selectWeather(e.target.dataset.weather);
+                });
+            });
+            
+            // Season selection
+            document.querySelectorAll('#timePanel [data-season]').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    selectSeason(e.target.dataset.season);
+                });
+            });
+            
+            // Close buttons
+            document.querySelectorAll('.close-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const panelId = e.target.dataset.panel;
+                    const panel = document.getElementById(panelId);
+                    if (panel) {
+                        panel.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Debug buttons
+            logAudioInfo.addEventListener('click', logAudioState);
+            forceNewContext.addEventListener('click', createNewAudioContext);
+            forceAudioStart.addEventListener('click', forceAudioStart_click);
+            testTone.addEventListener('click', playTestTone);
+            
+            // Audio resume
+            audioStatusText.addEventListener('click', tryToResumeAudioContext);
+            audioStatus.addEventListener('click', tryToResumeAudioContext);
+            document.addEventListener('click', tryToResumeAudioContext);
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.code === 'Space') {
+                    togglePlayback();
+                    e.preventDefault();
+                }
+                
+                if (e.code === 'Escape') {
+                    hideAllPanels();
+                }
+                
+                if (e.code === 'KeyD') {
+                    togglePanel(debugPanel);
+                }
+                
+                if (e.code === 'KeyF') {
+                    toggleFullscreen();
+                }
+            });
+            
+            // Parameter sliders
+            volumeSlider.addEventListener('input', updateVolume);
+            reverbSlider.addEventListener('input', updateReverb);
+            maSlider.addEventListener('input', updateMa);
+            tempoSlider.addEventListener('input', updateTempo);
+            harmonySlider.addEventListener('input', updateHarmony);
+            lightSlider.addEventListener('input', updateLight);
+            cameraSlider.addEventListener('input', updateCamera);
+            
+            window.addEventListener('resize', resizeCanvases);
+            
+            // Fullscreen change events
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+            document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+            document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+            document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+        }
+        
+        function handleFullscreenChange() {
+            if (document.fullscreenElement || 
+                document.webkitFullscreenElement || 
+                document.mozFullScreenElement || 
+                document.msFullscreenElement) {
+                fullscreenButton.textContent = 'Exit Fullscreen';
+            } else {
+                fullscreenButton.textContent = 'Fullscreen';
+            }
+            
+            setTimeout(resizeCanvases, 100);
+        }
+
+        function hideAllPanels() {
+            document.querySelectorAll('.panel').forEach(panel => {
+                panel.style.display = 'none';
+            });
+        }
+
+        function resizeCanvases() {
+            const container = document.querySelector('.scene-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            architecturalCanvas.width = width;
+            architecturalCanvas.height = height;
+            effectsCanvas.width = width;
+            effectsCanvas.height = height;
+            
+            drawArchitecturalSpace();
+        }
+
+        // =====================
+        // UI Controls
+        // =====================
+        function togglePanel(panel) {
+            document.querySelectorAll('.panel').forEach(p => {
+                p.style.display = 'none';
+            });
+            
+            document.querySelectorAll('.control-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            if (panel.style.display === 'block') {
+                panel.style.display = 'none';
+                return;
+            }
+            
+            panel.style.display = 'block';
+            
+            if (panel === spacePanel) spaceButton.classList.add('active');
+            if (panel === timePanel) timeButton.classList.add('active');
+            if (panel === parametersPanel) parametersButton.classList.add('active');
+            if (panel === infoPanel) infoButton.classList.add('active');
+            if (panel === debugPanel) debugButton.classList.add('active');
+        }
+
+        function togglePlayback() {
+            if (isPlaying) {
+                pauseAudio();
+                playButton.textContent = 'Play';
+                isPlaying = false;
+                addDebugLog("Playback paused");
+            } else {
+                resumeAudio();
+                playButton.textContent = 'Pause';
+                isPlaying = true;
+                addDebugLog("Playback resumed");
+            }
+        }
+
+        function toggleUI() {
+            uiVisible = !uiVisible;
+            
+            if (uiVisible) {
+                document.querySelector('.container').classList.remove('ui-hidden');
+                uiToggle.textContent = 'Hide UI';
+            } else {
+                document.querySelector('.container').classList.add('ui-hidden');
+                uiToggle.textContent = 'Show UI';
+            }
+        }
+
+        function toggleFullscreen() {
+            const elem = document.documentElement;
+            
+            if (!document.fullscreenElement && !document.mozFullScreenElement &&
+                !document.webkitFullscreenElement && !document.msFullscreenElement) {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.msRequestFullscreen) {
+                    elem.msRequestFullscreen();
+                } else if (elem.mozRequestFullScreen) {
+                    elem.mozRequestFullScreen();
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+                }
+                fullscreenButton.textContent = 'Exit Fullscreen';
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+                fullscreenButton.textContent = 'Fullscreen';
+            }
+            
+            setTimeout(resizeCanvases, 100);
+        }
+
+        function selectSpace(space) {
+            if (!spaces[space]) return;
+            
+            currentSpace = space;
+            
+            document.querySelectorAll('#spacePanel .option-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            document.querySelector(`#spacePanel [data-space="${space}"]`).classList.add('active');
+            
+            if (reverbNode && audioContext) {
+                updateReverb();
+            }
+            
+            updateFilterSettings();
+            updateFieldRecordings();
+            
+            if (sequencer) {
+                sequencer.selectPattern();
+                updateTempo();
+            }
+            
+            if (bassSequencer) {
+                bassSequencer.updateChords();
+            }
+            
+            showStatus(`Space: ${spaces[space].name}`);
+            addDebugLog(`Changed to space: ${spaces[space].name}`);
+            
+            calculateSoundModifier();
+            randomizeCameraPosition();
+        }
+
+        function selectTime(time) {
+            if (!timeSettings[time]) return;
+            
+            currentTime = time;
+            
+            document.querySelectorAll('#timePanel [data-time]').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            document.querySelector(`#timePanel [data-time="${time}"]`).classList.add('active');
+            
+            updateLightingForTimeOfDay();
+            updateFilterSettings();
+            
+            if (sequencer) {
+                updateTempo();
+            }
+            
+            showStatus(`Time: ${timeSettings[time].name}`);
+            addDebugLog(`Changed to time: ${timeSettings[time].name}`);
+            
+            calculateSoundModifier();
+        }
+
+        function selectWeather(weather) {
+            if (!weatherSettings[weather]) return;
+            
+            currentWeather = weather;
+            
+            document.querySelectorAll('#timePanel [data-weather]').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            document.querySelector(`#timePanel [data-weather="${weather}"]`).classList.add('active');
+            
+            updateWeatherParticles();
+            updateFilterSettings();
+            
+            showStatus(`Weather: ${weatherSettings[weather].name}`);
+            addDebugLog(`Changed to weather: ${weatherSettings[weather].name}`);
+            
+            calculateSoundModifier();
+        }
+
+        function selectSeason(season) {
+            if (!seasonSettings[season]) return;
+            
+            currentSeason = season;
+            
+            document.querySelectorAll('#timePanel [data-season]').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            document.querySelector(`#timePanel [data-season="${season}"]`).classList.add('active');
+            
+            updateSeasonalEffects();
+            updateFilterSettings();
+            
+            showStatus(`Season: ${seasonSettings[season].name}`);
+            addDebugLog(`Changed to season: ${seasonSettings[season].name}`);
+            
+            calculateSoundModifier();
+        }
+
+        function calculateSoundModifier() {
+            const timeModifier = timeSettings[currentTime].soundModifier;
+            const weatherModifier = weatherSettings[currentWeather].soundModifier;
+            const seasonModifier = seasonSettings[currentSeason].soundModifier;
+            
+            currentSoundModifier = timeModifier * weatherModifier * seasonModifier;
+            
+            addDebugLog(`Sound modifier updated: ${currentSoundModifier.toFixed(2)}`);
+            
+            updateFieldRecordingVolumes();
+        }
+
+        function updateFilterSettings() {
+            if (!filterNode || !audioContext) return;
+            
+            const spaceSettings = soundCharacters[currentSpace];
+            const baseFrequency = spaceSettings.filterFrequency;
+            const baseQ = spaceSettings.filterQ;
+            
+            const timeModifier = timeSettings[currentTime].filterModifier;
+            const weatherModifier = weatherSettings[currentWeather].filterModifier;
+            const seasonModifier = seasonSettings[currentSeason].toneModifier;
+            
+            const effectiveFrequency = baseFrequency * timeModifier * weatherModifier * seasonModifier;
+            const effectiveQ = baseQ * (1 + (1 - weatherModifier) * 2);
+            
+            filterNode.frequency.setTargetAtTime(effectiveFrequency, audioContext.currentTime, 1.0);
+            filterNode.Q.setTargetAtTime(effectiveQ, audioContext.currentTime, 1.0);
+            
+            addDebugLog(`Filter updated: ${effectiveFrequency.toFixed(0)}Hz, Q=${effectiveQ.toFixed(2)}`);
+        }
+
+        function updateVolume() {
+            const value = volumeSlider.value;
+            volumeValue.textContent = `${value}%`;
+            
+            if (masterGainNode && audioContext) {
+                const volume = value / 100;
+                masterGainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+                addDebugLog(`Volume updated: ${volume.toFixed(2)}`);
+            }
+        }
+
+        function updateReverb() {
+            const value = reverbSlider.value;
+            reverbValue.textContent = `${value}%`;
+            
+            if (wetGainNode && dryGainNode && audioContext) {
+                const baseReverb = value / 100;
+                const spaceModifier = spaces[currentSpace].reverb;
+                const effectiveReverb = baseReverb * spaceModifier;
+                
+                wetGainNode.gain.setTargetAtTime(effectiveReverb, audioContext.currentTime, 0.5);
+                dryGainNode.gain.setTargetAtTime(1 - effectiveReverb, audioContext.currentTime, 0.5);
+                
+                addDebugLog(`Reverb updated: ${effectiveReverb.toFixed(2)}`);
+            }
+        }
+
+        function updateMa() {
+            const value = maSlider.value;
+            maValue.textContent = `${value}%`;
+            
+            if (sequencer) {
+                sequencer.maValue = value / 100;
+                addDebugLog(`Ma updated: ${sequencer.maValue.toFixed(2)}`);
+            }
+        }
+
+        function updateTempo() {
+            const value = tempoSlider.value;
+            tempoValue.textContent = `${value} BPM`;
+            
+            if (sequencer) {
+                const spaceModifier = spaces[currentSpace].tempoModifier;
+                const timeModifier = timeSettings[currentTime].tempoModifier;
+                const effectiveTempo = value * spaceModifier * timeModifier;
+                
+                sequencer.tempo = effectiveTempo;
+                if (bassSequencer) {
+                    bassSequencer.tempo = effectiveTempo;
+                }
+                addDebugLog(`Tempo updated: ${effectiveTempo.toFixed(1)} BPM`);
+            }
+        }
+
+        function updateHarmony() {
+            const value = harmonySlider.value;
+            harmonyValue.textContent = `${value}%`;
+            harmonyLevel = value / 100;
+            
+            addDebugLog(`Harmony level updated: ${harmonyLevel.toFixed(2)}`);
+        }
+
+        function updateLight() {
+            const value = lightSlider.value;
+            lightValue.textContent = `${value}%`;
+            
+            lightIntensity = value / 100;
+            updateLightingForTimeOfDay();
+            
+            addDebugLog(`Light intensity updated: ${lightIntensity.toFixed(2)}`);
+        }
+
+        function updateCamera() {
+            const value = cameraSlider.value;
+            cameraValue.textContent = `${value}%`;
+            
+            cameraMovementSpeed = value / 100;
+            
+            addDebugLog(`Camera movement updated: ${cameraMovementSpeed.toFixed(2)}`);
+        }
+
+        function updateLightingForTimeOfDay() {
+            const timeConfig = timeSettings[currentTime];
+            
+            const effectiveIntensity = lightIntensity * timeConfig.lightIntensity;
+            
+            if (currentTime === 'dawn') {
+                lightPosition = { x: 0.2, y: 0.3, z: 0.5 };
+            } else if (currentTime === 'morning') {
+                lightPosition = { x: 0.3, y: 0.2, z: 0.5 };
+            } else if (currentTime === 'afternoon') {
+                lightPosition = { x: 0.5, y: 0.1, z: 0.5 };
+            } else if (currentTime === 'evening') {
+                lightPosition = { x: 0.7, y: 0.2, z: 0.5 };
+            } else if (currentTime === 'night') {
+                lightPosition = { x: 0.5, y: 0.5, z: 1.0 };
+            }
+            
+            generateLightRays();
+        }
+
+        function updateWeatherParticles() {
+            particles = particles.filter(p => p.type !== 'raindrop' && p.type !== 'fog');
+            
+            const weatherConfig = weatherSettings[currentWeather];
+            
+            for (let i = 0; i < weatherConfig.particleCount; i++) {
+                createParticle(weatherConfig.visualEffect);
+            }
+        }
+
+        function updateSeasonalEffects() {
+            const seasonConfig = seasonSettings[currentSeason];
+            
+            particles = particles.filter(p => p.type !== 'blossom' && p.type !== 'leaf' && p.type !== 'snow');
+            
+            if (seasonConfig.particleType !== 'dust') {
+                for (let i = 0; i < 20; i++) {
+                    createParticle(seasonConfig.particleType);
+                }
+            }
+        }
+
+        function showStatus(message) {
+            statusMessage.textContent = message;
+            statusMessage.classList.add('visible');
+            
+            setTimeout(() => {
+                statusMessage.classList.remove('visible');
+            }, 3000);
+        }
+
+        // =====================
+        // Audio System
+        // =====================
+        function createNewAudioContext() {
+            if (audioContext) {
+                try {
+                    if (activeOscillators.length > 0) {
+                        activeOscillators.forEach(osc => {
+                            try {
+                                osc.stop();
+                                osc.disconnect();
+                            } catch (e) {
+                                addDebugLog(`Error stopping oscillator: ${e.message}`);
+                            }
+                        });
+                        activeOscillators = [];
+                    }
+                    
+                    if (activeBassOscillators.length > 0) {
+                        activeBassOscillators.forEach(osc => {
+                            try {
+                                osc.stop();
+                                osc.disconnect();
+                            } catch (e) {
+                                addDebugLog(`Error stopping bass oscillator: ${e.message}`);
+                            }
+                        });
+                        activeBassOscillators = [];
+                    }
+                    
+                    audioContext.close().then(() => {
+                        addDebugLog("Old AudioContext closed successfully");
+                    }).catch(err => {
+                        addDebugLog(`Error closing AudioContext: ${err.message}`);
+                    });
+                } catch (e) {
+                    addDebugLog(`Error in cleanup: ${e.message}`);
+                }
+            }
+            
+            initializeAudio();
+            tryToResumeAudioContext();
+            
+            setTimeout(() => {
+                playTestTone();
+            }, 500);
+        }
+
+        function initializeAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                addDebugLog(`AudioContext created: ${audioContext.state}, ${audioContext.sampleRate}Hz`);
+                
+                // Create master gain node
+                masterGainNode = audioContext.createGain();
+                masterGainNode.gain.value = volumeSlider.value / 100;
+                
+                // Create compressor for better dynamics
+                compressorNode = audioContext.createDynamicsCompressor();
+                compressorNode.threshold.value = -24;
+                compressorNode.knee.value = 30;
+                compressorNode.ratio.value = 12;
+                compressorNode.attack.value = 0.003;
+                compressorNode.release.value = 0.25;
+                
+                // Create filter node
+                filterNode = audioContext.createBiquadFilter();
+                filterNode.type = 'lowpass';
+                
+                // Create reverb
+                reverbNode = audioContext.createConvolver();
+                
+                // Create dry/wet mix
+                dryGainNode = audioContext.createGain();
+                wetGainNode = audioContext.createGain();
+                
+                const reverbLevel = reverbSlider.value / 100;
+                dryGainNode.gain.value = 1 - reverbLevel;
+                wetGainNode.gain.value = reverbLevel;
+                
+                createReverbImpulse(2);
+                
+                // Connect nodes
+                masterGainNode.connect(filterNode);
+                filterNode.connect(compressorNode);
+                compressorNode.connect(dryGainNode);
+                compressorNode.connect(reverbNode);
+                reverbNode.connect(wetGainNode);
+                dryGainNode.connect(audioContext.destination);
+                wetGainNode.connect(audioContext.destination);
+                
+                updateFilterSettings();
+                calculateSoundModifier();
+                initializeFieldRecordings();
+                
+                // Create sequencers
+                sequencer = new MelodicSequencer();
+                bassSequencer = new BassSequencer();
+                
+                isPlaying = true;
+                updateAudioStatusIndicator();
+                
+                sequencer.start();
+                bassSequencer.start();
+                
+                addDebugLog("Audio system initialized");
+                return true;
+            } catch (error) {
+                addDebugLog(`Audio initialization error: ${error.message}`);
+                showStatus("Audio system initialization failed");
+                return false;
+            }
+        }
+
+        function createReverbImpulse(duration) {
+            const sampleRate = audioContext.sampleRate;
+            const length = sampleRate * duration;
+            const impulseResponse = audioContext.createBuffer(2, length, sampleRate);
+            const impulseL = impulseResponse.getChannelData(0);
+            const impulseR = impulseResponse.getChannelData(1);
+            
+            for (let i = 0; i < length; i++) {
+                const t = i / sampleRate;
+                const decay = Math.exp(-t * 3);
+                impulseL[i] = (Math.random() * 2 - 1) * decay;
+                impulseR[i] = (Math.random() * 2 - 1) * decay;
+            }
+            
+            reverbNode.buffer = impulseResponse;
+            
+            addDebugLog(`Created reverb impulse: ${duration}s, ${length} samples`);
+        }
+
+        function initializeFieldRecordings() {
+            if (!audioContext || !masterGainNode) return;
+            
+            for (const id in fieldRecordingNodes) {
+                if (fieldRecordingNodes[id].oscillator) {
+                    fieldRecordingNodes[id].oscillator.stop();
+                    fieldRecordingNodes[id].oscillator.disconnect();
+                }
+                if (fieldRecordingNodes[id].gainNode) {
+                    fieldRecordingNodes[id].gainNode.disconnect();
+                }
+            }
+            fieldRecordingNodes = {};
+            
+            updateFieldRecordings();
+        }
+        
+        function updateFieldRecordings() {
+            if (!audioContext || !masterGainNode) return;
+            
+            for (const id in fieldRecordingNodes) {
+                if (fieldRecordingNodes[id].oscillator) {
+                    fieldRecordingNodes[id].oscillator.stop();
+                    fieldRecordingNodes[id].oscillator.disconnect();
+                }
+                if (fieldRecordingNodes[id].gainNode) {
+                    fieldRecordingNodes[id].gainNode.disconnect();
+                }
+            }
+            fieldRecordingNodes = {};
+            
+            const recordingList = spaces[currentSpace].fieldRecordings;
+            
+            recordingList.forEach(recordingId => {
+                const recording = fieldRecordings[recordingId];
+                if (!recording) return;
+                
+                try {
+                    createFieldRecording(recordingId, recording);
+                } catch (e) {
+                    addDebugLog(`Error creating field recording ${recordingId}: ${e.message}`);
+                }
+            });
+            
+            addDebugLog(`Field recordings updated for ${spaces[currentSpace].name}`);
+            updateFieldRecordingVolumes();
+        }
+        
+        function createFieldRecording(id, settings) {
+            if (!audioContext || !masterGainNode) return;
+            
+            const oscillator = audioContext.createOscillator();
+            oscillator.type = 'sine';
+            oscillator.detune.value = (Math.random() * 20) - 10;
+            oscillator.frequency.value = settings.baseFrequency * (0.98 + Math.random() * 0.04);
+            
+            const gainNode = audioContext.createGain();
+            
+            const filter = audioContext.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = settings.baseFrequency * 1.5;
+            filter.Q.value = 0.8;
+            
+            const baseVolume = settings.volumeRange[0] + Math.random() * (settings.volumeRange[1] - settings.volumeRange[0]);
+            gainNode.gain.value = baseVolume * currentSoundModifier;
+            
+            oscillator.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(masterGainNode);
+            
+            oscillator.start();
+            
+            fieldRecordingNodes[id] = {
+                oscillator: oscillator,
+                gainNode: gainNode,
+                filter: filter,
+                baseVolume: baseVolume,
+                settings: settings
+            };
+            
+            if (settings.intervalRange[0] > 0) {
+                gainNode.gain.value = 0;
+                scheduleFieldRecordingInterval(id);
+            }
+            
+            addDebugLog(`Created field recording: ${id}`);
+        }
+        
+        function scheduleFieldRecordingInterval(id) {
+            if (!audioContext || !fieldRecordingNodes[id]) return;
+            
+            const node = fieldRecordingNodes[id];
+            const settings = node.settings;
+            
+            const minInterval = settings.intervalRange[0];
+            const maxInterval = settings.intervalRange[1];
+            const interval = minInterval + Math.random() * (maxInterval - minInterval);
+            
+            setTimeout(() => {
+                if (!audioContext || !fieldRecordingNodes[id]) return;
+                
+                const node = fieldRecordingNodes[id];
+                const duration = 0.5 + Math.random() * 2.0;
+                
+                try {
+                    const volume = node.baseVolume * currentSoundModifier;
+                    node.gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                    node.gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.1);
+                    node.gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+                    
+                    const freqMod = 0.8 + Math.random() * 0.4;
+                    node.oscillator.frequency.setValueAtTime(settings.baseFrequency * freqMod, audioContext.currentTime);
+                    
+                    scheduleFieldRecordingInterval(id);
+                } catch (e) {
+                    addDebugLog(`Error in field recording ${id}: ${e.message}`);
+                }
+            }, interval * 1000);
+        }
+        
+        function updateFieldRecordingVolumes() {
+            if (!audioContext) return;
+            
+            for (const id in fieldRecordingNodes) {
+                const node = fieldRecordingNodes[id];
+                if (node.gainNode && node.settings.intervalRange[0] === 0) {
+                    const volume = node.baseVolume * currentSoundModifier;
+                    node.gainNode.gain.setTargetAtTime(volume, audioContext.currentTime, 1.0);
+                }
+            }
+        }
+
+        function pauseAudio() {
+            if (audioContext) {
+                audioContext.suspend().then(() => {
+                    addDebugLog("AudioContext suspended");
+                    updateAudioStatusIndicator();
+                }).catch(err => {
+                    addDebugLog(`Error suspending AudioContext: ${err.message}`);
+                });
+            }
+        }
+
+        function resumeAudio() {
+            tryToResumeAudioContext();
+        }
+
+        function forceAudioStart_click() {
+            addDebugLog("Force audio start button clicked");
+            
+            if (!audioContext) {
+                initializeAudio();
+            }
+            
+            tryToResumeAudioContext();
+            playTestTone(0.1, 880, 0.2);
+        }
+        
+        function tryToResumeAudioContext() {
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume().then(() => {
+                    addDebugLog('AudioContext resumed successfully');
+                    showStatus("Audio enabled");
+                    updateAudioStatusIndicator();
+                    
+                    if (sequencer && isPlaying) {
+                        sequencer.start();
+                    }
+                    if (bassSequencer && isPlaying) {
+                        bassSequencer.start();
+                    }
+                }).catch(err => {
+                    addDebugLog(`Failed to resume AudioContext: ${err.message}`);
+                });
+            }
+        }
+
+        function playTestTone(duration = 0.5, frequency = 440, volume = 0.2) {
+            try {
+                if (!audioContext) {
+                    initializeAudio();
+                }
+                
+                tryToResumeAudioContext();
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.value = frequency;
+                
+                gainNode.gain.value = 0;
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.05);
+                gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + duration);
+                
+                addDebugLog(`Test tone played: ${frequency}Hz, ${duration}s`);
+                showStatus(`Test tone: ${frequency}Hz`);
+                
+                return true;
+            } catch (error) {
+                addDebugLog(`Error playing test tone: ${error.message}`);
+                return false;
+            }
+        }
+
+        // Enhanced Melodic Sequencer
+        class MelodicSequencer {
+            constructor() {
+                this.tempo = parseInt(tempoSlider.value);
+                this.maValue = parseInt(maSlider.value) / 100;
+                this.lastNoteTime = 0;
+                this.currentScale = this.getRandomScale();
+                this.noteIndex = 0;
+                this.nextNoteTime = 0;
+                this.isRunning = false;
+                this.noteCounter = 0;
+                this.phrasePosition = 0;
+                this.currentPhrase = [];
+                this.generateNewPhrase();
+                
+                addDebugLog("Melodic Sequencer created");
+            }
+            
+            getRandomScale() {
+                const scales = musicalScales[currentSpace].scales;
+                return scales[Math.floor(Math.random() * scales.length)];
+            }
+            
+            selectPattern() {
+                this.currentScale = this.getRandomScale();
+                this.generateNewPhrase();
+                addDebugLog(`New scale selected: ${this.currentScale.name}`);
+            }
+            
+            generateNewPhrase() {
+                const patterns = soundCharacters[currentSpace].melodyPatterns;
+                const pattern = patterns[Math.floor(Math.random() * patterns.length)];
+                const scaleNotes = this.currentScale.notes;
+                
+                this.currentPhrase = [];
+                
+                switch(pattern) {
+                    case 'ascending':
+                        for (let i = 0; i < phraseLength; i++) {
+                            const noteIndex = Math.floor((i / phraseLength) * scaleNotes.length);
+                            this.currentPhrase.push(scaleNotes[noteIndex]);
+                        }
+                        break;
+                    case 'descending':
+                        for (let i = 0; i < phraseLength; i++) {
+                            const noteIndex = Math.floor(((phraseLength - i) / phraseLength) * scaleNotes.length);
+                            this.currentPhrase.push(scaleNotes[noteIndex]);
+                        }
+                        break;
+                    case 'arch':
+                        for (let i = 0; i < phraseLength; i++) {
+                            const progress = i / phraseLength;
+                            const archProgress = Math.sin(progress * Math.PI);
+                            const noteIndex = Math.floor(archProgress * (scaleNotes.length - 1));
+                            this.currentPhrase.push(scaleNotes[noteIndex]);
+                        }
+                        break;
+                    case 'pentatonic':
+                        const pentatonicIndices = [0, 2, 4, 5, 7];
+                        for (let i = 0; i < phraseLength; i++) {
+                            const index = pentatonicIndices[Math.floor(Math.random() * pentatonicIndices.length)];
+                            this.currentPhrase.push(scaleNotes[index % scaleNotes.length]);
+                        }
+                        break;
+                    case 'interval_jumps':
+                        let currentIndex = 0;
+                        for (let i = 0; i < phraseLength; i++) {
+                            this.currentPhrase.push(scaleNotes[currentIndex]);
+                            currentIndex = (currentIndex + 2 + Math.floor(Math.random() * 3)) % scaleNotes.length;
+                        }
+                        break;
+                    case 'jazz_runs':
+                        for (let i = 0; i < phraseLength; i++) {
+                            if (i % 4 === 0) {
+                                this.currentPhrase.push(scaleNotes[0]);
+                            } else {
+                                const chromatic = Math.random() < 0.3;
+                                if (chromatic && i > 0) {
+                                    const lastNote = this.currentPhrase[i - 1];
+                                    this.currentPhrase.push(lastNote * 1.059463);
+                                } else {
+                                    this.currentPhrase.push(scaleNotes[Math.floor(Math.random() * scaleNotes.length)]);
+                                }
+                            }
+                        }
+                        break;
+                    case 'repetitive':
+                        const motif = [];
+                        for (let i = 0; i < 3; i++) {
+                            motif.push(scaleNotes[Math.floor(Math.random() * scaleNotes.length)]);
+                        }
+                        for (let i = 0; i < phraseLength; i++) {
+                            this.currentPhrase.push(motif[i % motif.length]);
+                        }
+                        break;
+                    case 'minimal':
+                        const minimalNotes = [scaleNotes[0], scaleNotes[4]];
+                        for (let i = 0; i < phraseLength; i++) {
+                            this.currentPhrase.push(minimalNotes[Math.floor(Math.random() * minimalNotes.length)]);
+                        }
+                        break;
+                    case 'contemplative':
+                        for (let i = 0; i < phraseLength; i++) {
+                            if (Math.random() < 0.3) {
+                                this.currentPhrase.push(null); // Rest
+                            } else {
+                                const weight = Math.random();
+                                if (weight < 0.5) {
+                                    this.currentPhrase.push(scaleNotes[0]);
+                                } else if (weight < 0.8) {
+                                    this.currentPhrase.push(scaleNotes[4]);
+                                } else {this.currentPhrase.push(scaleNotes[Math.floor(Math.random() * scaleNotes.length)]);
+                                }
+                            }
+                        }
+                        break;
+                    case 'sparse':
+                        for (let i = 0; i < phraseLength; i++) {
+                            if (Math.random() < 0.5) {
+                                this.currentPhrase.push(null); // Rest
+                            } else {
+                                this.currentPhrase.push(scaleNotes[Math.floor(Math.random() * scaleNotes.length)]);
+                            }
+                        }
+                        break;
+                    case 'flowing':
+                        let lastIndex = Math.floor(scaleNotes.length / 2);
+                        for (let i = 0; i < phraseLength; i++) {
+                            const direction = Math.random() < 0.7 ? 1 : -1;
+                            const step = Math.floor(Math.random() * 2) + 1;
+                            lastIndex = (lastIndex + direction * step + scaleNotes.length) % scaleNotes.length;
+                            this.currentPhrase.push(scaleNotes[lastIndex]);
+                        }
+                        break;
+                    case 'circular':
+                        for (let i = 0; i < phraseLength; i++) {
+                            const angle = (i / phraseLength) * Math.PI * 2;
+                            const noteIndex = Math.floor((Math.sin(angle) + 1) / 2 * (scaleNotes.length - 1));
+                            this.currentPhrase.push(scaleNotes[noteIndex]);
+                        }
+                        break;
+                    default:
+                        // Default random pattern
+                        for (let i = 0; i < phraseLength; i++) {
+                            this.currentPhrase.push(scaleNotes[Math.floor(Math.random() * scaleNotes.length)]);
+                        }
+                }
+                
+                this.phrasePosition = 0;
+            }
+            
+            start() {
+                if (this.isRunning) return;
+                
+                this.isRunning = true;
+                this.lastNoteTime = audioContext ? audioContext.currentTime : 0;
+                this.nextNoteTime = this.lastNoteTime;
+                this.schedule();
+                
+                addDebugLog("Melodic Sequencer started");
+            }
+            
+            stop() {
+                this.isRunning = false;
+                addDebugLog("Melodic Sequencer stopped");
+            }
+            
+            schedule() {
+                if (!this.isRunning || !isPlaying || !audioContext) {
+                    return;
+                }
+                
+                const now = audioContext.currentTime;
+                
+                if (now >= this.nextNoteTime) {
+                    this.playNote();
+                    this.lastNoteTime = now;
+                    this.nextNoteTime = now + this.getNoteInterval();
+                    
+                    this.noteCounter++;
+                    if (this.noteCounter % 10 === 0) {
+                        addDebugLog(`Note ${this.noteCounter} played, phrase position: ${this.phrasePosition}/${phraseLength}`);
+                    }
+                }
+                
+                setTimeout(() => this.schedule(), 50);
+            }
+            
+            getNoteInterval() {
+                const beatDuration = 60 / this.tempo;
+                const maFactor = 1 + (this.maValue * 3);
+                const density = soundCharacters[currentSpace].rhythmicDensity;
+                
+                // Create rhythmic patterns
+                const rhythmPatterns = [
+                    [1, 1, 2, 1], // Syncopated
+                    [2, 2, 2, 2], // Even
+                    [1, 2, 1, 4], // Long pause
+                    [1, 1, 1, 1], // Quick
+                    [3, 1, 3, 1], // Waltz-like
+                ];
+                
+                const pattern = rhythmPatterns[Math.floor(Math.random() * rhythmPatterns.length)];
+                const selectedValue = pattern[this.phrasePosition % pattern.length];
+                
+                const duration = beatDuration * (selectedValue / 2) * maFactor / density;
+                
+                return duration * (0.9 + Math.random() * 0.2) * currentSoundModifier;
+            }
+            
+            playNote() {
+                try {
+                    if (!audioContext || !masterGainNode || !isPlaying) return false;
+                    
+                    const frequency = this.currentPhrase[this.phrasePosition];
+                    
+                    // Move to next position in phrase
+                    this.phrasePosition = (this.phrasePosition + 1) % phraseLength;
+                    
+                    // Start new phrase if completed
+                    if (this.phrasePosition === 0) {
+                        if (Math.random() < 0.3) { // 30% chance to generate new phrase
+                            this.generateNewPhrase();
+                        }
+                        
+                        // Progress chord every phrase
+                        currentChord = (currentChord + 1) % chordProgression.length;
+                    }
+                    
+                    // Skip if rest
+                    if (!frequency) return true;
+                    
+                    // Get sound character for current space
+                    const spaceSound = soundCharacters[currentSpace];
+                    
+                    // Create main oscillator
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    // Choose oscillator type
+                    const types = spaceSound.oscillatorTypes;
+                    oscillator.type = types[Math.floor(Math.random() * types.length)];
+                    
+                    // Set frequency with seasonal detuning
+                    const seasonModifier = seasonSettings[currentSeason].toneModifier;
+                    const detuneAmount = (Math.random() * 10 - 5) * (2 - seasonModifier);
+                    oscillator.frequency.value = frequency;
+                    oscillator.detune.value = detuneAmount;
+                    
+                    // Calculate envelope
+                    const now = audioContext.currentTime;
+                    const attackMin = spaceSound.attackRange[0];
+                    const attackMax = spaceSound.attackRange[1];
+                    const decayMin = spaceSound.decayRange[0];
+                    const decayMax = spaceSound.decayRange[1];
+                    
+                    const attack = (attackMin + Math.random() * (attackMax - attackMin)) / currentSoundModifier;
+                    const decay = (decayMin + Math.random() * (decayMax - decayMin)) * currentSoundModifier;
+                    
+                    const volume = (0.15 + (0.1 * currentSoundModifier)) * (1 - harmonyLevel * 0.3);
+                    
+                    gainNode.gain.setValueAtTime(0, now);
+                    gainNode.gain.linearRampToValueAtTime(volume, now + attack);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, now + attack + decay);
+                    
+                    // Connect and start
+                    oscillator.connect(gainNode);
+                    gainNode.connect(masterGainNode);
+                    
+                    oscillator.start(now);
+                    oscillator.stop(now + attack + decay + 0.1);
+                    
+                    activeOscillators.push(oscillator);
+                    
+                    // Add harmony notes based on harmony level
+                    if (harmonyLevel > 0.2 && Math.random() < harmonyLevel) {
+                        this.addHarmonyNote(frequency, attack, decay);
+                    }
+                    
+                    // Clean up old oscillators
+                    if (activeOscillators.length > 50) {
+                        activeOscillators = activeOscillators.slice(-30);
+                    }
+                    
+                    // Create visual event
+                    this.createVisualEvent(frequency);
+                    
+                    lastNoteTime = now;
+                    
+                    return true;
+                } catch (error) {
+                    addDebugLog(`Error playing note: ${error.message}`);
+                    return false;
+                }
+            }
+            
+            addHarmonyNote(baseFrequency, attack, decay) {
+                if (!audioContext || !masterGainNode) return;
+                
+                // Create harmony intervals
+                const intervals = [1.5, 1.333, 1.25, 2.0]; // Perfect fifth, perfect fourth, major third, octave
+                const interval = intervals[Math.floor(Math.random() * intervals.length)];
+                
+                const harmonyOsc = audioContext.createOscillator();
+                const harmonyGain = audioContext.createGain();
+                
+                harmonyOsc.type = 'sine';
+                harmonyOsc.frequency.value = baseFrequency * interval;
+                harmonyOsc.detune.value = (Math.random() * 5 - 2.5);
+                
+                const now = audioContext.currentTime;
+                const harmonyVolume = 0.05 * harmonyLevel * currentSoundModifier;
+                
+                harmonyGain.gain.setValueAtTime(0, now);
+                harmonyGain.gain.linearRampToValueAtTime(harmonyVolume, now + attack * 1.2);
+                harmonyGain.gain.exponentialRampToValueAtTime(0.001, now + attack + decay * 1.2);
+                
+                harmonyOsc.connect(harmonyGain);
+                harmonyGain.connect(masterGainNode);
+                
+                harmonyOsc.start(now);
+                harmonyOsc.stop(now + attack + decay + 0.2);
+                
+                activeOscillators.push(harmonyOsc);
+            }
+            
+            createVisualEvent(frequency) {
+                try {
+                    const normalizedFreq = (frequency - 100) / 1000;
+                    
+                    if (Math.random() < 0.5) {
+                        const ray = {
+                            x: 0.1 + Math.random() * 0.8,
+                            y: 0.1 + Math.random() * 0.4,
+                            length: 0.2 + normalizedFreq * 0.3,
+                            angle: Math.random() * Math.PI * 2,
+                            width: 0.01 + normalizedFreq * 0.02,
+                            opacity: 0.1 + Math.random() * 0.2,
+                            life: 1.0,
+                            decayRate: 0.005 + Math.random() * 0.01
+                        };
+                        
+                        lightRays.push(ray);
+                    } else {
+                        const pattern = {
+                            x: 0.1 + Math.random() * 0.8,
+                            y: 0.3 + Math.random() * 0.6,
+                            size: 0.05 + normalizedFreq * 0.1,
+                            opacity: 0.2 + Math.random() * 0.3,
+                            life: 1.0,
+                            decayRate: 0.005 + Math.random() * 0.01
+                        };
+                        
+                        shadowPatterns.push(pattern);
+                    }
+                    
+                    const moveX = (normalizedFreq - 0.5) * 0.05;
+                    const moveY = (Math.random() - 0.5) * 0.03;
+                    
+                    cameraTarget.x += moveX;
+                    cameraTarget.y += moveY;
+                    
+                    cameraTarget.x = Math.max(0.1, Math.min(0.9, cameraTarget.x));
+                    cameraTarget.y = Math.max(0.1, Math.min(0.9, cameraTarget.y));
+                } catch (error) {
+                    addDebugLog(`Error creating visual event: ${error.message}`);
+                }
+            }
+        }
+
+        // Bass Sequencer for chord progressions
+        class BassSequencer {
+            constructor() {
+                this.tempo = parseInt(tempoSlider.value);
+                this.isRunning = false;
+                this.nextChordTime = 0;
+                this.currentChords = musicalScales[currentSpace].chords;
+                
+                addDebugLog("Bass Sequencer created");
+            }
+            
+            updateChords() {
+                this.currentChords = musicalScales[currentSpace].chords;
+            }
+            
+            start() {
+                if (this.isRunning) return;
+                
+                this.isRunning = true;
+                this.nextChordTime = audioContext ? audioContext.currentTime : 0;
+                this.schedule();
+                
+                addDebugLog("Bass Sequencer started");
+            }
+            
+            stop() {
+                this.isRunning = false;
+                addDebugLog("Bass Sequencer stopped");
+            }
+            
+            schedule() {
+                if (!this.isRunning || !isPlaying || !audioContext) {
+                    return;
+                }
+                
+                const now = audioContext.currentTime;
+                
+                if (now >= this.nextChordTime) {
+                    this.playChord();
+                    const beatDuration = 60 / this.tempo;
+                    this.nextChordTime = now + beatDuration * 4; // Every 4 beats
+                }
+                
+                setTimeout(() => this.schedule(), 100);
+            }
+            
+            playChord() {
+                try {
+                    if (!audioContext || !masterGainNode || !isPlaying || harmonyLevel < 0.1) return;
+                    
+                    const chordIndex = chordProgression[currentChord];
+                    const chord = this.currentChords[chordIndex % this.currentChords.length];
+                    
+                    if (!chord) return;
+                    
+                    // Play bass note
+                    const bassFreq = chord[0] / 2; // One octave down
+                    this.playBassNote(bassFreq);
+                    
+                    // Play chord notes with slight delay and lower volume
+                    chord.forEach((freq, i) => {
+                        setTimeout(() => {
+                            this.playChordNote(freq, i);
+                        }, i * 50);
+                    });
+                    
+                } catch (error) {
+                    addDebugLog(`Error playing chord: ${error.message}`);
+                }
+            }
+            
+            playBassNote(frequency) {
+                if (!audioContext || !masterGainNode) return;
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.value = frequency;
+                
+                const now = audioContext.currentTime;
+                const volume = 0.08 * harmonyLevel * currentSoundModifier;
+                
+                gainNode.gain.setValueAtTime(0, now);
+                gainNode.gain.linearRampToValueAtTime(volume, now + 0.1);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, now + 3.0);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(masterGainNode);
+                
+                oscillator.start(now);
+                oscillator.stop(now + 3.5);
+                
+                activeBassOscillators.push(oscillator);
+                
+                // Clean up
+                if (activeBassOscillators.length > 20) {
+                    activeBassOscillators = activeBassOscillators.slice(-10);
+                }
+            }
+            
+            playChordNote(frequency, index) {
+                if (!audioContext || !masterGainNode) return;
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.type = 'triangle';
+                oscillator.frequency.value = frequency;
+                oscillator.detune.value = (Math.random() * 10 - 5);
+                
+                const now = audioContext.currentTime;
+                const volume = 0.03 * harmonyLevel * currentSoundModifier;
+                
+                gainNode.gain.setValueAtTime(0, now);
+                gainNode.gain.linearRampToValueAtTime(volume, now + 0.3);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(masterGainNode);
+                
+                oscillator.start(now);
+                oscillator.stop(now + 3.0);
+                
+                activeBassOscillators.push(oscillator);
+            }
+        }
+
+        // =====================
+        // Visual System
+        // =====================
+        function startAnimation() {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+            
+            animate();
+            
+            addDebugLog("Animation started");
+        }
+
+        function animate() {
+            architecturalCtx.clearRect(0, 0, architecturalCanvas.width, architecturalCanvas.height);
+            effectsCtx.clearRect(0, 0, effectsCanvas.width, effectsCanvas.height);
+            
+            updateCamera3D();
+            drawArchitecturalSpace();
+            drawLightingEffects();
+            drawParticles();
+            
+            animationFrameId = requestAnimationFrame(animate);
+        }
+
+        function updateCamera3D() {
+            cameraPosition.x += (cameraTarget.x - cameraPosition.x) * 0.05 * cameraMovementSpeed;
+            cameraPosition.y += (cameraTarget.y - cameraPosition.y) * 0.05 * cameraMovementSpeed;
+            cameraPosition.z += (cameraTarget.z - cameraPosition.z) * 0.05 * cameraMovementSpeed;
+            
+            if (Math.random() < 0.02) {
+                cameraTarget.x += (Math.random() - 0.5) * 0.01;
+                cameraTarget.y += (Math.random() - 0.5) * 0.01;
+                
+                cameraTarget.x = Math.max(0.1, Math.min(0.9, cameraTarget.x));
+                cameraTarget.y = Math.max(0.1, Math.min(0.9, cameraTarget.y));
+            }
+        }
+
+        function drawArchitecturalSpace() {
+            if (!spaces[currentSpace]) return;
+            
+            const space = spaces[currentSpace];
+            const width = architecturalCanvas.width;
+            const height = architecturalCanvas.height;
+            
+            const timeConfig = timeSettings[currentTime];
+            architecturalCtx.fillStyle = timeConfig.ambientColor;
+            architecturalCtx.fillRect(0, 0, width, height);
+            
+            space.elements.forEach(element => {
+                let x = element.x * width;
+                let y = element.y * height;
+                let w = element.width * width;
+                let h = element.height * height;
+                
+                x += (0.5 - cameraPosition.x) * width * 0.2;
+                y += (0.5 - cameraPosition.y) * height * 0.2;
+                
+                let color;
+                switch (element.type) {
+                    case 'wall':
+                        color = space.colors.walls;
+                        break;
+                    case 'floor':
+                        color = space.colors.floor;
+                        break;
+                    case 'ceiling':
+                        color = space.colors.ceiling;
+                        break;
+                    case 'window':
+                        architecturalCtx.fillStyle = space.colors.accent;
+                        architecturalCtx.fillRect(x, y, w, h);
+                        
+                        const padding = Math.min(w, h) * 0.1;
+                        architecturalCtx.clearRect(x + padding, y + padding, w - padding * 2, h - padding * 2);
+                        return;
+                    case 'shoji':
+                        architecturalCtx.fillStyle = `rgba(255, 253, 250, 0.7)`;
+                        architecturalCtx.fillRect(x, y, w, h);
+                        
+                        architecturalCtx.strokeStyle = space.colors.accent;
+                        architecturalCtx.lineWidth = 2;
+                        architecturalCtx.strokeRect(x, y, w, h);
+                        
+                        architecturalCtx.beginPath();
+                        for (let i = 1; i < 3; i++) {
+                            architecturalCtx.moveTo(x + w * (i/3), y);
+                            architecturalCtx.lineTo(x + w * (i/3), y + h);
+                            architecturalCtx.moveTo(x, y + h * (i/3));
+                            architecturalCtx.lineTo(x + w, y + h * (i/3));
+                        }
+                        architecturalCtx.stroke();
+                        return;
+                    case 'glass':
+                        architecturalCtx.fillStyle = `rgba(240, 240, 255, 0.1)`;
+                        architecturalCtx.fillRect(x, y, w, h);
+                        
+                        architecturalCtx.strokeStyle = space.colors.accent;
+                        architecturalCtx.lineWidth = 1;
+                        architecturalCtx.strokeRect(x, y, w, h);
+                        return;
+                    case 'water':
+                        const gradient = architecturalCtx.createLinearGradient(x, y, x, y + h);
+                        gradient.addColorStop(0, `rgba(120, 140, 180, 0.6)`);
+                        gradient.addColorStop(1, `rgba(70, 90, 110, 0.8)`);
+                        architecturalCtx.fillStyle = gradient;
+                        architecturalCtx.fillRect(x, y, w, h);
+                        
+                        architecturalCtx.strokeStyle = `rgba(255, 255, 255, 0.2)`;
+                        architecturalCtx.lineWidth = 1;
+                        
+                        for (let i = 0; i < 3; i++) {
+                            const rippleX = x + Math.random() * w;
+                            const rippleY = y + Math.random() * h;
+                            const rippleSize = 10 + Math.random() * 20;
+                            
+                            architecturalCtx.beginPath();
+                            architecturalCtx.arc(rippleX, rippleY, rippleSize, 0, Math.PI * 2);
+                            architecturalCtx.stroke();
+                        }
+                        return;
+                    case 'track':
+                        color = '#555555';
+                        architecturalCtx.fillStyle = color;
+                        architecturalCtx.fillRect(x, y, w, h);
+                        
+                        architecturalCtx.strokeStyle = '#999999';
+                        architecturalCtx.lineWidth = 2;
+                        architecturalCtx.beginPath();
+                        architecturalCtx.moveTo(x, y + h * 0.3);
+                        architecturalCtx.lineTo(x + w, y + h * 0.3);
+                        architecturalCtx.moveTo(x, y + h * 0.7);
+                        architecturalCtx.lineTo(x + w, y + h * 0.7);
+                        architecturalCtx.stroke();
+                        return;
+                    case 'platform':
+                        color = space.colors.floor;
+                        break;
+                    case 'pillars':
+                        const pillarWidth = w / 5;
+                        const pillarGap = (w - pillarWidth * 3) / 4;
+                        
+                        architecturalCtx.fillStyle = space.colors.accent;
+                        for (let i = 0; i < 3; i++) {
+                            const pillarX = x + pillarGap + (pillarWidth + pillarGap) * i;
+                            architecturalCtx.fillRect(pillarX, y, pillarWidth, h);
+                        }
+                        return;
+                    case 'stairs':
+                        const steps = 5;
+                        const stepHeight = h / steps;
+                        
+                        architecturalCtx.fillStyle = space.colors.accent;
+                        for (let i = 0; i < steps; i++) {
+                            const stepWidth = w * (1 - i / steps);
+                            const stepX = x + (w - stepWidth) / 2;
+                            architecturalCtx.fillRect(stepX, y + i * stepHeight, stepWidth, stepHeight);
+                        }
+                        return;
+                    case 'roof':
+                        architecturalCtx.fillStyle = space.colors.ceiling;
+                        architecturalCtx.beginPath();
+                        architecturalCtx.moveTo(x, y + h);
+                        architecturalCtx.lineTo(x + w / 2, y);
+                        architecturalCtx.lineTo(x + w, y + h);
+                        architecturalCtx.closePath();
+                        architecturalCtx.fill();
+                        return;
+                    default:
+                        color = space.colors.walls;
+                }
+                
+                architecturalCtx.fillStyle = color;
+                architecturalCtx.fillRect(x, y, w, h);
+            });
+        }
+
+        function drawLightingEffects() {
+            const width = effectsCanvas.width;
+            const height = effectsCanvas.height;
+            
+            lightRays = lightRays.filter(ray => {
+                ray.life -= ray.decayRate;
+                if (ray.life <= 0) return false;
+                
+                const x = ray.x * width;
+                const y = ray.y * height;
+                const length = ray.length * height;
+                const endX = x + Math.cos(ray.angle) * length;
+                const endY = y + Math.sin(ray.angle) * length;
+                
+                const gradient = effectsCtx.createLinearGradient(x, y, endX, endY);
+                
+                const lightColor = timeSettings[currentTime].lightColor;
+                
+                gradient.addColorStop(0, `rgba(255, 255, 255, ${ray.opacity * ray.life})`);
+                gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
+                
+                effectsCtx.beginPath();
+                effectsCtx.moveTo(x, y);
+                effectsCtx.lineTo(endX, endY);
+                effectsCtx.lineWidth = ray.width * width;
+                effectsCtx.strokeStyle = gradient;
+                effectsCtx.stroke();
+                
+                return true;
+            });
+            
+            shadowPatterns = shadowPatterns.filter(pattern => {
+                pattern.life -= pattern.decayRate;
+                if (pattern.life <= 0) return false;
+                
+                const x = pattern.x * width;
+                const y = pattern.y * height;
+                const size = pattern.size * width;
+                
+                effectsCtx.fillStyle = `rgba(0, 0, 0, ${pattern.opacity * pattern.life})`;
+                
+                const type = Math.floor(Math.random() * 3);
+                if (type === 0) {
+                    effectsCtx.fillRect(x - size/2, y - size/2, size, size);
+                } else if (type === 1) {
+                    effectsCtx.beginPath();
+                    effectsCtx.arc(x, y, size/2, 0, Math.PI * 2);
+                    effectsCtx.fill();
+                } else {
+                    effectsCtx.beginPath();
+                    effectsCtx.moveTo(x, y - size/2);
+                    effectsCtx.lineTo(x + size/2, y + size/2);
+                    effectsCtx.lineTo(x - size/2, y + size/2);
+                    effectsCtx.closePath();
+                    effectsCtx.fill();
+                }
+                
+                return true;
+            });
+        }
+
+        function generateLightRays() {
+            lightRays = [];
+            
+            const rayCount = Math.floor(5 + Math.random() * 5);
+            const x = lightPosition.x;
+            const y = lightPosition.y;
+            
+            for (let i = 0; i < rayCount; i++) {
+                const ray = {
+                    x: x + (Math.random() * 0.1 - 0.05),
+                    y: y + (Math.random() * 0.1 - 0.05),
+                    length: 0.2 + Math.random() * 0.4,
+                    angle: Math.random() * Math.PI * 2,
+                    width: 0.005 + Math.random() * 0.015,
+                    opacity: 0.1 + Math.random() * 0.2,
+                    life: 1.0,
+                    decayRate: 0.001 + Math.random() * 0.002
+                };
+                
+                lightRays.push(ray);
+            }
+        }
+
+        function initializeParticles() {
+            updateWeatherParticles();
+            generateLightRays();
+            
+            addDebugLog("Particles initialized");
+        }
+
+        function createParticle(type) {
+            const width = effectsCanvas.width;
+            const height = effectsCanvas.height;
+            
+            let particle;
+            
+            switch(type) {
+                case 'raindrops':
+                    particle = {
+                        x: Math.random() * width,
+                        y: -10,
+                        size: 2 + Math.random() * 3,
+                        speed: 5 + Math.random() * 10,
+                        opacity: 0.2 + Math.random() * 0.3,
+                        type: 'raindrop'
+                    };
+                    break;
+                case 'fog':
+                    particle = {
+                        x: Math.random() * width,
+                        y: Math.random() * height,
+                        size: 50 + Math.random() * 100,
+                        speed: 0.2 + Math.random() * 0.5,
+                        opacity: 0.05 + Math.random() * 0.1,
+                        type: 'fog'
+                    };
+                    break;
+                case 'dust':
+                    particle = {
+                        x: Math.random() * width,
+                        y: Math.random() * height,
+                        size: 1 + Math.random() * 2,
+                        speed: 0.1 + Math.random() * 0.5,
+                        opacity: 0.2 + Math.random() * 0.4,
+                        type: 'dust',
+                        angle: Math.random() * Math.PI * 2,
+                        angleSpeed: (Math.random() - 0.5) * 0.02
+                    };
+                    break;
+                case 'blossom':
+                    particle = {
+                        x: Math.random() * width,
+                        y: -10,
+                        size: 3 + Math.random() * 5,
+                        speed: 1 + Math.random() * 2,
+                        opacity: 0.6 + Math.random() * 0.4,
+                        type: 'blossom',
+                        angle: Math.random() * Math.PI * 2,
+                        angleSpeed: (Math.random() - 0.5) * 0.05,
+                        horizontalSpeed: (Math.random() - 0.5) * 2
+                    };
+                    break;
+                case 'leaf':
+                    particle = {
+                        x: Math.random() * width,
+                        y: -10,
+                        size: 5 + Math.random() * 8,
+                        speed: 1 + Math.random() * 3,
+                        opacity: 0.7 + Math.random() * 0.3,
+                        type: 'leaf',
+                        angle: Math.random() * Math.PI * 2,
+                        angleSpeed: (Math.random() - 0.5) * 0.1,
+                        horizontalSpeed: (Math.random() - 0.5) * 3
+                    };
+                    break;
+                case 'snow':
+                    particle = {
+                        x: Math.random() * width,
+                        y: -10,
+                        size: 2 + Math.random() * 4,
+                        speed: 0.5 + Math.random() * 1.5,
+                        opacity: 0.7 + Math.random() * 0.3,
+                        type: 'snow',
+                        horizontalSpeed: (Math.random() - 0.5) * 1
+                    };
+                    break;
+                default:
+                    return;
+            }
+            
+            particles.push(particle);
+        }
+
+        function drawParticles() {
+            const width = effectsCanvas.width;
+            const height = effectsCanvas.height;
+            
+            particles = particles.filter(particle => {
+                particle.y += particle.speed;
+                
+                if (particle.horizontalSpeed) {
+                    particle.x += particle.horizontalSpeed;
+                    
+                    if (Math.random() < 0.05) {
+                        particle.horizontalSpeed += (Math.random() - 0.5) * 0.5;
+                        particle.horizontalSpeed = Math.max(-3, Math.min(3, particle.horizontalSpeed));
+                    }
+                }
+                
+                if (particle.angleSpeed) {
+                    particle.angle += particle.angleSpeed;
+                }
+                
+                if (particle.y > height + 20 || particle.x < -20 || particle.x > width + 20) {
+                    return false;
+                }
+                
+                switch(particle.type) {
+                    case 'raindrop':
+                        effectsCtx.strokeStyle = `rgba(200, 220, 255, ${particle.opacity})`;
+                        effectsCtx.lineWidth = 1;
+                        effectsCtx.beginPath();
+                        effectsCtx.moveTo(particle.x, particle.y);
+                        effectsCtx.lineTo(particle.x, particle.y + particle.size);
+                        effectsCtx.stroke();
+                        break;
+                    case 'fog':
+                        effectsCtx.fillStyle = `rgba(255, 255, 255, ${particle.opacity})`;
+                        effectsCtx.beginPath();
+                        effectsCtx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                        effectsCtx.fill();
+                        break;
+                    case 'dust':
+                        effectsCtx.fillStyle = `rgba(255, 255, 220, ${particle.opacity})`;
+                        effectsCtx.beginPath();
+                        effectsCtx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                        effectsCtx.fill();
+                        break;
+                    case 'blossom':
+                        effectsCtx.fillStyle = `rgba(255, 230, 240, ${particle.opacity})`;
+                        effectsCtx.save();
+                        effectsCtx.translate(particle.x, particle.y);
+                        effectsCtx.rotate(particle.angle);
+                        
+                        for (let i = 0; i < 5; i++) {
+                            const angle = (i / 5) * Math.PI * 2;
+                            effectsCtx.beginPath();
+                            effectsCtx.ellipse(
+                                Math.cos(angle) * particle.size / 2, 
+                                Math.sin(angle) * particle.size / 2, 
+                                particle.size / 2, 
+                                particle.size / 4, 
+                                angle, 
+                                0, 
+                                Math.PI * 2
+                            );
+                            effectsCtx.fill();
+                        }
+                        
+                        effectsCtx.restore();
+                        break;
+                    case 'leaf':
+                        effectsCtx.fillStyle = `rgba(200, 100, 50, ${particle.opacity})`;
+                        effectsCtx.save();
+                        effectsCtx.translate(particle.x, particle.y);
+                        effectsCtx.rotate(particle.angle);
+                        
+                        effectsCtx.beginPath();
+                        effectsCtx.ellipse(0, 0, particle.size, particle.size / 2, 0, 0, Math.PI * 2);
+                        effectsCtx.fill();
+                        
+                        effectsCtx.strokeStyle = `rgba(100, 50, 25, ${particle.opacity})`;
+                        effectsCtx.lineWidth = 1;
+                        effectsCtx.beginPath();
+                        effectsCtx.moveTo(-particle.size, 0);
+                        effectsCtx.lineTo(particle.size, 0);
+                        effectsCtx.stroke();
+                        
+                        effectsCtx.restore();
+                        break;
+                    case 'snow':
+                        effectsCtx.fillStyle = `rgba(255, 255, 255, ${particle.opacity})`;
+                        effectsCtx.beginPath();
+                        effectsCtx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                        effectsCtx.fill();
+                        break;
+                }
+                
+                return true;
+            });
+            
+            if (weatherSettings[currentWeather].particleCount > 0 && Math.random() < 0.1) {
+                createParticle(weatherSettings[currentWeather].visualEffect);
+            }
+            
+            if (seasonSettings[currentSeason].particleType !== 'dust' && Math.random() < 0.05) {
+                createParticle(seasonSettings[currentSeason].particleType);
+            }
+        }
+
+        // =====================
+        // Initialize the application
+        // =====================
+        window.addEventListener('DOMContentLoaded', init);
+
+        // Run init even if DOMContentLoaded already happened
+        if (document.readyState === 'interactive' || document.readyState === 'complete') {
+            init();
+        }
+    </script>
+</body>
+</html>
