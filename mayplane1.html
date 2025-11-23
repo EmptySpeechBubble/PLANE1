@@ -5776,18 +5776,30 @@
         tempoControl.value = artistStyles[artistId].tempo;
         updateTempo();
     }
-    
+
     // Update decay if artist has specific decay
     if (artistStyles[artistId].decay && decayControl) {
         decayControl.value = artistStyles[artistId].decay;
         updateDecay();
     }
-    
+
     // Update reverb if artist has specific reverb
     if (artistStyles[artistId].reverb && reverbControl) {
         reverbControl.value = artistStyles[artistId].reverb;
         updateReverb();
     }
+
+    // Update musical notes based on artist style
+    if (artistStyles[artistId].harmonicNotes) {
+        harmonicNotes = artistStyles[artistId].harmonicNotes;
+    }
+    if (artistStyles[artistId].planeNotes) {
+        planeNotes = artistStyles[artistId].planeNotes;
+    }
+
+    // Force sequencers to select new patterns with artist-specific notes
+    if (sequencer1) sequencer1.selectPattern();
+    if (sequencer2) sequencer2.selectPattern();
 
     // Track artist change in flight log
     trackArtistChange(currentArtistName);
@@ -6501,7 +6513,8 @@ function trackArtistChange(newArtist) {
     });
 
     flightLog.currentArtistName = newArtist;
-    addLogEvent('artist_change', `Cabin music changed to ${newArtist}`);
+    const initials = getArtistInitials(newArtist);
+    addLogEvent('artist_change', `Cabin music changed to ${initials}`);
 }
 
 // Track altitude changes
@@ -6553,6 +6566,25 @@ function formatRelativeTime(seconds) {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `+${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+// Convert artist name to initials
+function getArtistInitials(artistName) {
+    const initialsMap = {
+        'Brian Eno': 'BE',
+        'Erik Satie': 'ES',
+        'Harold Budd': 'HB',
+        'Stars of the Lid': 'SOTL',
+        'Boards of Canada': 'BOC',
+        'William Basinski': 'WB',
+        'Steve Reich': 'SR',
+        'Tim Hecker': 'TH',
+        'Ryuichi Sakamoto': 'RS',
+        'Aphex Twin': 'AT',
+        'Jon Hopkins': 'JH',
+        'Various Artists': 'VA'
+    };
+    return initialsMap[artistName] || artistName.split(' ').map(word => word[0]).join('');
 }
 
 // Generate the flight log HTML
@@ -6649,7 +6681,7 @@ function generateFlightLog() {
                 <div class="timeline-event">
                     <div class="event-marker">♫</div>
                     <div class="event-content">
-                        <div class="event-title">${artist.name}</div>
+                        <div class="event-title">${getArtistInitials(artist.name)}</div>
                         <div class="event-detail">Duration: ${formatDuration(artist.duration)}</div>
                     </div>
                 </div>
