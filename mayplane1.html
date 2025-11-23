@@ -7050,8 +7050,22 @@ function startFlightVisualization() {
     // Start plane animation
     requestAnimationFrame(animatePlane);
 
-    // Create the initial landscape
-    createInitialLandscape();
+    // Clear mountains/clouds for minimalist gradient aesthetic
+    // Keep arrays empty to preserve clean Rothko-style visuals
+    mountains = [];
+    clouds = [];
+    flightPaths = [];
+    stars = [];
+    planeTrail = [];
+    smoothedTrail = [];
+
+    // Create stars only (keep sky interesting but minimal)
+    for (let i = 0; i < 100; i++) {
+        createStar();
+    }
+
+    // Create cities
+    createCities();
 
     // Draw landscape and stars
     drawLandscape();
@@ -7832,7 +7846,7 @@ function updateGradientColors() {
 
     // Get current audio state
     const filterCutoff = filterNode ? parseFloat(filterCutoffControl?.value || 20000) : 20000;
-    const reverbMix = reverbToggle ? (reverbToggle.checked ? parseFloat(reverbMixControl?.value || 0.5) : 0) : 0;
+    const reverbMix = reverbToggle ? (reverbToggle.checked ? parseFloat(reverbControl?.value || 0.5) : 0) : 0;
     const altitude = parseFloat(altitudeControl?.value || 0.5);
 
     // Select palette based on destination
@@ -7872,7 +7886,7 @@ function drawGradientBackground() {
     landscapeCtx.fillRect(0, 0, width, height);
 
     // Optional: Add subtle texture/noise for Rothko effect
-    const reverbMix = reverbToggle ? (reverbToggle.checked ? parseFloat(reverbMixControl?.value || 0.5) : 0) : 0;
+    const reverbMix = reverbToggle ? (reverbToggle.checked ? parseFloat(reverbControl?.value || 0.5) : 0) : 0;
     if (reverbMix > 0.3) {
         landscapeCtx.globalAlpha = 0.02 * reverbMix;
         for (let i = 0; i < 50; i++) {
