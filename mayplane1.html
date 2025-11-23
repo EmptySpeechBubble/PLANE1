@@ -39,17 +39,31 @@
             --gauge-bg: #080a0c;
         }
         
+        /* Reset for Squarespace and iframe compatibility */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
             background-color: var(--dark-bg);
             color: var(--text-color);
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
             -webkit-text-size-adjust: 100%;
             -webkit-font-smoothing: antialiased;
             -webkit-tap-highlight-color: transparent;
             transition: background-color 0.5s ease;
+            /* Ensure body works in Squarespace iframes */
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
         }
         
         /* Container */
@@ -80,10 +94,42 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
             height: 75vh;
             min-height: 450px;
+            max-height: 800px;
             position: relative;
             width: 100%;
             border: 2px solid #34495e;
             margin-bottom: 10px;
+            /* Squarespace compatibility */
+            touch-action: none;
+        }
+
+        /* Mobile responsive adjustments */
+        @media (max-width: 768px) {
+            .flight-display {
+                height: 60vh;
+                min-height: 400px;
+                border-radius: 4px;
+                border-width: 1px;
+            }
+
+            h1 {
+                font-size: 1.3rem;
+                margin: 5px 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .flight-display {
+                height: 50vh;
+                min-height: 350px;
+            }
+        }
+
+        /* Squarespace iframe specific */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .flight-display {
+                height: 70vh;
+            }
         }
         
         /* Make sure all canvases fill the entire display */
@@ -122,136 +168,75 @@
             background: rgb(110, 160, 200);
         }
 
-        /* Modern Airplane Design */
+        /* Minimalist Geometric Plane Design */
         .plane {
             position: absolute;
-            width: 140px;
-            height: 70px;
+            width: 60px;
+            height: 60px;
             z-index: 10;
             transform-origin: center;
-            transition: transform 0.5s ease;
+            transition: transform 0.3s ease;
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
         }
-        
+
+        /* Simple geometric plane body - SVG-like triangle */
         .plane-body {
             position: absolute;
-            width: 110px;
-            height: 18px;
-            background-color: #ffffff;
-            border: 1px solid #333;
-            left: 15px;
-            top: 26px;
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 50px solid rgba(255, 255, 255, 0.9);
+            left: 10px;
+            top: 5px;
+            transform: rotate(90deg);
             z-index: 2;
-            border-radius: 20px 5px 5px 20px; /* Rounded nose */
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        
+
+        /* Subtle wing accent */
         .plane-wings {
             position: absolute;
-            width: 80px;
-            height: 14px;
-            background-color: #ffffff;
-            border: 1px solid #333;
-            left: 30px;
-            top: 23px;
+            width: 50px;
+            height: 2px;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.6), transparent);
+            left: 5px;
+            top: 29px;
             z-index: 1;
-            transform: skewX(-15deg); /* Swept wings */
-            border-radius: 3px;
-            box-shadow: 0 2px 3px rgba(0,0,0,0.15);
         }
-        
+
+        /* Small nose dot for focal point */
         .plane-tail {
             position: absolute;
-            width: 18px;
-            height: 28px;
-            background-color: #ffffff;
-            border: 1px solid #333;
-            right: 15px;
-            top: 5px;
-            clip-path: polygon(0 100%, 100% 30%, 100% 0, 0 40%);
-            z-index: 1;
-        }
-        
-        .plane-windows {
-            position: absolute;
-            width: 50px;
+            width: 4px;
             height: 4px;
-            left: 35px;
-            top: 29px;
-            z-index: 3;
-        }
-        
-        .plane-windows::before {
-            content: "";
-            position: absolute;
-            width: 3px;
-            height: 3px;
+            background-color: rgba(255, 255, 255, 1);
             border-radius: 50%;
-            background-color: var(--primary-color);
-            left: 5px;
-            top: 0;
-        }
-        
-        .plane-windows::after {
-            content: "";
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            border-radius: 50%;
-            background-color: var(--primary-color);
-            left: 15px;
-            top: 0;
-        }
-        
-        /* Modern jet engines */
-        .plane-engine {
-            position: absolute;
-            width: 22px;
-            height: 12px;
-            background-color: #333;
-            border-radius: 5px;
+            right: 2px;
+            top: 28px;
             z-index: 3;
+            box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
         }
-        
-        .plane-engine.left {
-            left: 35px;
-            top: 41px;
-        }
-        
-        .plane-engine.right {
-            left: 35px;
-            top: 17px;
-        }
-        
-        /* Jet exhaust effect */
-        .plane-exhaust {
-            position: absolute;
-            width: 30px;
-            height: 6px;
-            right: -20px;
-            top: 32px;
-            z-index: 0;
-            animation: exhaust 0.3s infinite;
-        }
-        
-        @keyframes exhaust {
-            0% { 
-                box-shadow: -10px 0 10px rgba(255, 140, 0, 0.7),
-                           -20px 0 15px rgba(255, 69, 0, 0.5);
-            }
-            100% { 
-                box-shadow: -15px 0 15px rgba(255, 140, 0, 0.5),
-                           -25px 0 20px rgba(255, 69, 0, 0.3);
-            }
-        }
-        
+
+        /* Hide detailed elements - minimalist design */
+        .plane-windows,
+        .plane-engine,
+        .plane-exhaust,
         .plane-trail {
-            position: absolute;
-            width: 150px;
-            height: 2px;
-            background: linear-gradient(to left, rgba(255,255,255,0.8), rgba(255,255,255,0));
-            top: 30px;
-            left: -150px; /* Trail behind the plane */
-            z-index: 0;
+            display: none;
+        }
+
+        /* Gentle pulse animation for plane */
+        @keyframes planePulse {
+            0%, 100% {
+                filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+            }
+            50% {
+                filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.5));
+            }
+        }
+
+        .plane {
+            animation: planePulse 3s ease-in-out infinite;
         }
 
         /* Filter indicator */
@@ -867,10 +852,9 @@
         }
 
         /* Settings Toggle */
-        .settings-toggle {
+        .settings-toggle, .help-toggle {
             position: absolute;
             top: 10px;
-            right: 10px;
             background-color: transparent;
             border: none;
             color: var(--text-color);
@@ -884,7 +868,15 @@
             z-index: 102;
         }
 
-        .settings-toggle:hover {
+        .settings-toggle {
+            right: 10px;
+        }
+
+        .help-toggle {
+            right: 50px;
+        }
+
+        .settings-toggle:hover, .help-toggle:hover {
             color: var(--primary-color);
         }
 
@@ -1165,6 +1157,92 @@
 
         .welcome-start-btn:active {
             transform: translateY(0);
+        }
+
+        /* Help Overlay */
+        .help-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        .help-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+            display: none;
+        }
+
+        .help-content {
+            background-color: var(--panel-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            max-width: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
+            border: 2px solid var(--secondary-color);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            pointer-events: auto;
+            position: relative;
+        }
+
+        .help-content::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .help-content::-webkit-scrollbar-track {
+            background: var(--cockpit-dark);
+            border-radius: 5px;
+        }
+
+        .help-content::-webkit-scrollbar-thumb {
+            background: var(--secondary-color);
+            border-radius: 5px;
+        }
+
+        .help-content h2 {
+            color: var(--secondary-color);
+            margin-top: 0;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+
+        .help-content h3 {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            border-bottom: 1px solid rgba(46, 204, 113, 0.3);
+            padding-bottom: 5px;
+            margin-top: 20px;
+        }
+
+        .help-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .help-close-btn:hover {
+            background: #c0392b;
         }
 
         /* Landing Destination Overlay */
@@ -1506,16 +1584,50 @@
     </style>
 </head>
 <body>
-    <!-- Welcome Overlay -->
+    <!-- Welcome Overlay (Minimal) -->
     <div class="welcome-overlay" id="welcomeOverlay">
         <div class="welcome-content">
-            <h2>✈️ Welcome to Music for Airplanes</h2>
-            <p style="font-size: 1.05rem; line-height: 1.6; margin-bottom: 20px;">An immersive generative ambient music experience inspired by Brian Eno's "Music for Airports". Your journey through the sky creates ever-evolving soundscapes, with flight as both metaphor and mechanism for musical exploration.</p>
+            <h2>✈️ Music for Airplanes</h2>
+            <p style="font-size: 1.1rem; line-height: 1.7; margin: 20px 0; text-align: center;">An immersive generative ambient music experience inspired by Brian Eno's "Music for Airports".</p>
 
-            <h3 style="color: var(--primary-color); margin-top: 20px; margin-bottom: 10px;">🎭 The Aviation Theme</h3>
+            <p style="font-size: 0.95rem; line-height: 1.6; margin: 15px 0; opacity: 0.9;">Your flight deck controls shape evolving soundscapes. Altitude affects cabin pressure (sound thinness), speed creates wind noise, engine hums beneath you. Each note nudges your plane, making music and flight one journey.</p>
+
+            <div class="keyboard-shortcuts" style="margin-top: 25px;">
+                <h3>Quick Start</h3>
+                <div class="shortcut">
+                    <span>Take Off / Land</span>
+                    <kbd>SPACE</kbd>
+                </div>
+                <div class="shortcut">
+                    <span>Show Full Help</span>
+                    <kbd>H</kbd>
+                </div>
+                <div class="shortcut">
+                    <span>Toggle Controls</span>
+                    <kbd>C</kbd>
+                </div>
+                <div class="shortcut">
+                    <span>Emergency Eject</span>
+                    <kbd>ESC</kbd>
+                </div>
+            </div>
+
+            <p style="margin-top: 20px; font-size: 0.95rem; text-align: center; opacity: 0.8;">Press <strong>H</strong> anytime for complete documentation and controls.</p>
+
+            <button class="welcome-start-btn" id="welcomeStartBtn" onclick="window.hideWelcomeOverlay(); return false;">Begin Flight</button>
+        </div>
+    </div>
+
+    <!-- Help Overlay (Comprehensive Documentation) -->
+    <div class="help-overlay hidden" id="helpOverlay">
+        <div class="help-content">
+            <button class="help-close-btn" id="helpCloseBtn">×</button>
+            <h2>📖 Flight Manual</h2>
+
+            <h3>🎭 The Aviation Theme</h3>
             <p style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px;">Everything is "in theme" - the cockpit controls aren't just UI, they're your flight deck. Altitude changes the sound's thinness (cabin pressure), speed creates wind noise, the engine hums beneath you. When you land, you arrive at real spaces with unique acoustics. Flight becomes a journey through sound itself.</p>
 
-            <h3 style="color: var(--primary-color); margin-top: 20px; margin-bottom: 10px;">🎵 How The Music Works</h3>
+            <h3>🎵 How The Music Works</h3>
             <div style="font-size: 0.9rem; line-height: 1.7; margin-bottom: 15px;">
                 <p style="margin-bottom: 10px;"><strong>Dual Sequencers:</strong> Two independent generative sequencers create interlocking melodic patterns. They select notes from scales and play them through sine wave oscillators, creating pure, ethereal tones.</p>
 
@@ -1526,7 +1638,7 @@
                 <p style="margin-bottom: 10px;"><strong>Plane as Instrument:</strong> Your plane's movement isn't just visual - each note played actually nudges the plane in a direction, creating a feedback loop where music influences flight and flight influences music.</p>
             </div>
 
-            <h3 style="color: var(--primary-color); margin-top: 20px; margin-bottom: 10px;">🎛️ Audio Effects Explained</h3>
+            <h3>🎛️ Audio Effects Explained</h3>
             <div style="font-size: 0.9rem; line-height: 1.7; margin-bottom: 15px;">
                 <p style="margin-bottom: 8px;"><strong>Reverb:</strong> Convolver-based reverb simulates acoustic space. Higher settings create cathedral-like expansiveness, lower settings feel intimate.</p>
 
@@ -1539,9 +1651,15 @@
                 <p style="margin-bottom: 8px;"><strong>Wind Noise:</strong> Bandpass-filtered white noise that intensifies with speed, creating realistic flight atmosphere.</p>
 
                 <p style="margin-bottom: 8px;"><strong>Cabin Pressure (Altitude Filter):</strong> As you climb higher, a lowpass filter gradually dampens high frequencies (22kHz → 800Hz), simulating thinning air and muffled sound in the upper atmosphere.</p>
+
+                <p style="margin-bottom: 8px;"><strong>Rain Ambience:</strong> Filtered pink noise through reverb creates soothing rainfall sounds. Perfect for peaceful, meditative flights through gentle weather.</p>
+
+                <p style="margin-bottom: 8px;"><strong>Distant Thunder:</strong> Low-frequency rumbles with dynamic filtering simulate thunder in the distance. Periodic rolls add drama and atmosphere, occurring every 15-45 seconds when enabled.</p>
+
+                <p style="margin-bottom: 8px;"><strong>Musical Particles:</strong> When landed, seasonal particles (blossoms, leaves, snow, dust) play notes from your selected scale as they fall and touch down. Inspired by falling leaves generative music. Musical particles glow softly and create gentle rustling sounds when they collide. Control attack/release, gravity, and musical density.</p>
             </div>
 
-            <h3 style="color: var(--primary-color); margin-top: 20px; margin-bottom: 10px;">✨ Visual Systems</h3>
+            <h3>✨ Visual Systems</h3>
             <div style="font-size: 0.9rem; line-height: 1.7; margin-bottom: 15px;">
                 <p style="margin-bottom: 8px;"><strong>Note Circles:</strong> Expanding rings visualize each note played, with size and color responding to pitch and velocity.</p>
 
@@ -1554,7 +1672,7 @@
                 <p style="margin-bottom: 8px;"><strong>Drifting Clouds:</strong> Procedural cloud particles add depth and movement to the scene.</p>
             </div>
 
-            <h3 style="color: var(--primary-color); margin-top: 20px; margin-bottom: 10px;">🏛️ Landing Destinations</h3>
+            <h3>🏛️ Landing Destinations</h3>
             <p style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 10px;">When you land, choose from 6 unique spaces, each with distinct acoustic properties:</p>
             <div style="font-size: 0.85rem; line-height: 1.7; margin-bottom: 15px; padding-left: 15px;">
                 <p style="margin-bottom: 6px;"><strong>🏛️ Museum Gallery:</strong> Minimalist white space (Reverb 0.7, slower tempo) - spacious, contemplative</p>
@@ -1565,7 +1683,7 @@
                 <p style="margin-bottom: 6px;"><strong>🌊 Waterside Pavilion:</strong> Natural wood/water (Reverb 0.4, tranquil tempo) - open, serene</p>
             </div>
 
-            <h3 style="color: var(--primary-color); margin-top: 20px; margin-bottom: 10px;">🌤️ Atmospheric Settings</h3>
+            <h3>🌤️ Atmospheric Settings</h3>
             <p style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 10px;">Customize your landing atmosphere:</p>
             <div style="font-size: 0.85rem; line-height: 1.7; margin-bottom: 15px; padding-left: 15px;">
                 <p style="margin-bottom: 6px;"><strong>Time of Day:</strong> Dawn/Morning/Afternoon/Evening/Night - affects lighting color and tempo modifiers</p>
@@ -1573,7 +1691,7 @@
                 <p style="margin-bottom: 6px;"><strong>Season:</strong> Spring (blossoms) / Summer (dust) / Autumn (leaves) / Winter (snow) - unique particle types</p>
             </div>
 
-            <div class="keyboard-shortcuts" style="margin-top: 20px;">
+            <div class="keyboard-shortcuts" style="margin-top: 25px;">
                 <h3>⌨️ Keyboard Shortcuts</h3>
                 <div class="shortcut">
                     <span>Take Off / Land</span>
@@ -1592,7 +1710,7 @@
                     <kbd>F</kbd>
                 </div>
                 <div class="shortcut">
-                    <span>Randomize</span>
+                    <span>Randomize All</span>
                     <kbd>R</kbd>
                 </div>
                 <div class="shortcut">
@@ -1600,18 +1718,20 @@
                     <kbd>T</kbd>
                 </div>
                 <div class="shortcut">
+                    <span>View Flight Log</span>
+                    <kbd>L</kbd>
+                </div>
+                <div class="shortcut">
                     <span>Emergency Eject</span>
                     <kbd>ESC</kbd>
                 </div>
                 <div class="shortcut">
-                    <span>Show Help</span>
+                    <span>Toggle Help</span>
                     <kbd>H</kbd>
                 </div>
             </div>
 
-            <p style="margin-top: 20px; font-size: 0.9rem; opacity: 0.8; text-align: center;">Ready for takeoff? Your ambient journey awaits.</p>
-
-            <button class="welcome-start-btn" id="welcomeStartBtn" onclick="console.log('Button onclick fired'); if(typeof hideWelcomeOverlay === 'function') hideWelcomeOverlay();">Begin Flight</button>
+            <p style="margin-top: 25px; font-size: 0.9rem; opacity: 0.8; text-align: center;">Press H or ESC to close this help screen.</p>
         </div>
     </div>
 
@@ -1741,7 +1861,10 @@
             
             <!-- Emergency Eject Button -->
             <button class="emergency-eject" id="emergencyEject" title="Immediately stop all audio and reset system">Eject</button>
-            
+
+            <!-- Help Toggle -->
+            <button class="help-toggle" id="helpButton" title="Show Help (H)">?</button>
+
             <!-- Settings Toggle -->
             <button class="settings-toggle" id="settingsButton" title="Open Settings">⚙️</button>
             
@@ -1954,6 +2077,62 @@
                                     <span class="slider-switch"></span>
                                 </label>
                                 <div class="effect-label">Altitude Filter <span class="led-indicator led-on" id="altitudeFilterLed"></span></div>
+                            </div>
+
+                            <div class="effect-switch">
+                                <label class="switch">
+                                    <input type="checkbox" id="rainToggle">
+                                    <span class="slider-switch"></span>
+                                </label>
+                                <div class="effect-label">Rain Ambience <span class="led-indicator" id="rainLed"></span></div>
+                            </div>
+
+                            <div class="effect-switch">
+                                <label class="switch">
+                                    <input type="checkbox" id="thunderToggle">
+                                    <span class="slider-switch"></span>
+                                </label>
+                                <div class="effect-label">Distant Thunder <span class="led-indicator" id="thunderLed"></span></div>
+                            </div>
+
+                            <div class="effect-switch">
+                                <label class="switch">
+                                    <input type="checkbox" id="musicalParticlesToggle">
+                                    <span class="slider-switch"></span>
+                                </label>
+                                <div class="effect-label">Musical Particles <span class="led-indicator" id="musicalParticlesLed"></span></div>
+                            </div>
+                        </div>
+
+                        <!-- Musical Particles Controls -->
+                        <div id="musicalParticlesControlsPanel" style="display: none; margin-top: 15px;">
+                            <div class="control-group">
+                                <label class="control-label">Particle Attack:</label>
+                                <div class="slider-container">
+                                    <input type="range" id="particleAttackControl" class="slider" min="0.01" max="1" step="0.01" value="0.1">
+                                    <span id="particleAttackValue" class="slider-value">0.1s</span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">Particle Release:</label>
+                                <div class="slider-container">
+                                    <input type="range" id="particleReleaseControl" class="slider" min="0.1" max="5" step="0.1" value="2.0">
+                                    <span id="particleReleaseValue" class="slider-value">2.0s</span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">Particle Gravity:</label>
+                                <div class="slider-container">
+                                    <input type="range" id="particleGravityControl" class="slider" min="0.5" max="3" step="0.1" value="1.5">
+                                    <span id="particleGravityValue" class="slider-value">1.5</span>
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label class="control-label">Musical Density:</label>
+                                <div class="slider-container">
+                                    <input type="range" id="particleDensityControl" class="slider" min="0" max="1" step="0.05" value="0.3">
+                                    <span id="particleDensityValue" class="slider-value">30%</span>
+                                </div>
                             </div>
                         </div>
 
@@ -2177,9 +2356,43 @@
     let cabinPressureFilter = null;
     let turbulenceTimeout = null;
     let lastVelocity = { x: 0, y: 0 };
+    let rainNoiseNode = null;
+    let rainFilter = null;
+    let rainGain = null;
+    let rainReverb = null;
+    let rainReverbGain = null;
+    let thunderNoiseNode = null;
+    let thunderFilter = null;
+    let thunderGain = null;
+    let thunderReverb = null;
+    let thunderReverbGain = null;
+    let thunderLFO = null;
+    let thunderInterval = null;
     let isEngineEnabled = true;
     let isWindEnabled = true;
     let isCabinPressureEnabled = true;
+    let isRainEnabled = false;
+    let isThunderEnabled = false;
+    let isMusicalParticlesEnabled = false;
+    let particleAttack = 0.1;
+    let particleRelease = 2.0;
+    let particleGravity = 1.5;
+    let particleDensity = 0.3; // 0-1, controls how many particles are musical
+    let groundY = 0; // Will be set based on canvas height
+
+    // Frequency visualization variables
+    let frequencyData = null;
+    let frequencyAnalyser = null;
+    let frequencyBinCount = 128;
+
+    // Gradient color system
+    let currentGradientColors = {
+        top: '#FFE5B4',
+        middle: '#FFB6C1',
+        bottom: '#E6E6FA'
+    };
+    let targetGradientColors = {...currentGradientColors};
+    let gradientTransitionSpeed = 0.02; // Slow color lerp
 
     // LFO rate divisions (relative to BPM)
     const lfoDivisions = [
@@ -2462,6 +2675,13 @@
     const engineToggle = document.getElementById('engineToggle');
     const windToggle = document.getElementById('windToggle');
     const altitudeFilterToggle = document.getElementById('altitudeFilterToggle');
+    const rainToggle = document.getElementById('rainToggle');
+    const thunderToggle = document.getElementById('thunderToggle');
+    const musicalParticlesToggle = document.getElementById('musicalParticlesToggle');
+    const particleAttackControl = document.getElementById('particleAttackControl');
+    const particleReleaseControl = document.getElementById('particleReleaseControl');
+    const particleGravityControl = document.getElementById('particleGravityControl');
+    const particleDensityControl = document.getElementById('particleDensityControl');
     
     // Filter controls
     const filterCutoffControl = document.getElementById('filterCutoff');
@@ -2493,7 +2713,12 @@
     const darkModeToggle = document.getElementById('darkModeToggle');
     const safeLowFreqControl = document.getElementById('safeLowFreq');
     const limiterThresholdControl = document.getElementById('limiterThreshold');
-    
+
+    // Help overlay
+    const helpButton = document.getElementById('helpButton');
+    const helpOverlay = document.getElementById('helpOverlay');
+    const helpCloseBtn = document.getElementById('helpCloseBtn');
+
     // Emergency eject button
     const emergencyEjectBtn = document.getElementById('emergencyEject');
     
@@ -2530,10 +2755,10 @@
     
     // Predefined flight paths
     let movieFlightPaths = [
-        { start: { x: -10, y: 50 }, end: { x: 110, y: 50 }, duration: 40000 }, // Straight path
-        { start: { x: -10, y: 30 }, end: { x: 110, y: 70 }, duration: 50000 }, // Diagonal path
-        { start: { x: -10, y: 70 }, end: { x: 110, y: 30 }, duration: 50000 }, // Reverse diagonal
-        { start: { x: -10, y: 60 }, end: { x: 40, y: 40 }, next: { x: 110, y: 60 }, duration: 60000 } // Path with turn
+        { start: { x: 10, y: 50 }, end: { x: 90, y: 50 }, duration: 30000 }, // Straight path (visible)
+        { start: { x: 10, y: 30 }, end: { x: 90, y: 70 }, duration: 35000 }, // Diagonal path
+        { start: { x: 10, y: 70 }, end: { x: 90, y: 30 }, duration: 35000 }, // Reverse diagonal
+        { start: { x: 10, y: 60 }, end: { x: 50, y: 40 }, next: { x: 90, y: 60 }, duration: 40000 } // Path with turn
     ];
     
     // Movie-style flight path animation variables
@@ -2753,6 +2978,49 @@
                 [0, 2, 7, 12]               // Additive pattern
             ]
         }
+    };
+
+    // Gradient color palettes for each destination (Rothko-inspired)
+    const gradientPalettes = {
+        worldTour: [
+            { top: '#FFE5B4', middle: '#FFB6C1', bottom: '#E6E6FA' }, // Dawn pastels
+            { top: '#FF6B9D', middle: '#C44569', bottom: '#5F4B8B' }  // Sunset rich
+        ],
+        asia: [
+            { top: '#FFE5B4', middle: '#FFB6C1', bottom: '#E6E6FA' }, // Cherry blossom dawn
+            { top: '#FF6B9D', middle: '#C44569', bottom: '#5F4B8B' }, // Evening crimson
+            { top: '#FFB347', middle: '#FFCC99', bottom: '#E6F2FF' }  // Temple gold
+        ],
+        europe: [
+            { top: '#1E3A8A', middle: '#3B82F6', bottom: '#93C5FD' }, // Classic blues
+            { top: '#4C1D95', middle: '#7C3AED', bottom: '#A78BFA' }, // Royal twilight
+            { top: '#374151', middle: '#6B7280', bottom: '#D1D5DB' }  // Stone cathedral
+        ],
+        africa: [
+            { top: '#C2410C', middle: '#EA580C', bottom: '#FBBF24' }, // Savanna fire
+            { top: '#78350F', middle: '#CA8A04', bottom: '#FDE68A' }, // Desert gold
+            { top: '#DC2626', middle: '#F59E0B', bottom: '#FCD34D' }  // Sunset heat
+        ],
+        oceania: [
+            { top: '#0E7490', middle: '#06B6D4', bottom: '#A5F3FC' }, // Ocean depths
+            { top: '#DB2777', middle: '#EC4899', bottom: '#F9A8D4' }, // Coral reef
+            { top: '#065F46', middle: '#10B981', bottom: '#6EE7B7' }  // Tropical lagoon
+        ],
+        americas: [
+            { top: '#1E40AF', middle: '#3B82F6', bottom: '#DBEAFE' }, // Sky blue
+            { top: '#7C2D12', middle: '#B45309', bottom: '#FDE68A' }, // Canyon earth
+            { top: '#064E3B', middle: '#059669', bottom: '#A7F3D0' }  // Forest green
+        ],
+        impressionist: [
+            { top: '#DDD6FE', middle: '#C4B5FD', bottom: '#A78BFA' }, // Monet water lilies
+            { top: '#FECACA', middle: '#FCA5A5', bottom: '#F87171' }, // Renoir soft pink
+            { top: '#BAE6FD', middle: '#7DD3FC', bottom: '#38BDF8' }  // Impressionist sky
+        ],
+        minimalist: [
+            { top: '#F3F4F6', middle: '#E5E7EB', bottom: '#D1D5DB' }, // Minimal gray
+            { top: '#FEF3C7', middle: '#FDE68A', bottom: '#FCD34D' }, // Warm minimal
+            { top: '#DBEAFE', middle: '#BFDBFE', bottom: '#93C5FD' }  // Cool minimal
+        ]
     };
 
     // Artist-inspired scales and settings
@@ -3281,7 +3549,8 @@
     }
     
     // Welcome overlay functions
-    function hideWelcomeOverlay() {
+    // Make hideWelcomeOverlay globally accessible for debugging
+    window.hideWelcomeOverlay = function hideWelcomeOverlay() {
         console.log('Hiding welcome overlay...');
         const welcomeOverlay = document.getElementById('welcomeOverlay');
         if (welcomeOverlay) {
@@ -3300,7 +3569,7 @@
         } else {
             console.error('Welcome overlay element not found!');
         }
-    }
+    };
 
     function showWelcomeOverlay() {
         const welcomeOverlay = document.getElementById('welcomeOverlay');
@@ -3309,6 +3578,29 @@
             setTimeout(() => {
                 welcomeOverlay.classList.remove('hidden');
             }, 10);
+        }
+    }
+
+    // Help overlay functions
+    function showHelpOverlay() {
+        if (helpOverlay) {
+            helpOverlay.classList.remove('hidden');
+        }
+    }
+
+    function hideHelpOverlay() {
+        if (helpOverlay) {
+            helpOverlay.classList.add('hidden');
+        }
+    }
+
+    function toggleHelpOverlay() {
+        if (helpOverlay) {
+            if (helpOverlay.classList.contains('hidden')) {
+                showHelpOverlay();
+            } else {
+                hideHelpOverlay();
+            }
         }
     }
 
@@ -3442,6 +3734,30 @@
         engineToggle.addEventListener('change', toggleEngine);
         windToggle.addEventListener('change', toggleWind);
         altitudeFilterToggle.addEventListener('change', toggleAltitudeFilter);
+        rainToggle.addEventListener('change', toggleRain);
+        thunderToggle.addEventListener('change', toggleThunder);
+        musicalParticlesToggle.addEventListener('change', toggleMusicalParticles);
+
+        // Musical particles controls
+        particleAttackControl.addEventListener('input', function() {
+            particleAttack = parseFloat(this.value);
+            document.getElementById('particleAttackValue').textContent = particleAttack.toFixed(2) + 's';
+        });
+
+        particleReleaseControl.addEventListener('input', function() {
+            particleRelease = parseFloat(this.value);
+            document.getElementById('particleReleaseValue').textContent = particleRelease.toFixed(1) + 's';
+        });
+
+        particleGravityControl.addEventListener('input', function() {
+            particleGravity = parseFloat(this.value);
+            document.getElementById('particleGravityValue').textContent = particleGravity.toFixed(1);
+        });
+
+        particleDensityControl.addEventListener('input', function() {
+            particleDensity = parseFloat(this.value);
+            document.getElementById('particleDensityValue').textContent = Math.floor(particleDensity * 100) + '%';
+        });
 
         // Filter controls
         filterCutoffControl.addEventListener('input', updateFilterCutoff);
@@ -3475,7 +3791,16 @@
         settingsButton.addEventListener('click', openSettings);
         saveSettingsBtn.addEventListener('click', saveSettings);
         closeSettingsBtn.addEventListener('click', closeSettings);
-        
+
+        // Help overlay
+        helpButton.addEventListener('click', showHelpOverlay);
+        helpCloseBtn.addEventListener('click', hideHelpOverlay);
+        helpOverlay.addEventListener('click', function(e) {
+            if (e.target === helpOverlay) {
+                hideHelpOverlay();
+            }
+        });
+
         // Dark mode toggle
         darkModeToggle.addEventListener('change', function() {
             if (this.checked) {
@@ -3511,18 +3836,43 @@
             }, 250);
         });
 
-        // Welcome overlay
+        // Welcome overlay - attach directly with multiple fallbacks
         const welcomeStartBtn = document.getElementById('welcomeStartBtn');
+        const welcomeOverlay = document.getElementById('welcomeOverlay');
+
         if (welcomeStartBtn) {
             console.log('Welcome button found, attaching listener');
+
+            // Primary click handler
             welcomeStartBtn.addEventListener('click', function(e) {
                 console.log('Welcome button clicked!');
                 e.preventDefault();
                 e.stopPropagation();
                 hideWelcomeOverlay();
+            }, { capture: true });
+
+            // Backup: also listen for any pointer events
+            welcomeStartBtn.addEventListener('pointerdown', function(e) {
+                console.log('Welcome button pointer down!');
+                hideWelcomeOverlay();
             });
+
+            // Make absolutely sure it's clickable
+            welcomeStartBtn.style.pointerEvents = 'auto';
+            welcomeStartBtn.style.cursor = 'pointer';
+
         } else {
             console.error('Welcome button NOT found!');
+        }
+
+        // Also allow clicking anywhere on the welcome overlay to dismiss it
+        if (welcomeOverlay) {
+            welcomeOverlay.addEventListener('click', function(e) {
+                if (e.target === welcomeOverlay || e.target.classList.contains('welcome-content')) {
+                    console.log('Welcome overlay clicked, hiding...');
+                    hideWelcomeOverlay();
+                }
+            });
         }
 
         // Landing destination system
@@ -3611,13 +3961,18 @@
                     e.preventDefault();
                     showFlightLog();
                     break;
-                case 'escape':
-                    e.preventDefault();
-                    emergencyEject();
-                    break;
                 case 'h':
                     e.preventDefault();
-                    showWelcomeOverlay();
+                    toggleHelpOverlay();
+                    break;
+                case 'escape':
+                    e.preventDefault();
+                    // Close help overlay if it's open, otherwise emergency eject
+                    if (helpOverlay && !helpOverlay.classList.contains('hidden')) {
+                        hideHelpOverlay();
+                    } else {
+                        emergencyEject();
+                    }
                     break;
             }
         });
@@ -4334,6 +4689,211 @@
         }
     }
 
+    // Setup rain ambience (inspired by pink noise + reverb)
+    function setupRainAmbience() {
+        try {
+            if (!audioContext) return false;
+
+            // Create buffer for pink-ish noise (filtered white noise)
+            const bufferSize = audioContext.sampleRate * 2;
+            const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+
+            // Generate white noise
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+
+            // Create buffer source
+            rainNoiseNode = audioContext.createBufferSource();
+            rainNoiseNode.buffer = noiseBuffer;
+            rainNoiseNode.loop = true;
+
+            // HPF at 400Hz (remove deep rumble)
+            const rainHPF = audioContext.createBiquadFilter();
+            rainHPF.type = 'highpass';
+            rainHPF.frequency.setValueAtTime(400, audioContext.currentTime);
+            rainHPF.Q.setValueAtTime(0.5, audioContext.currentTime);
+
+            // LPF for rain character (variable drops)
+            rainFilter = audioContext.createBiquadFilter();
+            rainFilter.type = 'lowpass';
+            rainFilter.frequency.setValueAtTime(7000, audioContext.currentTime);
+            rainFilter.Q.setValueAtTime(1.0, audioContext.currentTime);
+
+            // Create reverb for spaciousness
+            rainReverb = audioContext.createConvolver();
+            createSimpleReverb(rainReverb, 2.5, 0.5); // 2.5s reverb, 0.5 decay
+
+            // Gain nodes
+            rainReverbGain = audioContext.createGain();
+            rainReverbGain.gain.setValueAtTime(0.7, audioContext.currentTime);
+
+            rainGain = audioContext.createGain();
+            rainGain.gain.setValueAtTime(0, audioContext.currentTime); // Start at 0
+
+            // Connect: noise -> HPF -> LPF -> reverb -> gain -> master
+            rainNoiseNode.connect(rainHPF);
+            rainHPF.connect(rainFilter);
+            rainFilter.connect(rainReverb);
+            rainReverb.connect(rainReverbGain);
+            rainReverbGain.connect(rainGain);
+            rainGain.connect(masterGainNode);
+
+            // Start the noise
+            rainNoiseNode.start();
+
+            // Slowly fade in rain over 10 seconds
+            rainGain.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 10);
+
+            console.log('Rain ambience initialized');
+            return true;
+        } catch (error) {
+            console.error('Error setting up rain:', error);
+            return false;
+        }
+    }
+
+    // Setup distant thunder
+    function setupThunder() {
+        try {
+            if (!audioContext) return false;
+
+            // Create buffer for pink-ish noise
+            const bufferSize = audioContext.sampleRate * 2;
+            const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+
+            // Generate white noise
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+
+            // Create buffer source
+            thunderNoiseNode = audioContext.createBufferSource();
+            thunderNoiseNode.buffer = noiseBuffer;
+            thunderNoiseNode.loop = true;
+
+            // HPF at 20Hz (keep the rumble)
+            const thunderHPF = audioContext.createBiquadFilter();
+            thunderHPF.type = 'highpass';
+            thunderHPF.frequency.setValueAtTime(20, audioContext.currentTime);
+            thunderHPF.Q.setValueAtTime(0.7, audioContext.currentTime);
+
+            // LPF with modulation for thunder character
+            thunderFilter = audioContext.createBiquadFilter();
+            thunderFilter.type = 'lowpass';
+            thunderFilter.frequency.setValueAtTime(1500, audioContext.currentTime);
+            thunderFilter.Q.setValueAtTime(3.0, audioContext.currentTime);
+
+            // LFO for filter modulation
+            thunderLFO = audioContext.createOscillator();
+            thunderLFO.type = 'sine';
+            thunderLFO.frequency.setValueAtTime(1, audioContext.currentTime); // 1Hz modulation
+
+            const thunderLFOGain = audioContext.createGain();
+            thunderLFOGain.gain.setValueAtTime(1000, audioContext.currentTime); // Modulation depth
+
+            thunderLFO.connect(thunderLFOGain);
+            thunderLFOGain.connect(thunderFilter.frequency);
+
+            // Create reverb for spacious thunder
+            thunderReverb = audioContext.createConvolver();
+            createSimpleReverb(thunderReverb, 4.0, 0.7); // 4s reverb, 0.7 decay
+
+            // Gain nodes
+            thunderReverbGain = audioContext.createGain();
+            thunderReverbGain.gain.setValueAtTime(0.8, audioContext.currentTime);
+
+            thunderGain = audioContext.createGain();
+            thunderGain.gain.setValueAtTime(0, audioContext.currentTime); // Start at 0
+
+            // Connect chain
+            thunderNoiseNode.connect(thunderHPF);
+            thunderHPF.connect(thunderFilter);
+            thunderFilter.connect(thunderReverb);
+            thunderReverb.connect(thunderReverbGain);
+            thunderReverbGain.connect(thunderGain);
+            thunderGain.connect(masterGainNode);
+
+            // Start nodes
+            thunderNoiseNode.start();
+            thunderLFO.start();
+
+            // Trigger thunder rumbles periodically (every 15-45 seconds)
+            startThunderRumbles();
+
+            console.log('Thunder initialized');
+            return true;
+        } catch (error) {
+            console.error('Error setting up thunder:', error);
+            return false;
+        }
+    }
+
+    // Create a simple reverb impulse response
+    function createSimpleReverb(convolverNode, duration, decay) {
+        const sampleRate = audioContext.sampleRate;
+        const length = sampleRate * duration;
+        const impulse = audioContext.createBuffer(2, length, sampleRate);
+        const left = impulse.getChannelData(0);
+        const right = impulse.getChannelData(1);
+
+        for (let i = 0; i < length; i++) {
+            const n = length - i;
+            left[i] = (Math.random() * 2 - 1) * Math.pow(n / length, decay);
+            right[i] = (Math.random() * 2 - 1) * Math.pow(n / length, decay);
+        }
+
+        convolverNode.buffer = impulse;
+    }
+
+    // Trigger thunder rumbles at random intervals
+    function startThunderRumbles() {
+        if (thunderInterval) {
+            clearInterval(thunderInterval);
+        }
+
+        const triggerThunder = () => {
+            if (!isThunderEnabled || !isFlying || !thunderGain) return;
+
+            // Random thunder intensity
+            const intensity = 0.05 + Math.random() * 0.15; // 0.05 to 0.2
+            const duration = 3 + Math.random() * 4; // 3-7 seconds
+
+            // Fade in
+            thunderGain.gain.cancelScheduledValues(audioContext.currentTime);
+            thunderGain.gain.setValueAtTime(thunderGain.gain.value, audioContext.currentTime);
+            thunderGain.gain.linearRampToValueAtTime(intensity, audioContext.currentTime + 1);
+
+            // Fade out
+            thunderGain.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration);
+
+            console.log(`Thunder rumble: intensity ${intensity.toFixed(2)}, duration ${duration.toFixed(1)}s`);
+
+            // Schedule next thunder (15-45 seconds later)
+            const nextDelay = 15000 + Math.random() * 30000;
+            thunderInterval = setTimeout(triggerThunder, nextDelay);
+        };
+
+        // Trigger first thunder after 5-15 seconds
+        const initialDelay = 5000 + Math.random() * 10000;
+        thunderInterval = setTimeout(triggerThunder, initialDelay);
+    }
+
+    // Stop thunder rumbles
+    function stopThunderRumbles() {
+        if (thunderInterval) {
+            clearTimeout(thunderInterval);
+            thunderInterval = null;
+        }
+
+        if (thunderGain && audioContext) {
+            thunderGain.gain.cancelScheduledValues(audioContext.currentTime);
+            thunderGain.gain.setValueAtTime(0, audioContext.currentTime);
+        }
+    }
+
     // Setup cabin pressure filter (altitude-based)
     function setupCabinPressureFilter() {
         try {
@@ -4899,6 +5459,73 @@
         }
     }
 
+    // Toggle rain ambience
+    function toggleRain() {
+        isRainEnabled = rainToggle.checked;
+
+        // Update LED indicator
+        const rainLed = document.getElementById('rainLed');
+        rainLed.classList.toggle('led-on', isRainEnabled);
+
+        if (isRainEnabled) {
+            if (!rainNoiseNode && audioContext) {
+                setupRainAmbience();
+            }
+            showStatus('Rain ambience enabled - soothing rainfall');
+        } else {
+            if (rainGain && audioContext) {
+                rainGain.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2);
+                showStatus('Rain ambience disabled');
+            }
+        }
+    }
+
+    // Toggle distant thunder
+    function toggleThunder() {
+        isThunderEnabled = thunderToggle.checked;
+
+        // Update LED indicator
+        const thunderLed = document.getElementById('thunderLed');
+        thunderLed.classList.toggle('led-on', isThunderEnabled);
+
+        if (isThunderEnabled) {
+            if (!thunderNoiseNode && audioContext) {
+                setupThunder();
+            } else {
+                // Restart thunder rumbles if already initialized
+                startThunderRumbles();
+            }
+            showStatus('Distant thunder enabled - rumbles in the distance');
+        } else {
+            stopThunderRumbles();
+            if (thunderGain && audioContext) {
+                thunderGain.gain.linearRampToValueAtTime(0, audioContext.currentTime + 2);
+                showStatus('Thunder disabled');
+            }
+        }
+    }
+
+    // Toggle musical particles
+    function toggleMusicalParticles() {
+        isMusicalParticlesEnabled = musicalParticlesToggle.checked;
+
+        // Update LED indicator
+        const musicalParticlesLed = document.getElementById('musicalParticlesLed');
+        musicalParticlesLed.classList.toggle('led-on', isMusicalParticlesEnabled);
+
+        // Show/hide controls panel
+        const controlsPanel = document.getElementById('musicalParticlesControlsPanel');
+        if (controlsPanel) {
+            controlsPanel.style.display = isMusicalParticlesEnabled ? 'block' : 'none';
+        }
+
+        if (isMusicalParticlesEnabled) {
+            showStatus('Musical particles enabled - land to hear them!');
+        } else {
+            showStatus('Musical particles disabled');
+        }
+    }
+
     // Update immersive audio based on flight dynamics
     function updateImmersiveAudio() {
         if (!audioContext || !isFlying || !altitudeControl) return;
@@ -5175,18 +5802,30 @@
         tempoControl.value = artistStyles[artistId].tempo;
         updateTempo();
     }
-    
+
     // Update decay if artist has specific decay
     if (artistStyles[artistId].decay && decayControl) {
         decayControl.value = artistStyles[artistId].decay;
         updateDecay();
     }
-    
+
     // Update reverb if artist has specific reverb
     if (artistStyles[artistId].reverb && reverbControl) {
         reverbControl.value = artistStyles[artistId].reverb;
         updateReverb();
     }
+
+    // Update musical notes based on artist style
+    if (artistStyles[artistId].harmonicNotes) {
+        harmonicNotes = artistStyles[artistId].harmonicNotes;
+    }
+    if (artistStyles[artistId].planeNotes) {
+        planeNotes = artistStyles[artistId].planeNotes;
+    }
+
+    // Force sequencers to select new patterns with artist-specific notes
+    if (sequencer1) sequencer1.selectPattern();
+    if (sequencer2) sequencer2.selectPattern();
 
     // Track artist change in flight log
     trackArtistChange(currentArtistName);
@@ -5250,12 +5889,18 @@ function changeDestination(destId) {
     if (musicalScales[destId]) {
         harmonicNotes = musicalScales[destId].harmonicNotes;
         planeNotes = musicalScales[destId].planeNotes;
-        
+
         // Force sequencers to select new patterns
         if (sequencer1) sequencer1.selectPattern();
         if (sequencer2) sequencer2.selectPattern();
     }
-    
+
+    // Initialize gradient colors for new destination
+    const palette = gradientPalettes[destId] || gradientPalettes.worldTour;
+    const initialPalette = palette[0];
+    currentGradientColors = {...initialPalette};
+    targetGradientColors = {...initialPalette};
+
     // Show announcement about the destination change
     const announcementElement = document.getElementById('announcement');
     const announcementText = document.getElementById('announcementText');
@@ -5894,7 +6539,8 @@ function trackArtistChange(newArtist) {
     });
 
     flightLog.currentArtistName = newArtist;
-    addLogEvent('artist_change', `Cabin music changed to ${newArtist}`);
+    const initials = getArtistInitials(newArtist);
+    addLogEvent('artist_change', `Cabin music changed to ${initials}`);
 }
 
 // Track altitude changes
@@ -5946,6 +6592,25 @@ function formatRelativeTime(seconds) {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `+${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+// Convert artist name to initials
+function getArtistInitials(artistName) {
+    const initialsMap = {
+        'Brian Eno': 'BE',
+        'Erik Satie': 'ES',
+        'Harold Budd': 'HB',
+        'Stars of the Lid': 'SOTL',
+        'Boards of Canada': 'BOC',
+        'William Basinski': 'WB',
+        'Steve Reich': 'SR',
+        'Tim Hecker': 'TH',
+        'Ryuichi Sakamoto': 'RS',
+        'Aphex Twin': 'AT',
+        'Jon Hopkins': 'JH',
+        'Various Artists': 'VA'
+    };
+    return initialsMap[artistName] || artistName.split(' ').map(word => word[0]).join('');
 }
 
 // Generate the flight log HTML
@@ -6042,7 +6707,7 @@ function generateFlightLog() {
                 <div class="timeline-event">
                     <div class="event-marker">♫</div>
                     <div class="event-content">
-                        <div class="event-title">${artist.name}</div>
+                        <div class="event-title">${getArtistInitials(artist.name)}</div>
                         <div class="event-detail">Duration: ${formatDuration(artist.duration)}</div>
                     </div>
                 </div>
@@ -6188,16 +6853,110 @@ function initializeLandingParticles(particleType, count) {
     landingParticles = [];
     if (count === 0) return;
 
+    // Set ground level based on canvas height
+    groundY = (landscapeCanvas?.height || 600) * 0.85; // 85% down the screen
+
+    // Get current scale notes for musical particles
+    const scaleNotes = destinations[currentDestination]?.harmonicNotes || destinations.worldTour.harmonicNotes;
+
     for (let i = 0; i < count; i++) {
+        const isMusical = isMusicalParticlesEnabled && Math.random() < particleDensity;
+        const note = isMusical ? scaleNotes[Math.floor(Math.random() * scaleNotes.length)][Math.floor(Math.random() * scaleNotes[0].length)] : null;
+
         landingParticles.push({
             x: Math.random() * (landscapeCanvas?.width || 800),
-            y: Math.random() * (landscapeCanvas?.height || 600),
+            y: Math.random() * -200, // Start above screen
             vx: (Math.random() - 0.5) * 2,
-            vy: Math.random() * 2 + 1,
+            vy: Math.random() * 0.5 + 0.5, // Initial fall speed
             size: Math.random() * 3 + 1,
             opacity: Math.random() * 0.5 + 0.3,
-            type: particleType
+            type: particleType,
+            isMusical: isMusical,
+            note: note,
+            hasPlayed: false,
+            resting: false,
+            fadeTime: 0,
+            gravity: isMusical ? particleGravity : 1.0,
+            sway: Math.random() * Math.PI * 2, // For swaying motion
+            swaySpeed: 0.02 + Math.random() * 0.03,
+            collisionCooldown: 0
         });
+    }
+}
+
+// Play a note for a particle
+function playParticleNote(particle) {
+    if (!audioContext || !particle.isMusical || !particle.note) return;
+
+    try {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(particle.note, audioContext.currentTime);
+
+        // Pan based on x position
+        const panValue = ((particle.x / (landscapeCanvas?.width || 800)) - 0.5) * 2;
+        const panNode = audioContext.createStereoPanner();
+        panNode.pan.setValueAtTime(panValue, audioContext.currentTime);
+
+        // Velocity based on fall speed
+        const velocity = Math.min(1, particle.vy / 5) * 0.3; // Quieter than main notes
+
+        // Soft attack and decay like falling leaves
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(velocity, audioContext.currentTime + particleAttack);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + particleRelease);
+
+        // Connect: oscillator -> gain -> pan -> master
+        oscillator.connect(gainNode);
+        gainNode.connect(panNode);
+        panNode.connect(masterGainNode);
+
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + particleRelease);
+
+        particle.hasPlayed = true;
+
+        // Log occasionally
+        if (Math.random() < 0.1) {
+            console.log('Particle landed:', particle.type, 'note:', particle.note.toFixed(2) + 'Hz');
+        }
+    } catch (error) {
+        console.error('Error playing particle note:', error);
+    }
+}
+
+// Play rustle sound for particle collision
+function playParticleRustle(particle) {
+    if (!audioContext || !isMusicalParticlesEnabled) return;
+
+    try {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        const filterNode = audioContext.createBiquadFilter();
+
+        oscillator.type = 'triangle';
+        const rustleFreq = 800 + Math.random() * 1200; // 800-2000 Hz
+        oscillator.frequency.setValueAtTime(rustleFreq, audioContext.currentTime);
+
+        filterNode.type = 'bandpass';
+        filterNode.frequency.setValueAtTime(rustleFreq, audioContext.currentTime);
+        filterNode.Q.setValueAtTime(5, audioContext.currentTime);
+
+        const rustleAmp = 0.02 + Math.random() * 0.03; // Very quiet
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(rustleAmp, audioContext.currentTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+
+        oscillator.connect(filterNode);
+        filterNode.connect(gainNode);
+        gainNode.connect(masterGainNode);
+
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.1);
+    } catch (error) {
+        console.error('Error playing rustle:', error);
     }
 }
 
@@ -6205,21 +6964,99 @@ function initializeLandingParticles(particleType, count) {
 function drawLandingParticles() {
     if (!isLanded || !landscapeCtx || !landscapeCanvas || landingParticles.length === 0) return;
 
-    landingParticles.forEach(particle => {
-        particle.x += particle.vx;
-        particle.y += particle.vy;
+    // Collision detection map
+    const collisionMap = {};
 
-        // Wrap particles
-        if (particle.y > landscapeCanvas.height) particle.y = 0;
-        if (particle.x < 0) particle.x = landscapeCanvas.width;
-        if (particle.x > landscapeCanvas.width) particle.x = 0;
+    landingParticles.forEach((particle, index) => {
+        if (particle.resting) {
+            // Resting particles fade out slowly
+            particle.fadeTime += 0.01;
+            particle.opacity = Math.max(0, particle.opacity - 0.002);
+
+            // Respawn particle when fully faded
+            if (particle.opacity <= 0) {
+                // Reinitialize with new properties
+                const scaleNotes = destinations[currentDestination]?.harmonicNotes || destinations.worldTour.harmonicNotes;
+                const isMusical = isMusicalParticlesEnabled && Math.random() < particleDensity;
+                const note = isMusical ? scaleNotes[Math.floor(Math.random() * scaleNotes.length)][Math.floor(Math.random() * scaleNotes[0].length)] : null;
+
+                particle.x = Math.random() * landscapeCanvas.width;
+                particle.y = -Math.random() * 200;
+                particle.vy = Math.random() * 0.5 + 0.5;
+                particle.opacity = Math.random() * 0.5 + 0.3;
+                particle.isMusical = isMusical;
+                particle.note = note;
+                particle.hasPlayed = false;
+                particle.resting = false;
+                particle.fadeTime = 0;
+                particle.sway = Math.random() * Math.PI * 2;
+            }
+        } else {
+            // Apply gravity
+            particle.vy += particle.gravity * 0.05;
+
+            // Apply swaying motion (like wind)
+            particle.sway += particle.swaySpeed;
+            const swayForce = Math.sin(particle.sway) * 0.5;
+            particle.vx = swayForce;
+
+            // Update position
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+
+            // Wrap horizontally
+            if (particle.x < 0) particle.x = landscapeCanvas.width;
+            if (particle.x > landscapeCanvas.width) particle.x = 0;
+
+            // Check if particle has landed
+            if (particle.y >= groundY && !particle.hasPlayed) {
+                particle.resting = true;
+                particle.vy = 0;
+                particle.y = groundY;
+
+                // Play note if musical
+                if (particle.isMusical) {
+                    playParticleNote(particle);
+                }
+            }
+
+            // Collision detection (for rustling)
+            if (!particle.resting && particle.collisionCooldown === 0) {
+                const gridX = Math.floor(particle.x / 10);
+                const gridY = Math.floor(particle.y / 10);
+                const key = `${gridX},${gridY}`;
+
+                if (collisionMap[key]) {
+                    // Collision detected
+                    playParticleRustle(particle);
+                    particle.collisionCooldown = 10;
+                } else {
+                    collisionMap[key] = true;
+                }
+            }
+
+            if (particle.collisionCooldown > 0) {
+                particle.collisionCooldown--;
+            }
+        }
 
         // Draw based on type
         landscapeCtx.globalAlpha = particle.opacity;
+
+        // Musical particles glow slightly
+        if (particle.isMusical && !particle.resting) {
+            landscapeCtx.shadowBlur = 3;
+            landscapeCtx.shadowColor = particle.type === 'snow' ? '#ffffff' :
+                particle.type === 'leaf' ? '#ffa500' :
+                particle.type === 'blossom' ? '#ff69b4' :
+                '#ffffff';
+        }
+
         landscapeCtx.fillStyle = particle.type === 'snow' ? '#ffffff' :
             particle.type === 'rain' ? '#88aacc' :
             particle.type === 'leaf' ? '#d4a574' :
             particle.type === 'blossom' ? '#ffccdd' :
+            particle.type === 'dust' ? '#e0c090' :
             '#e0e0e0';
 
         if (particle.type === 'rain') {
@@ -6229,7 +7066,10 @@ function drawLandingParticles() {
             landscapeCtx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
             landscapeCtx.fill();
         }
+
+        landscapeCtx.shadowBlur = 0;
     });
+
     landscapeCtx.globalAlpha = 1.0;
 }
 
@@ -6241,25 +7081,59 @@ function startFlightVisualization() {
     isLanded = false;
     currentLandingSpace = null;
     landingParticles = [];
-    
-    // Show plane
+
+    // Reset path variables
+    pathStartTime = Date.now();
+    currentPath = 0;
+    pathProgress = 0;
+
+    // Show plane and ensure it has dimensions
     plane.style.display = 'block';
-    
+
+    // Position plane initially at starting position (visible on screen)
+    // Start at 20% from left, middle of screen for better visibility
+    if (flightCanvas && flightCanvas.width > 0) {
+        planePosition.x = 20; // Start 20% from left edge
+        planePosition.y = 50; // Middle vertically
+        const left = (planePosition.x / 100) * flightCanvas.width;
+        const top = (planePosition.y / 100) * flightCanvas.height;
+        plane.style.left = `${left - 70}px`; // 70 is half of plane width (140px)
+        plane.style.top = `${top - 35}px`;   // 35 is half of plane height (70px)
+        plane.style.transform = 'rotate(0deg)';
+        console.log('Plane positioned at:', left, top, 'Canvas dimensions:', flightCanvas.width, flightCanvas.height);
+    } else {
+        console.warn('flightCanvas not ready, dimensions:', flightCanvas ? flightCanvas.width : 'null');
+    }
+
     // Start plane animation
     requestAnimationFrame(animatePlane);
-    
-    // Create the initial landscape
-    createInitialLandscape();
-    
+
+    // Clear mountains/clouds for minimalist gradient aesthetic
+    // Keep arrays empty to preserve clean Rothko-style visuals
+    mountains = [];
+    clouds = [];
+    flightPaths = [];
+    stars = [];
+    planeTrail = [];
+    smoothedTrail = [];
+
+    // Create stars only (keep sky interesting but minimal)
+    for (let i = 0; i < 100; i++) {
+        createStar();
+    }
+
+    // Create cities
+    createCities();
+
     // Draw landscape and stars
     drawLandscape();
     drawStars();
-    
+
     // Set up sequencers
     sequencer1 = new AmbientSequencer(1);
     sequencer1.start();
     sequencer1.selectPattern();
-    
+
     sequencer2 = new AmbientSequencer(2);
     setTimeout(() => {
         if (isFlying && sequencer2) {
@@ -6996,6 +7870,157 @@ function generateAnnouncement() {
     }, fadeTime);
 }
 
+// ===== SYNESTHETIC GRADIENT VISUALIZATION =====
+
+// Color utility functions
+function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+
+function rgbToHex(r, g, b) {
+    return "#" + ((1 << 24) + (Math.round(r) << 16) + (Math.round(g) << 8) + Math.round(b)).toString(16).slice(1);
+}
+
+function lerpColor(color1, color2, t) {
+    const c1 = hexToRgb(color1);
+    const c2 = hexToRgb(color2);
+    if (!c1 || !c2) return color1;
+
+    return rgbToHex(
+        c1.r + (c2.r - c1.r) * t,
+        c1.g + (c2.g - c1.g) * t,
+        c1.b + (c2.b - c1.b) * t
+    );
+}
+
+// Update gradient colors based on audio parameters
+function updateGradientColors() {
+    if (!isFlying) return;
+
+    // Get current audio state
+    const filterCutoff = filterNode ? parseFloat(filterCutoffControl?.value || 20000) : 20000;
+    const reverbMix = reverbToggle ? (reverbToggle.checked ? parseFloat(reverbControl?.value || 0.5) : 0) : 0;
+    const altitude = parseFloat(altitudeControl?.value || 0.5);
+
+    // Select palette based on destination
+    const palette = gradientPalettes[currentDestination] || gradientPalettes.worldTour;
+    const paletteIndex = Math.floor((filterCutoff / 20000) * (palette.length - 1));
+    const targetPalette = palette[Math.min(paletteIndex, palette.length - 1)];
+
+    // Lerp to target colors
+    targetGradientColors = {...targetPalette};
+
+    currentGradientColors.top = lerpColor(currentGradientColors.top, targetGradientColors.top, gradientTransitionSpeed);
+    currentGradientColors.middle = lerpColor(currentGradientColors.middle, targetGradientColors.middle, gradientTransitionSpeed);
+    currentGradientColors.bottom = lerpColor(currentGradientColors.bottom, targetGradientColors.bottom, gradientTransitionSpeed);
+
+    // Adjust brightness based on altitude
+    const brightnessModifier = 0.7 + (altitude * 0.6); // 0.7 to 1.3
+    // Note: Full brightness adjustment would require HSL conversion - keeping simple for performance
+}
+
+// Draw Rothko-inspired gradient background
+function drawGradientBackground() {
+    if (!landscapeCtx || !landscapeCanvas) return;
+
+    const width = landscapeCanvas.width;
+    const height = landscapeCanvas.height;
+
+    // Create multi-stop vertical gradient
+    const gradient = landscapeCtx.createLinearGradient(0, 0, 0, height);
+
+    // Add color stops
+    gradient.addColorStop(0, currentGradientColors.top);
+    gradient.addColorStop(0.4, currentGradientColors.middle);
+    gradient.addColorStop(1, currentGradientColors.bottom);
+
+    // Fill entire canvas
+    landscapeCtx.fillStyle = gradient;
+    landscapeCtx.fillRect(0, 0, width, height);
+
+    // Optional: Add subtle texture/noise for Rothko effect
+    const reverbMix = reverbToggle ? (reverbToggle.checked ? parseFloat(reverbControl?.value || 0.5) : 0) : 0;
+    if (reverbMix > 0.3) {
+        landscapeCtx.globalAlpha = 0.02 * reverbMix;
+        for (let i = 0; i < 50; i++) {
+            landscapeCtx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+            landscapeCtx.fillRect(
+                Math.random() * width,
+                Math.random() * height,
+                Math.random() * 100,
+                Math.random() * 100
+            );
+        }
+        landscapeCtx.globalAlpha = 1.0;
+    }
+}
+
+// Draw frequency-based terrain
+function drawFrequencyTerrain() {
+    if (!landscapeCtx || !landscapeCanvas || !audioAnalyser || !isFlying) return;
+
+    const width = landscapeCanvas.width;
+    const height = landscapeCanvas.height;
+
+    // Get frequency data
+    if (!frequencyData) {
+        frequencyData = new Uint8Array(audioAnalyser.frequencyBinCount);
+    }
+    audioAnalyser.getByteFrequencyData(frequencyData);
+
+    // Draw bass frequencies as terrain (bins 0-20)
+    const bassData = frequencyData.slice(0, 20);
+    const numPoints = bassData.length;
+    const pointSpacing = width / (numPoints - 1);
+    const baselineY = height * 0.75; // Terrain starts at 75% down
+
+    // Create smooth bezier curve
+    landscapeCtx.save();
+    landscapeCtx.globalAlpha = 0.4;
+    landscapeCtx.filter = 'blur(2px)';
+
+    // Begin path for terrain
+    landscapeCtx.beginPath();
+    landscapeCtx.moveTo(0, height);
+
+    for (let i = 0; i < numPoints; i++) {
+        const x = i * pointSpacing;
+        const amplitude = (bassData[i] / 255) * (height * 0.3); // Max 30% of screen
+        const y = baselineY - amplitude;
+
+        if (i === 0) {
+            landscapeCtx.lineTo(x, y);
+        } else {
+            const prevX = (i - 1) * pointSpacing;
+            const prevAmplitude = (bassData[i - 1] / 255) * (height * 0.3);
+            const prevY = baselineY - prevAmplitude;
+
+            // Smooth curve
+            const cpX = (prevX + x) / 2;
+            const cpY = (prevY + y) / 2;
+            landscapeCtx.quadraticCurveTo(prevX, prevY, cpX, cpY);
+        }
+    }
+
+    // Close path
+    landscapeCtx.lineTo(width, height);
+    landscapeCtx.closePath();
+
+    // Fill with translucent gradient
+    const terrainGradient = landscapeCtx.createLinearGradient(0, baselineY - height * 0.3, 0, height);
+    terrainGradient.addColorStop(0, 'rgba(0, 0, 0, 0.3)');
+    terrainGradient.addColorStop(1, 'rgba(0, 0, 0, 0.1)');
+    landscapeCtx.fillStyle = terrainGradient;
+    landscapeCtx.fill();
+
+    landscapeCtx.restore();
+}
+
 // Draw stars
 function drawStars() {
     starsCtx.clearRect(0, 0, starsCanvas.width, starsCanvas.height);
@@ -7183,18 +8208,15 @@ function drawAtmosphericGlow() {
 function drawLandscape() {
     landscapeCtx.clearRect(0, 0, landscapeCanvas.width, landscapeCanvas.height);
 
-    // Draw sky gradient
-    const altitude = altitudeControl ? parseFloat(altitudeControl.value) : 1.0;
-    const skyColors = {
-        top: altitude < 1 ? '#1a2f38' : (altitude > 1.5 ? '#0a1525' : '#1a2f38'),
-        bottom: altitude < 1 ? '#2c3e50' : (altitude > 1.5 ? '#162740' : '#2c3e50')
-    };
-    
-    const gradient = landscapeCtx.createLinearGradient(0, 0, 0, landscapeCanvas.height);
-    gradient.addColorStop(0, skyColors.top);
-    gradient.addColorStop(1, skyColors.bottom);
-    landscapeCtx.fillStyle = gradient;
-    landscapeCtx.fillRect(0, 0, landscapeCanvas.width, landscapeCanvas.height);
+    // SYNESTHETIC VISUALIZATION: Gradient + Frequency Terrain
+    // Update colors based on audio parameters
+    updateGradientColors();
+
+    // Draw Rothko-inspired gradient background
+    drawGradientBackground();
+
+    // Draw frequency-based terrain overlay
+    drawFrequencyTerrain();
     
     // Draw flight paths
     flightPaths.forEach(path => {
@@ -7521,19 +8543,23 @@ class AmbientSequencer {
     }
 
     playNote() {
-        if (!isFlying || !audioContext) return;
+        if (!isFlying || !audioContext) {
+            if (!isFlying) console.log('Sequencer', this.id, ': Not flying, skipping note');
+            if (!audioContext) console.log('Sequencer', this.id, ': No audio context, skipping note');
+            return;
+        }
         if (!this.currentPattern) this.selectPattern();
 
         try {
             // Check if audio context is running
             if (audioContext.state !== 'running') {
-                console.warn('AudioContext not running, trying to resume...');
+                console.warn('Sequencer', this.id, ': AudioContext not running (state:', audioContext.state, '), trying to resume...');
                 audioContext.resume().then(() => {
-                    console.log('AudioContext resumed in playNote');
+                    console.log('Sequencer', this.id, ': AudioContext resumed in playNote');
                     // Try again after resuming
                     setTimeout(() => this.playNote(), 100);
                 }).catch(err => {
-                    console.error('Failed to resume AudioContext in playNote:', err);
+                    console.error('Sequencer', this.id, ': Failed to resume AudioContext in playNote:', err);
                 });
                 return;
             }
@@ -7596,6 +8622,11 @@ class AmbientSequencer {
 
             // Track note in flight log
             trackNotePlayed();
+
+            // Log successful note creation (only occasionally to avoid spam)
+            if (Math.random() < 0.1) {
+                console.log('Sequencer', this.id, ': Playing note at', frequency.toFixed(2), 'Hz, decay:', decayTime + 's');
+            }
 
             // Increment pattern index and occasionally randomize
             this.patternIndex++;
