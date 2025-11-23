@@ -1021,7 +1021,7 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.9);
-            z-index: 2000;
+            z-index: 3000;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1044,6 +1044,9 @@
             overflow-y: auto;
             border: 2px solid var(--primary-color);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            pointer-events: auto;
+            position: relative;
+            z-index: 3001;
         }
 
         .welcome-content h2 {
@@ -1097,6 +1100,9 @@
             cursor: pointer;
             margin-top: 20px;
             transition: all 0.3s;
+            pointer-events: auto;
+            position: relative;
+            z-index: 3002;
         }
 
         .welcome-start-btn:hover {
@@ -1312,7 +1318,7 @@
                 <li>✈️ Plane movement influenced by generated notes</li>
             </ul>
 
-            <button class="welcome-start-btn" id="welcomeStartBtn">Begin Flight</button>
+            <button class="welcome-start-btn" id="welcomeStartBtn" onclick="console.log('Button onclick fired'); if(typeof hideWelcomeOverlay === 'function') hideWelcomeOverlay();">Begin Flight</button>
         </div>
     </div>
 
@@ -3185,7 +3191,15 @@
         // Welcome overlay
         const welcomeStartBtn = document.getElementById('welcomeStartBtn');
         if (welcomeStartBtn) {
-            welcomeStartBtn.addEventListener('click', hideWelcomeOverlay);
+            console.log('Welcome button found, attaching listener');
+            welcomeStartBtn.addEventListener('click', function(e) {
+                console.log('Welcome button clicked!');
+                e.preventDefault();
+                e.stopPropagation();
+                hideWelcomeOverlay();
+            });
+        } else {
+            console.error('Welcome button NOT found!');
         }
 
         // Landing destination system
