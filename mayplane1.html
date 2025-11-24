@@ -332,10 +332,13 @@
 
         .cockpit-container.collapsed {
             height: 30px;
+            overflow: hidden;
         }
 
         .cockpit-container.expanded {
-            height: 70%;
+            height: 75%;
+            max-height: 85vh;
+            overflow: visible;
         }
 
         .cockpit-toggle {
@@ -364,7 +367,9 @@
             flex-wrap: wrap;
             padding: 35px 10px 10px 10px;
             overflow-y: auto;
+            overflow-x: hidden;
             max-height: calc(100% - 35px);
+            scroll-behavior: smooth;
         }
 
         .cockpit-panel {
