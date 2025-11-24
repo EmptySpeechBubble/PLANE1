@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- VERSION: 2.0-2025-11-24-FIXED -->
+<!-- VERSION: 2.1-2025-11-24-LAYOUT-LABELS-FIXED -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -337,9 +337,10 @@
         }
 
         .cockpit-container.expanded {
-            height: 75%;
-            max-height: 85vh;
-            overflow: visible;
+            height: 65%;
+            max-height: 50vh;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
 
         .cockpit-toggle {
@@ -946,7 +947,8 @@
         /* Mobile Responsiveness */
         @media screen and (max-width: 768px) {
             .cockpit-container.expanded {
-                height: 80%;
+                height: 65%;
+                max-height: 55vh;
             }
 
             .cockpit-panel {
@@ -976,7 +978,8 @@
 
         @media screen and (max-width: 480px) {
             .cockpit-container.expanded {
-                height: 85%;
+                height: 70%;
+                max-height: 60vh;
             }
 
             .cockpit-panels {
@@ -1965,7 +1968,7 @@
                         </div>
                         
                         <div class="control-group">
-                            <label class="control-label">Weather Persistence:</label>
+                            <label class="control-label" for="persistence">Weather Persistence:</label>
                             <div class="slider-container">
                                 <input type="range" id="persistence" class="slider" min="0" max="1" step="0.01" value="0.5">
                                 <span id="persistenceValue" class="slider-value">50%</span>
@@ -1973,7 +1976,7 @@
                         </div>
                         
                         <div class="control-group">
-                            <label class="control-label">Trail Intensity:</label>
+                            <label class="control-label" for="trailIntensity">Trail Intensity:</label>
                             <div class="slider-container">
                                 <input type="range" id="trailIntensity" class="slider" min="0.1" max="5" step="0.1" value="1">
                                 <span id="trailIntensityValue" class="slider-value">1.0</span>
@@ -1986,7 +1989,7 @@
                         <div class="cockpit-panel-title">Cabin Audio</div>
                         
                         <div class="control-group">
-                            <label class="control-label">Cabin Volume:</label>
+                            <label class="control-label" for="volume">Cabin Volume:</label>
                             <div class="slider-container">
                                 <input type="range" id="volume" class="slider" min="0" max="0.3" step="0.01" value="0.15">
                                 <span id="volumeValue" class="slider-value">0.15</span>
@@ -1998,7 +2001,7 @@
                         </div>
                         
                         <div class="control-group">
-                            <label class="control-label">Cabin Atmosphere:</label>
+                            <label class="control-label" for="reverb">Cabin Atmosphere:</label>
                             <div class="slider-container">
                                 <input type="range" id="reverb" class="slider" min="0" max="1" step="0.05" value="0.3">
                                 <span id="reverbValue" class="slider-value">30%</span>
@@ -2006,7 +2009,7 @@
                         </div>
                         
                         <div class="control-group">
-                            <label class="control-label">Note Decay:</label>
+                            <label class="control-label" for="decay">Note Decay:</label>
                             <div class="slider-container">
                                 <input type="range" id="decay" class="slider" min="0.1" max="10" step="0.1" value="5">
                                 <span id="decayValue" class="slider-value">5s</span>
@@ -2014,7 +2017,7 @@
                         </div>
                         
                         <div class="control-group">
-                            <label class="control-label">Bass Level:</label>
+                            <label class="control-label" for="bassLevel">Bass Level:</label>
                             <div class="slider-container">
                                 <input type="range" id="bassLevel" class="slider" min="0" max="1" step="0.05" value="0.7">
                                 <span id="bassLevelValue" class="slider-value">70%</span>
@@ -2022,7 +2025,7 @@
                         </div>
                         
                         <div class="control-group">
-                            <label class="control-label">Flight Speed (BPM):</label>
+                            <label class="control-label" for="tempo">Flight Speed (BPM):</label>
                             <div class="slider-container">
                                 <input type="range" id="tempo" class="slider" min="40" max="200" step="1" value="90">
                                 <span id="tempoValue" class="slider-value">90</span>
@@ -2030,7 +2033,7 @@
                         </div>
                         
                         <div class="control-group">
-                            <label class="control-label">Flight Altitude:</label>
+                            <label class="control-label" for="altitude">Flight Altitude:</label>
                             <div class="slider-container">
                                 <input type="range" id="altitude" class="slider" min="0.5" max="2" step="0.05" value="1">
                                 <span id="altitudeValue" class="slider-value">Cruising</span>
@@ -2119,28 +2122,28 @@
                         <!-- Musical Particles Controls -->
                         <div id="musicalParticlesControlsPanel" style="display: none; margin-top: 15px;">
                             <div class="control-group">
-                                <label class="control-label">Particle Attack:</label>
+                                <label class="control-label" for="particleAttackControl">Particle Attack:</label>
                                 <div class="slider-container">
                                     <input type="range" id="particleAttackControl" class="slider" min="0.01" max="1" step="0.01" value="0.1">
                                     <span id="particleAttackValue" class="slider-value">0.1s</span>
                                 </div>
                             </div>
                             <div class="control-group">
-                                <label class="control-label">Particle Release:</label>
+                                <label class="control-label" for="particleReleaseControl">Particle Release:</label>
                                 <div class="slider-container">
                                     <input type="range" id="particleReleaseControl" class="slider" min="0.1" max="5" step="0.1" value="2.0">
                                     <span id="particleReleaseValue" class="slider-value">2.0s</span>
                                 </div>
                             </div>
                             <div class="control-group">
-                                <label class="control-label">Particle Gravity:</label>
+                                <label class="control-label" for="particleGravityControl">Particle Gravity:</label>
                                 <div class="slider-container">
                                     <input type="range" id="particleGravityControl" class="slider" min="0.5" max="3" step="0.1" value="1.5">
                                     <span id="particleGravityValue" class="slider-value">1.5</span>
                                 </div>
                             </div>
                             <div class="control-group">
-                                <label class="control-label">Musical Density:</label>
+                                <label class="control-label" for="particleDensityControl">Musical Density:</label>
                                 <div class="slider-container">
                                     <input type="range" id="particleDensityControl" class="slider" min="0" max="1" step="0.05" value="0.3">
                                     <span id="particleDensityValue" class="slider-value">30%</span>
@@ -2151,23 +2154,23 @@
                         <!-- Filter Controls -->
                         <div id="filterControlsPanel">
                             <div class="control-group">
-                                <label class="control-label">Filter Cutoff:</label>
+                                <label class="control-label" for="filterCutoff">Filter Cutoff:</label>
                                 <div class="slider-container">
                                     <input type="range" id="filterCutoff" class="slider filter-slider" min="20" max="20000" step="1" value="20000">
                                     <span id="filterCutoffValue" class="slider-value">20000 Hz</span>
                                 </div>
                             </div>
-                            
+
                             <div class="control-group">
-                                <label class="control-label">LFO Rate:</label>
+                                <label class="control-label" for="lfoRate">LFO Rate:</label>
                                 <div class="slider-container">
                                     <input type="range" id="lfoRate" class="slider filter-slider" min="0" max="7" step="1" value="2">
                                     <span id="lfoRateValue" class="slider-value">1/4 Note</span>
                                 </div>
                             </div>
-                            
+
                             <div class="control-group">
-                                <label class="control-label">LFO Amount:</label>
+                                <label class="control-label" for="lfoAmount">LFO Amount:</label>
                                 <div class="slider-container">
                                     <input type="range" id="lfoAmount" class="slider filter-slider" min="0" max="100" step="1" value="50">
                                     <span id="lfoAmountValue" class="slider-value">50%</span>
@@ -2178,31 +2181,31 @@
                         <!-- Compressor Controls -->
                         <div id="compressorControlsPanel">
                             <div class="control-group">
-                                <label class="control-label">Threshold:</label>
+                                <label class="control-label" for="compThreshold">Threshold:</label>
                                 <div class="slider-container">
                                     <input type="range" id="compThreshold" class="slider compressor-slider" min="-60" max="0" step="1" value="-24">
                                     <span id="compThresholdValue" class="slider-value">-24 dB</span>
                                 </div>
                             </div>
-                            
+
                             <div class="control-group">
-                                <label class="control-label">Ratio:</label>
+                                <label class="control-label" for="compRatio">Ratio:</label>
                                 <div class="slider-container">
                                     <input type="range" id="compRatio" class="slider compressor-slider" min="1" max="20" step="0.5" value="4">
                                     <span id="compRatioValue" class="slider-value">4:1</span>
                                 </div>
                             </div>
-                            
+
                             <div class="control-group">
-                                <label class="control-label">Attack:</label>
+                                <label class="control-label" for="compAttack">Attack:</label>
                                 <div class="slider-container">
                                     <input type="range" id="compAttack" class="slider compressor-slider" min="0" max="1" step="0.01" value="0.1">
                                     <span id="compAttackValue" class="slider-value">0.1s</span>
                                 </div>
                             </div>
-                            
+
                             <div class="control-group">
-                                <label class="control-label">Release:</label>
+                                <label class="control-label" for="compRelease">Release:</label>
                                 <div class="slider-container">
                                     <input type="range" id="compRelease" class="slider compressor-slider" min="0" max="1" step="0.01" value="0.25">
                                     <span id="compReleaseValue" class="slider-value">0.25s</span>
@@ -2252,7 +2255,7 @@
                         </div>
                         
                         <div class="control-group">
-                            <label class="control-label">Filter Presets:</label>
+                            <label class="control-label" for="filterPresets">Filter Presets:</label>
                             <select id="filterPresets" class="artist-selector">
                                 <option value="">Select Filter Preset</option>
                                 <option value="clearSky">Clear Sky</option>
@@ -2263,7 +2266,7 @@
                         </div>
                         
                         <div class="control-group">
-                            <label class="control-label">Compressor Presets:</label>
+                            <label class="control-label" for="compressorPresets">Compressor Presets:</label>
                             <select id="compressorPresets" class="artist-selector">
                                 <option value="">Select Compressor Preset</option>
                                 <option value="safetyMode">Safety Mode</option>
@@ -2283,7 +2286,7 @@
                 <div class="control-group">
                     <div class="effect-switches">
                         <div class="effect-switch">
-                            <label class="control-label">Dark Mode</label>
+                            <label class="control-label" for="darkModeToggle">Dark Mode</label>
                             <label class="switch">
                                 <input type="checkbox" id="darkModeToggle">
                                 <span class="slider-switch"></span>
@@ -2408,7 +2411,7 @@
 
     logInfo('SYSTEM', '═══════════════════════════════════════════════');
     logInfo('SYSTEM', 'Music for Airplanes - Initializing');
-    logInfo('SYSTEM', 'VERSION: 2.0-2025-11-24-FIXED');
+    logInfo('SYSTEM', 'VERSION: 2.1-2025-11-24-LAYOUT-LABELS-FIXED');
     logInfo('SYSTEM', '═══════════════════════════════════════════════');
     logInfo('SYSTEM', 'User Agent:', { userAgent: navigator.userAgent });
     logInfo('SYSTEM', 'Screen:', { width: window.screen.width, height: window.screen.height });
@@ -6597,6 +6600,8 @@ function completeLanding(spaceKey) {
         endTimer('landing_sequence');
     }
 }
+// Ensure function is accessible via window object
+window.completeLanding = completeLanding;
 
 // Apply landing atmosphere
 function applyLandingAtmosphere(spaceKey) {
