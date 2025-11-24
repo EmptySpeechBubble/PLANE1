@@ -332,10 +332,13 @@
 
         .cockpit-container.collapsed {
             height: 30px;
+            overflow: hidden;
         }
 
         .cockpit-container.expanded {
-            height: 70%;
+            height: 75%;
+            max-height: 85vh;
+            overflow: visible;
         }
 
         .cockpit-toggle {
@@ -364,7 +367,9 @@
             flex-wrap: wrap;
             padding: 35px 10px 10px 10px;
             overflow-y: auto;
+            overflow-x: hidden;
             max-height: calc(100% - 35px);
+            scroll-behavior: smooth;
         }
 
         .cockpit-panel {
@@ -512,12 +517,14 @@
             color: var(--text-color);
             border: 1px solid var(--panel-border);
             border-radius: var(--border-radius);
-            padding: 8px 5px;
-            font-size: 0.8rem;
+            padding: 12px 16px;
+            font-size: 0.9rem;
             cursor: pointer;
             text-align: center;
             transition: all 0.2s;
-            min-height: 36px;
+            min-height: 44px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(52, 152, 219, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -771,10 +778,13 @@
             color: var(--text-color);
             border: 1px solid var(--panel-border);
             border-radius: var(--border-radius);
-            padding: 6px 4px;
-            font-size: 0.75rem;
+            padding: 12px 8px;
+            font-size: 0.85rem;
+            min-height: 44px;
             cursor: pointer;
             text-align: center;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(52, 152, 219, 0.3);
             transition: all 0.2s;
         }
 
@@ -952,8 +962,9 @@
             }
 
             .control-button {
-                font-size: 0.7rem;
-                padding: 6px 4px;
+                font-size: 0.85rem;
+                padding: 14px 18px;
+                min-height: 48px;
             }
 
             h1 {
@@ -1614,7 +1625,7 @@
 
             <p style="margin-top: 20px; font-size: 0.95rem; text-align: center; opacity: 0.8;">Press <strong>H</strong> anytime for complete documentation and controls.</p>
 
-            <button class="welcome-start-btn" id="welcomeStartBtn" onclick="window.hideWelcomeOverlay(); return false;">Begin Flight</button>
+            <button class="welcome-start-btn" id="welcomeStartBtn" onclick="if(typeof window.hideWelcomeOverlay === 'function') window.hideWelcomeOverlay(); return false;">Begin Flight</button>
         </div>
     </div>
 
@@ -2305,6 +2316,106 @@
     </div>
 
 <script>
+    // =============================================================================
+    // DEBUG LOGGING SYSTEM
+    // =============================================================================
+
+    const LOG_LEVELS = {
+        DEBUG: 0,
+        INFO: 1,
+        WARN: 2,
+        ERROR: 3,
+        NONE: 4
+    };
+
+    let currentLogLevel = LOG_LEVELS.DEBUG;
+    let loggingEnabled = true;
+
+    function logDebug(category, message, data = null) {
+        if (!loggingEnabled || currentLogLevel > LOG_LEVELS.DEBUG) return;
+        const timestamp = new Date().toISOString();
+        const prefix = `[${timestamp}] [DEBUG] [${category}]`;
+        if (data !== null) {
+            console.log(`${prefix} ${message}`, data);
+        } else {
+            console.log(`${prefix} ${message}`);
+        }
+    }
+
+    function logInfo(category, message, data = null) {
+        if (!loggingEnabled || currentLogLevel > LOG_LEVELS.INFO) return;
+        const timestamp = new Date().toISOString();
+        const prefix = `[${timestamp}] [INFO] [${category}]`;
+        if (data !== null) {
+            console.info(`${prefix} ${message}`, data);
+        } else {
+            console.info(`${prefix} ${message}`);
+        }
+    }
+
+    function logWarn(category, message, data = null) {
+        if (!loggingEnabled || currentLogLevel > LOG_LEVELS.WARN) return;
+        const timestamp = new Date().toISOString();
+        const prefix = `[${timestamp}] [WARN] [${category}]`;
+        if (data !== null) {
+            console.warn(`${prefix} ${message}`, data);
+        } else {
+            console.warn(`${prefix} ${message}`);
+        }
+    }
+
+    function logError(category, message, error = null) {
+        if (!loggingEnabled || currentLogLevel > LOG_LEVELS.ERROR) return;
+        const timestamp = new Date().toISOString();
+        const prefix = `[${timestamp}] [ERROR] [${category}]`;
+        if (error !== null) {
+            console.error(`${prefix} ${message}`, error);
+            if (error instanceof Error && error.stack) {
+                console.error('Stack trace:', error.stack);
+            }
+        } else {
+            console.error(`${prefix} ${message}`);
+        }
+    }
+
+    function logStateChange(category, stateName, oldValue, newValue) {
+        logInfo(category, `State change: ${stateName}`, {
+            from: oldValue,
+            to: newValue
+        });
+    }
+
+    // Performance timing
+    const performanceTimers = new Map();
+
+    function startTimer(timerName) {
+        performanceTimers.set(timerName, performance.now());
+        logDebug('PERFORMANCE', `Timer started: ${timerName}`);
+    }
+
+    function endTimer(timerName) {
+        if (!performanceTimers.has(timerName)) {
+            logWarn('PERFORMANCE', `Timer ${timerName} was never started`);
+            return null;
+        }
+        const startTime = performanceTimers.get(timerName);
+        const duration = (performance.now() - startTime).toFixed(2);
+        logInfo('PERFORMANCE', `${timerName}: ${duration}ms`);
+        performanceTimers.delete(timerName);
+        return duration;
+    }
+
+    logInfo('SYSTEM', '═══════════════════════════════════════════════');
+    logInfo('SYSTEM', 'Music for Airplanes - Initializing');
+    logInfo('SYSTEM', '═══════════════════════════════════════════════');
+    logInfo('SYSTEM', 'User Agent:', { userAgent: navigator.userAgent });
+    logInfo('SYSTEM', 'Screen:', { width: window.screen.width, height: window.screen.height });
+    logInfo('SYSTEM', 'Window:', { width: window.innerWidth, height: window.innerHeight });
+
+    // =============================================================================
+    // AUDIO CONTEXT AND NODES
+    // =============================================================================
+
     // Audio context and nodes
     let audioContext = null;
     let masterGainNode = null;
@@ -3551,24 +3662,36 @@
     // Welcome overlay functions
     // Make hideWelcomeOverlay globally accessible for debugging
     window.hideWelcomeOverlay = function hideWelcomeOverlay() {
-        console.log('Hiding welcome overlay...');
+        logInfo('UI', '═══════════════════════════════════');
+        logInfo('UI', 'WELCOME OVERLAY - Hide requested');
+        logInfo('UI', '═══════════════════════════════════');
+
         const welcomeOverlay = document.getElementById('welcomeOverlay');
-        if (welcomeOverlay) {
-            welcomeOverlay.classList.add('hidden');
-            setTimeout(() => {
-                welcomeOverlay.style.display = 'none';
-            }, 500);
-
-            // Initialize audio when welcome is dismissed
-            if (!audioContext || audioContext.state === 'closed') {
-                console.log('Initializing audio from welcome overlay...');
-                initializeAudio();
-            }
-
-            showStatus('Welcome aboard! Ready for takeoff.');
-        } else {
-            console.error('Welcome overlay element not found!');
+        if (!welcomeOverlay) {
+            logError('UI', 'Welcome overlay element not found in DOM');
+            return;
         }
+
+        logDebug('UI', 'Welcome overlay element found, adding hidden class');
+        welcomeOverlay.classList.add('hidden');
+
+        setTimeout(() => {
+            welcomeOverlay.style.display = 'none';
+            logDebug('UI', 'Welcome overlay display set to none');
+        }, 500);
+
+        // Initialize audio when welcome is dismissed
+        if (!audioContext || audioContext.state === 'closed') {
+            logInfo('AUDIO', 'Audio context not initialized, initializing now');
+            initializeAudio();
+        } else {
+            logDebug('AUDIO', 'Audio context already initialized', {
+                state: audioContext.state
+            });
+        }
+
+        showStatus('Welcome aboard! Ready for takeoff.');
+        logInfo('UI', 'Welcome overlay hidden successfully');
     };
 
     function showWelcomeOverlay() {
@@ -3606,35 +3729,60 @@
 
     // Initialize the application
     function init() {
-        // Load user settings
-        loadSettings();
-        
-        // Set up canvas to ensure proper sizing
-        resetAllCanvases();
-        
-        // Set up event listeners
-        setupEventListeners();
-        
-        // Hide cockpit initially (expanded when user clicks)
-        cockpitContainer.classList.add('collapsed');
-        
-        // Update UI with default values
-        updateUIState();
+        logInfo('SYSTEM', '═══════════════════════════════════════════════');
+        logInfo('SYSTEM', 'APPLICATION INITIALIZATION STARTED');
+        logInfo('SYSTEM', '═══════════════════════════════════════════════');
 
-        // Initially hide plane
-        plane.style.display = 'none';
+        startTimer('app_initialization');
 
-        // Set initial UI state for effect panels
-        document.getElementById('filterControlsPanel').style.display = 'none';
-        document.getElementById('compressorControlsPanel').style.display = 'none';
-        
-        // Initially disable land button
-        if (landButton) landButton.disabled = true;
-        
-        // Show welcome message
-        showStatus('Welcome aboard! Click "Take Off" to begin your musical journey.');
-        
-        console.log("Application initialized successfully");
+        try {
+            // Load user settings
+            logDebug('SYSTEM', 'Loading user settings');
+            loadSettings();
+
+            // Set up canvas to ensure proper sizing
+            logDebug('SYSTEM', 'Initializing canvases');
+            resetAllCanvases();
+
+            // Set up event listeners
+            logDebug('SYSTEM', 'Setting up event listeners');
+            setupEventListeners();
+
+            // Show cockpit expanded by default so Take Off button is visible
+            cockpitContainer.classList.remove('collapsed');
+            logDebug('UI', 'Cockpit container expanded by default');
+
+            // Update UI with default values
+            logDebug('UI', 'Updating UI state');
+            updateUIState();
+
+            // Initially hide plane
+            plane.style.display = 'none';
+            logDebug('UI', 'Plane element hidden');
+
+            // Set initial UI state for effect panels
+            document.getElementById('filterControlsPanel').style.display = 'none';
+            document.getElementById('compressorControlsPanel').style.display = 'none';
+            logDebug('UI', 'Effect panels hidden');
+
+            // Initially disable land button
+            if (landButton) {
+                landButton.disabled = true;
+                logDebug('UI', 'Land button disabled');
+            }
+
+            // Show welcome message
+            showStatus('Welcome aboard! Click "Take Off" to begin your musical journey.');
+
+            const duration = endTimer('app_initialization');
+            logInfo('SYSTEM', `✓ Application initialized in ${duration}ms`);
+            logInfo('SYSTEM', '═══════════════════════════════════════════════');
+
+        } catch (error) {
+            logError('SYSTEM', 'Application initialization failed', error);
+            endTimer('app_initialization');
+            throw error;
+        }
     }
     
     // Load user settings from localStorage
@@ -3702,18 +3850,54 @@
     
     // Setup event listeners
     function setupEventListeners() {
+        logDebug('SYSTEM', 'Setting up event listeners');
+
         // Cockpit toggle
-        cockpitToggle.addEventListener('click', toggleCockpit);
-        
+        cockpitToggle.addEventListener('click', () => {
+            logDebug('INPUT', 'Cockpit toggle clicked');
+            toggleCockpit();
+        });
+
         // Basic flight controls
-        takeoffButton.addEventListener('click', takeOff);
-        landButton.addEventListener('click', land);
-        testAudioButton.addEventListener('click', testAudio);
-        fullscreenBtn.addEventListener('click', toggleFullScreen);
-        randomizeAllButton.addEventListener('click', randomizeAll);
-        toggleUIButton.addEventListener('click', toggleUI);
-        clearTrailButton.addEventListener('click', clearTrail);
-        flightLogBtn.addEventListener('click', showFlightLog);
+        takeoffButton.addEventListener('click', () => {
+            logDebug('INPUT', 'Take Off button clicked');
+            takeOff();
+        });
+
+        landButton.addEventListener('click', () => {
+            logDebug('INPUT', 'Land button clicked');
+            land();
+        });
+
+        testAudioButton.addEventListener('click', () => {
+            logDebug('INPUT', 'Test Audio button clicked');
+            testAudio();
+        });
+
+        fullscreenBtn.addEventListener('click', () => {
+            logDebug('INPUT', 'Fullscreen button clicked');
+            toggleFullScreen();
+        });
+
+        randomizeAllButton.addEventListener('click', () => {
+            logDebug('INPUT', 'Randomize All button clicked');
+            randomizeAll();
+        });
+
+        toggleUIButton.addEventListener('click', () => {
+            logDebug('INPUT', 'Toggle UI button clicked');
+            toggleUI();
+        });
+
+        clearTrailButton.addEventListener('click', () => {
+            logDebug('INPUT', 'Clear Trail button clicked');
+            clearTrail();
+        });
+
+        flightLogBtn.addEventListener('click', () => {
+            logDebug('INPUT', 'Flight Log button clicked');
+            showFlightLog();
+        });
         
         // Flight control sliders
         altitudeControl.addEventListener('input', updateAltitude);
@@ -3848,28 +4032,39 @@
                 console.log('Welcome button clicked!');
                 e.preventDefault();
                 e.stopPropagation();
-                hideWelcomeOverlay();
+                window.hideWelcomeOverlay();
             }, { capture: true });
 
             // Backup: also listen for any pointer events
             welcomeStartBtn.addEventListener('pointerdown', function(e) {
                 console.log('Welcome button pointer down!');
-                hideWelcomeOverlay();
+                e.preventDefault();
+                e.stopPropagation();
+                window.hideWelcomeOverlay();
             });
+
+            // Mobile touch support
+            welcomeStartBtn.addEventListener('touchstart', function(e) {
+                console.log('Welcome button touched!');
+                e.preventDefault();
+                e.stopPropagation();
+                window.hideWelcomeOverlay();
+            }, { passive: false });
 
             // Make absolutely sure it's clickable
             welcomeStartBtn.style.pointerEvents = 'auto';
             welcomeStartBtn.style.cursor = 'pointer';
+            welcomeStartBtn.style.touchAction = 'manipulation';
 
         } else {
             console.error('Welcome button NOT found!');
         }
 
-        // Also allow clicking anywhere on the welcome overlay to dismiss it
+        // Also allow clicking the dark background (but not the content) to dismiss it
         if (welcomeOverlay) {
             welcomeOverlay.addEventListener('click', function(e) {
-                if (e.target === welcomeOverlay || e.target.classList.contains('welcome-content')) {
-                    console.log('Welcome overlay clicked, hiding...');
+                if (e.target === welcomeOverlay) {
+                    console.log('Welcome overlay background clicked, hiding...');
                     hideWelcomeOverlay();
                 }
             });
@@ -5835,7 +6030,7 @@
 }
 
 // Change destination
-function changeDestination(destId) {
+window.changeDestination = function changeDestination(destId) {
     // Update destination name
     switch(destId) {
         case 'worldTour':
@@ -6121,21 +6316,39 @@ function playTestTone() {
     }
 }
 
-// Take off function
-function takeOff() {
+// Take off function - make globally accessible
+window.takeOff = function takeOff() {
+    logInfo('FLIGHT', '═══════════════════════════════════════════════');
+    logInfo('FLIGHT', 'TAKEOFF SEQUENCE INITIATED');
+    logInfo('FLIGHT', '═══════════════════════════════════════════════');
+
+    startTimer('takeoff_sequence');
+
     try {
+        // Check if already flying
+        if (isFlying) {
+            logWarn('FLIGHT', 'Takeoff requested but already flying');
+            showStatus('Already in flight!', 'warning');
+            return;
+        }
+
         // Initialize audio if not already done
         if (!audioContext) {
+            logInfo('AUDIO', 'Audio context not initialized, initializing now');
             initializeAudio();
+        } else {
+            logDebug('AUDIO', 'Audio context exists', { state: audioContext.state });
         }
-        
+
         // Resume audio context if suspended
         if (audioContext && audioContext.state === 'suspended') {
+            logInfo('AUDIO', 'Resuming suspended audio context');
             audioContext.resume().then(() => {
-                console.log('AudioContext resumed in takeOff');
+                logInfo('AUDIO', 'Audio context resumed successfully');
                 continueWithTakeoff();
             }).catch(err => {
-                console.error('Failed to resume AudioContext in takeOff:', err);
+                logError('AUDIO', 'Failed to resume audio context', err);
+                showStatus('⚠️ Audio may not work correctly', 'warning');
                 // Try anyway
                 continueWithTakeoff();
             });
@@ -6143,38 +6356,52 @@ function takeOff() {
             continueWithTakeoff();
         }
     } catch (error) {
-        console.error('Takeoff error:', error);
-        showStatus('Take off aborted: ' + error.message);
+        logError('FLIGHT', 'Takeoff sequence failed', error);
+        showStatus('Take off aborted: ' + error.message, 'error');
+        endTimer('takeoff_sequence');
     }
 }
 
 // Continue with takeoff after audio context is ready
 function continueWithTakeoff() {
-    if (!isFlying) {
-        isFlying = true;
-        
-        // Reset flight start time
-        flightStartTime = Date.now();
-        // Reset announcement time
-        lastAnnouncementTime = Date.now();
-        // Reset pathStartTime
-        pathStartTime = Date.now();
-        
-        // Disable takeoff button, enable land button
-        takeoffButton.disabled = true;
-        landButton.disabled = false;
-        
-        // Start flight visualization
-        startFlightVisualization();
-        
-        // Fade in master volume over 1 second
-        if (masterGainNode && audioContext) {
-            masterGainNode.gain.setValueAtTime(0, audioContext.currentTime);
-            masterGainNode.gain.linearRampToValueAtTime(
-                parseFloat(volumeControl.value),
-                audioContext.currentTime + 1
-            );
-        }
+    logDebug('FLIGHT', 'Continuing takeoff sequence');
+
+    if (isFlying) {
+        logWarn('FLIGHT', 'Already flying, aborting takeoff');
+        return;
+    }
+
+    const previousState = isFlying;
+    isFlying = true;
+    logStateChange('FLIGHT', 'isFlying', previousState, isFlying);
+
+    // Reset flight start time
+    flightStartTime = Date.now();
+    lastAnnouncementTime = Date.now();
+    pathStartTime = Date.now();
+
+    logInfo('FLIGHT', 'Flight timers reset', {
+        flightStartTime: new Date(flightStartTime).toISOString()
+    });
+
+    // Disable takeoff button, enable land button
+    takeoffButton.disabled = true;
+    landButton.disabled = false;
+    logDebug('UI', 'Button states updated: takeoff disabled, land enabled');
+
+    // Start flight visualization
+    logDebug('FLIGHT', 'Starting flight visualization');
+    startFlightVisualization();
+
+    // Fade in master volume over 1 second
+    if (masterGainNode && audioContext) {
+        const targetVolume = parseFloat(volumeControl.value);
+        masterGainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        masterGainNode.gain.linearRampToValueAtTime(targetVolume, audioContext.currentTime + 1);
+        logDebug('AUDIO', `Fading in volume to ${targetVolume}`);
+    } else {
+        logWarn('AUDIO', 'Master gain node not available for volume fade');
+    }
 
         // Initialize or restart immersive audio features
         if (isEngineEnabled) {
@@ -6224,19 +6451,39 @@ function continueWithTakeoff() {
             }, 7000);
         }
         
+        // Log final configuration
+        logInfo('FLIGHT', 'Flight configuration', {
+            destination: currentDestinationName,
+            artist: currentArtistName,
+            tempo: tempoControl.value,
+            altitude: altitudeControl.value,
+            volume: volumeControl.value
+        });
+
         // Show takeoff message
         showStatus('Taking off into ambient soundscape...');
-        
+
         // Start updating flight info
         startFlightTimer();
+
+        const duration = endTimer('takeoff_sequence');
+        logInfo('FLIGHT', `✓ Takeoff complete in ${duration}ms`);
+        logInfo('FLIGHT', '═══════════════════════════════════════════════');
     }
 }
 
-// Land function - show destination selector
-function land() {
-    if (isFlying) {
-        showLandingSelector();
+// Land function - show destination selector - make globally accessible
+window.land = function land() {
+    logInfo('FLIGHT', 'Land requested');
+
+    if (!isFlying) {
+        logWarn('FLIGHT', 'Land requested but not flying');
+        showStatus('Not currently in flight', 'warning');
+        return;
     }
+
+    logDebug('FLIGHT', 'Showing landing destination selector');
+    showLandingSelector();
 }
 
 // Show landing destination selector
@@ -6258,14 +6505,30 @@ function hideLandingSelector() {
 
 // Complete landing at selected destination
 function completeLanding(spaceKey) {
-    if (!isFlying) return;
+    logInfo('FLIGHT', '═══════════════════════════════════════════════');
+    logInfo('FLIGHT', 'LANDING SEQUENCE INITIATED');
+    logInfo('FLIGHT', '═══════════════════════════════════════════════');
+
+    startTimer('landing_sequence');
+
+    if (!isFlying) {
+        logWarn('FLIGHT', 'Landing requested but not flying');
+        return;
+    }
 
     try {
+        const previousFlyingState = isFlying;
+        const previousLandedState = isLanded;
+
         isFlying = false;
         isLanded = true;
         currentLandingSpace = spaceKey;
 
+        logStateChange('FLIGHT', 'isFlying', previousFlyingState, isFlying);
+        logStateChange('FLIGHT', 'isLanded', previousLandedState, isLanded);
+
         const space = destinationSpaces[spaceKey];
+        logInfo('FLIGHT', `Landing at: ${space.name}`, space);
         showStatus(`Landing at ${space.name}...`);
 
         // End flight log session
@@ -6316,9 +6579,14 @@ function completeLanding(spaceKey) {
             showStatus(`Welcome to ${space.name}. Press Take Off to depart.`);
         }, 2000);
 
+        const duration = endTimer('landing_sequence');
+        logInfo('FLIGHT', `✓ Landing complete in ${duration}ms`);
+        logInfo('FLIGHT', '═══════════════════════════════════════════════');
+
     } catch (error) {
-        console.error('Landing error:', error);
-        showStatus('Landing error: ' + error.message);
+        logError('FLIGHT', 'Landing sequence failed', error);
+        showStatus('Landing error: ' + error.message, 'error');
+        endTimer('landing_sequence');
     }
 }
 
@@ -7198,8 +7466,7 @@ function stopFlightVisualization() {
 
     // Clean up immersive audio nodes (but keep them initialized for next takeoff)
     // They'll be restarted in startFlightVisualization if toggles are still on
-    }
-    
+
     // Clear visualizations
     if (noteCtx && noteCanvas) {
         noteCtx.clearRect(0, 0, noteCanvas.width, noteCanvas.height);
