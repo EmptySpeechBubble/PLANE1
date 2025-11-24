@@ -1614,7 +1614,7 @@
 
             <p style="margin-top: 20px; font-size: 0.95rem; text-align: center; opacity: 0.8;">Press <strong>H</strong> anytime for complete documentation and controls.</p>
 
-            <button class="welcome-start-btn" id="welcomeStartBtn" onclick="window.hideWelcomeOverlay(); return false;">Begin Flight</button>
+            <button class="welcome-start-btn" id="welcomeStartBtn" onclick="if(typeof window.hideWelcomeOverlay === 'function') window.hideWelcomeOverlay(); return false;">Begin Flight</button>
         </div>
     </div>
 
@@ -3848,28 +3848,39 @@
                 console.log('Welcome button clicked!');
                 e.preventDefault();
                 e.stopPropagation();
-                hideWelcomeOverlay();
+                window.hideWelcomeOverlay();
             }, { capture: true });
 
             // Backup: also listen for any pointer events
             welcomeStartBtn.addEventListener('pointerdown', function(e) {
                 console.log('Welcome button pointer down!');
-                hideWelcomeOverlay();
+                e.preventDefault();
+                e.stopPropagation();
+                window.hideWelcomeOverlay();
             });
+
+            // Mobile touch support
+            welcomeStartBtn.addEventListener('touchstart', function(e) {
+                console.log('Welcome button touched!');
+                e.preventDefault();
+                e.stopPropagation();
+                window.hideWelcomeOverlay();
+            }, { passive: false });
 
             // Make absolutely sure it's clickable
             welcomeStartBtn.style.pointerEvents = 'auto';
             welcomeStartBtn.style.cursor = 'pointer';
+            welcomeStartBtn.style.touchAction = 'manipulation';
 
         } else {
             console.error('Welcome button NOT found!');
         }
 
-        // Also allow clicking anywhere on the welcome overlay to dismiss it
+        // Also allow clicking the dark background (but not the content) to dismiss it
         if (welcomeOverlay) {
             welcomeOverlay.addEventListener('click', function(e) {
-                if (e.target === welcomeOverlay || e.target.classList.contains('welcome-content')) {
-                    console.log('Welcome overlay clicked, hiding...');
+                if (e.target === welcomeOverlay) {
+                    console.log('Welcome overlay background clicked, hiding...');
                     hideWelcomeOverlay();
                 }
             });
