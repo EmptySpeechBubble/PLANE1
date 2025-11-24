@@ -6031,8 +6031,8 @@
     showStatus(`Now playing music inspired by ${currentArtistName}.`);
 }
 
-// Change destination
-window.changeDestination = function changeDestination(destId) {
+// Change destination - make globally accessible
+function changeDestination(destId) {
     // Update destination name
     switch(destId) {
         case 'worldTour':
@@ -6118,6 +6118,8 @@ window.changeDestination = function changeDestination(destId) {
     // Show status message
     showStatus(`Flight route changed to ${currentDestinationName}.`);
 }
+// Ensure function is accessible via window object
+window.changeDestination = changeDestination;
 
 // Emergency eject function
 function emergencyEject() {
@@ -6319,7 +6321,7 @@ function playTestTone() {
 }
 
 // Take off function - make globally accessible
-window.takeOff = function takeOff() {
+function takeOff() {
     logInfo('FLIGHT', '═══════════════════════════════════════════════');
     logInfo('FLIGHT', 'TAKEOFF SEQUENCE INITIATED');
     logInfo('FLIGHT', '═══════════════════════════════════════════════');
@@ -6363,6 +6365,8 @@ window.takeOff = function takeOff() {
         endTimer('takeoff_sequence');
     }
 }
+// Ensure function is accessible via window object
+window.takeOff = takeOff;
 
 // Continue with takeoff after audio context is ready
 function continueWithTakeoff() {
@@ -6474,8 +6478,8 @@ function continueWithTakeoff() {
     }
 }
 
-// Land function - show destination selector - make globally accessible
-window.land = function land() {
+// Land function - make globally accessible
+function land() {
     logInfo('FLIGHT', 'Land requested');
 
     if (!isFlying) {
@@ -6487,6 +6491,8 @@ window.land = function land() {
     logDebug('FLIGHT', 'Showing landing destination selector');
     showLandingSelector();
 }
+// Ensure function is accessible via window object
+window.land = land;
 
 // Show landing destination selector
 function showLandingSelector() {
