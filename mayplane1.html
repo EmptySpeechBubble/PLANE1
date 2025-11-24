@@ -3743,9 +3743,9 @@
             logDebug('SYSTEM', 'Setting up event listeners');
             setupEventListeners();
 
-            // Hide cockpit initially (expanded when user clicks)
-            cockpitContainer.classList.add('collapsed');
-            logDebug('UI', 'Cockpit container collapsed');
+            // Show cockpit expanded by default so Take Off button is visible
+            cockpitContainer.classList.remove('collapsed');
+            logDebug('UI', 'Cockpit container expanded by default');
 
             // Update UI with default values
             logDebug('UI', 'Updating UI state');
@@ -6311,8 +6311,8 @@ function playTestTone() {
     }
 }
 
-// Take off function
-function takeOff() {
+// Take off function - make globally accessible
+window.takeOff = function takeOff() {
     logInfo('FLIGHT', '═══════════════════════════════════════════════');
     logInfo('FLIGHT', 'TAKEOFF SEQUENCE INITIATED');
     logInfo('FLIGHT', '═══════════════════════════════════════════════');
@@ -6467,8 +6467,8 @@ function continueWithTakeoff() {
     }
 }
 
-// Land function - show destination selector
-function land() {
+// Land function - show destination selector - make globally accessible
+window.land = function land() {
     logInfo('FLIGHT', 'Land requested');
 
     if (!isFlying) {
