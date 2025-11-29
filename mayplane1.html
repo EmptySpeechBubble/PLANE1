@@ -878,6 +878,44 @@
         .city-label.region-af { color: #ecd3ff; }
         .city-label.region-oc { color: #d3ffee; }
 
+        /* City light twinkling effects */
+        .city-label::after {
+            content: '✦';
+            position: absolute;
+            left: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 8px;
+            opacity: 0.6;
+            animation: cityTwinkle 3s ease-in-out infinite;
+            color: inherit;
+        }
+
+        @keyframes cityTwinkle {
+            0%, 100% { opacity: 0.3; transform: translateY(-50%) scale(0.8); }
+            50% { opacity: 1; transform: translateY(-50%) scale(1.2); }
+        }
+
+        /* Reactive city glow when notes play nearby */
+        .city-label.note-reactive {
+            animation: cityNoteGlow 0.5s ease-out;
+        }
+
+        @keyframes cityNoteGlow {
+            0% {
+                text-shadow: 0 0 8px currentColor, 0 0 15px currentColor;
+                transform: scale(1);
+            }
+            50% {
+                text-shadow: 0 0 20px currentColor, 0 0 35px currentColor, 0 0 50px currentColor;
+                transform: scale(1.15);
+            }
+            100% {
+                text-shadow: 0 0 8px rgba(0, 0, 0, 0.9), 0 0 15px rgba(0, 0, 0, 0.7);
+                transform: scale(1);
+            }
+        }
+
         .city-flash {
             animation: cityPulse 1s ease-out;
         }
@@ -6767,6 +6805,10 @@ function createClickRipple(x, y) {
     logDebug('INTERACTIVE', `Created click ripple at (${x}, ${y})`);
 }
 
+// Ensure interactive functions are globally accessible
+window.playInteractiveNote = playInteractiveNote;
+window.createClickRipple = createClickRipple;
+
 // Test audio with a simple note
 function testAudio() {
     try {
@@ -8226,6 +8268,14 @@ function animatePlane() {
     updateContrailParticles();
     drawAtmosphericGlow();
 
+    // Draw weather effects
+    if (isRainEnabled) {
+        drawRainEffect();
+    }
+    if (isThunderEnabled) {
+        drawLightningFlash();
+    }
+
     // Draw note visualization
     drawNoteVisualization();
 
@@ -8605,6 +8655,81 @@ function showCityWithNote() {
             city.element.style.opacity = "1";
         }, 10);
     }
+}
+
+// Make cities react to nearby notes with twinkling and glow
+function makeCitiesReactToNote(noteX, noteY, frequency) {
+    if (!activeCities || activeCities.length === 0) return;
+
+    // Find cities within range of the note
+    const reactionRadius = 150; // pixels
+
+    activeCities.forEach(city => {
+        if (!city || !city.element) return;
+
+        // Calculate distance from note to city
+        const dx = city.x - noteX;
+        const dy = city.y - noteY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < reactionRadius) {
+            // Make city glow based on proximity (closer = stronger glow)
+            const intensity = 1 - (distance / reactionRadius);
+
+            // Only react if intensity is significant
+            if (intensity > 0.3) {
+                // Trigger reactive glow animation
+                city.element.classList.remove('note-reactive');
+                // Force reflow
+                void city.element.offsetWidth;
+                city.element.classList.add('note-reactive');
+
+                // Add extra twinkle stars based on note frequency
+                if (Math.random() < intensity) {
+                    addTwinkleStarToCity(city, frequency);
+                }
+
+                // Remove the class after animation completes
+                setTimeout(() => {
+                    if (city.element) {
+                        city.element.classList.remove('note-reactive');
+                    }
+                }, 500);
+            }
+        }
+    });
+}
+
+// Add temporary twinkling star effect to a city
+function addTwinkleStarToCity(city, frequency) {
+    if (!city || !city.element) return;
+
+    // Map frequency to star color
+    const normalizedFreq = Math.min(1, Math.max(0, (frequency - 100) / 1500));
+    const hue = 180 + (normalizedFreq * 180); // Range from cyan to magenta
+
+    // Create temporary star element
+    const star = document.createElement('span');
+    star.textContent = '✨';
+    star.style.position = 'absolute';
+    star.style.left = `${-10 + Math.random() * 20}px`;
+    star.style.top = `${-10 + Math.random() * 20}px`;
+    star.style.fontSize = `${8 + Math.random() * 6}px`;
+    star.style.opacity = '1';
+    star.style.pointerEvents = 'none';
+    star.style.filter = `hue-rotate(${hue}deg)`;
+    star.style.transition = 'opacity 0.8s ease-out, transform 0.8s ease-out';
+    star.style.transform = 'scale(1)';
+
+    city.element.style.position = 'relative';
+    city.element.appendChild(star);
+
+    // Fade out and remove
+    setTimeout(() => {
+        star.style.opacity = '0';
+        star.style.transform = 'scale(0.5) translateY(-10px)';
+        setTimeout(() => star.remove(), 800);
+    }, 100);
 }
 
 // Show status message
@@ -9355,6 +9480,153 @@ function drawNoteVisualization() {
 // PLANE VISUAL EFFECTS - Note-Reactive Lights & BPM Sync
 // ============================================================================
 
+// ============================================================================
+// WEATHER VISUAL EFFECTS - Rain and Lightning
+// ============================================================================
+
+// Rain particles array
+let rainDrops = [];
+
+// Draw rain effect on canvas
+function drawRainEffect() {
+    if (!flightCanvas || !flightCtx) return;
+
+    // Create new raindrops periodically
+    if (Math.random() < 0.3) { // 30% chance each frame
+        for (let i = 0; i < 3; i++) {
+            rainDrops.push({
+                x: Math.random() * flightCanvas.width,
+                y: -10,
+                length: 10 + Math.random() * 20,
+                speed: 5 + Math.random() * 10,
+                opacity: 0.3 + Math.random() * 0.4
+            });
+        }
+    }
+
+    // Update and draw raindrops
+    flightCtx.save();
+    flightCtx.strokeStyle = 'rgba(174, 194, 224, 0.6)'; // Light blue-white color
+    flightCtx.lineWidth = 1;
+
+    rainDrops = rainDrops.filter(drop => {
+        // Update position
+        drop.y += drop.speed;
+
+        // Draw raindrop
+        flightCtx.globalAlpha = drop.opacity;
+        flightCtx.beginPath();
+        flightCtx.moveTo(drop.x, drop.y);
+        flightCtx.lineTo(drop.x, drop.y + drop.length);
+        flightCtx.stroke();
+
+        // Remove if off screen
+        return drop.y < flightCanvas.height + 50;
+    });
+
+    flightCtx.restore();
+
+    // Add subtle fog/mist effect
+    flightCtx.fillStyle = 'rgba(180, 200, 220, 0.02)';
+    flightCtx.fillRect(0, 0, flightCanvas.width, flightCanvas.height);
+}
+
+// Lightning flash effect
+let lightningFlashTime = 0;
+let nextLightningTime = Date.now() + 3000 + Math.random() * 7000; // Random 3-10 seconds
+let lightningBrightness = 0;
+
+function drawLightningFlash() {
+    if (!flightCanvas || !flightCtx) return;
+
+    const now = Date.now();
+
+    // Trigger new lightning flash
+    if (now >= nextLightningTime && lightningBrightness === 0) {
+        lightningBrightness = 1;
+        lightningFlashTime = now;
+        nextLightningTime = now + 3000 + Math.random() * 7000; // Next flash in 3-10 seconds
+
+        // Sometimes do a double flash
+        if (Math.random() < 0.3) {
+            setTimeout(() => {
+                lightningBrightness = 1;
+                lightningFlashTime = Date.now();
+            }, 100 + Math.random() * 200);
+        }
+    }
+
+    // Draw lightning flash
+    if (lightningBrightness > 0) {
+        const elapsed = now - lightningFlashTime;
+
+        // Quick bright flash that fades rapidly
+        if (elapsed < 100) {
+            lightningBrightness = 1 - (elapsed / 100);
+        } else if (elapsed < 150) {
+            lightningBrightness = 0.5 * (1 - ((elapsed - 100) / 50));
+        } else {
+            lightningBrightness = 0;
+        }
+
+        if (lightningBrightness > 0) {
+            flightCtx.save();
+            flightCtx.fillStyle = `rgba(255, 255, 255, ${lightningBrightness * 0.3})`;
+            flightCtx.fillRect(0, 0, flightCanvas.width, flightCanvas.height);
+
+            // Add colored lightning tint (slight blue-purple)
+            flightCtx.fillStyle = `rgba(200, 180, 255, ${lightningBrightness * 0.15})`;
+            flightCtx.fillRect(0, 0, flightCanvas.width, flightCanvas.height);
+
+            // Draw lightning bolts occasionally
+            if (Math.random() < 0.3 && lightningBrightness > 0.7) {
+                drawLightningBolt();
+            }
+
+            flightCtx.restore();
+        }
+    }
+}
+
+// Draw a lightning bolt
+function drawLightningBolt() {
+    if (!flightCtx) return;
+
+    const startX = Math.random() * flightCanvas.width;
+    const startY = 0;
+    let x = startX;
+    let y = startY;
+
+    flightCtx.save();
+    flightCtx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+    flightCtx.lineWidth = 2;
+    flightCtx.shadowBlur = 10;
+    flightCtx.shadowColor = 'rgba(200, 200, 255, 0.8)';
+    flightCtx.beginPath();
+    flightCtx.moveTo(x, y);
+
+    // Create jagged lightning path
+    const segments = 8 + Math.floor(Math.random() * 4);
+    for (let i = 0; i < segments; i++) {
+        x += (Math.random() - 0.5) * 60;
+        y += (flightCanvas.height / segments) + (Math.random() - 0.5) * 30;
+        flightCtx.lineTo(x, y);
+
+        // Occasional branches
+        if (Math.random() < 0.3) {
+            flightCtx.moveTo(x, y);
+            const branchX = x + (Math.random() - 0.5) * 80;
+            const branchY = y + 40 + Math.random() * 40;
+            flightCtx.lineTo(branchX, branchY);
+            flightCtx.moveTo(x, y);
+        }
+    }
+
+    flightCtx.stroke();
+    flightCtx.restore();
+}
+
+// ============================================================================
 // Flash plane lights when notes are played
 function flashPlaneLights(frequency) {
     if (!plane) return;
@@ -9460,6 +9732,15 @@ function stopBPMSync() {
         bpmSyncInterval = null;
     }
 }
+
+// Ensure BPM and visual effect functions are globally accessible
+window.flashPlaneLights = flashPlaneLights;
+window.syncAnimationToBPM = syncAnimationToBPM;
+window.startBPMSync = startBPMSync;
+window.stopBPMSync = stopBPMSync;
+window.drawRainEffect = drawRainEffect;
+window.drawLightningFlash = drawLightningFlash;
+window.makeCitiesReactToNote = makeCitiesReactToNote;
 
 // ============================================================================
 // Sequencer class for ambient note generation
@@ -9718,6 +9999,9 @@ class AmbientSequencer {
 
         // Trigger note-reactive lights
         flashPlaneLights(frequency);
+
+        // Make nearby cities glow in response to notes
+        makeCitiesReactToNote(planePixelX, planePixelY, frequency);
     }
 
     affectPlaneMovement(frequency) {
@@ -10466,6 +10750,47 @@ if (document.readyState === 'loading') {
 } else {
     setTimeout(initAllEnhancements, 100);
 }
+
+// =============================================================================
+// GLOBAL FUNCTION SAFETY CHECK
+// Ensure all critical functions are accessible globally
+// This prevents ReferenceErrors if functions are called before assignment
+// =============================================================================
+(function() {
+    'use strict';
+
+    // List of functions that must be globally accessible
+    const criticalFunctions = [
+        'takeOff',
+        'land',
+        'testAudio',
+        'hideWelcomeOverlay',
+        'hideFlightLog',
+        'downloadFlightLog',
+        'playInteractiveNote',
+        'createClickRipple',
+        'flashPlaneLights',
+        'syncAnimationToBPM',
+        'startBPMSync',
+        'stopBPMSync',
+        'drawRainEffect',
+        'drawLightningFlash',
+        'makeCitiesReactToNote'
+    ];
+
+    // Check each function and log if missing
+    criticalFunctions.forEach(funcName => {
+        if (typeof window[funcName] !== 'function') {
+            console.warn(`[SAFETY CHECK] Function '${funcName}' is not defined on window object`);
+        } else {
+            console.log(`[SAFETY CHECK] ✓ Function '${funcName}' is properly defined`);
+        }
+    });
+
+    // Log success
+    const definedCount = criticalFunctions.filter(f => typeof window[f] === 'function').length;
+    console.log(`[SAFETY CHECK] ${definedCount}/${criticalFunctions.length} critical functions are properly defined`);
+})();
 
 
 </script>
