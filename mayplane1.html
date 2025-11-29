@@ -2094,7 +2094,7 @@
                         <div class="button-grid">
                             <button id="takeoff" class="btn btn-success">Take Off</button>
                             <button id="land" class="btn btn-danger">Land</button>
-                            <button id="testAudio" class="btn btn-secondary">Test Audio</button>
+                            <button id="testAudioBtn" class="btn btn-secondary">Test Audio</button>
                             <button id="fullscreenBtn" class="btn btn-secondary">Full Screen</button>
                             <button id="randomizeAll" class="btn btn-primary" style="grid-column: span 2;">Randomize All</button>
                         </div>
@@ -2933,7 +2933,7 @@
     // Main buttons
     const takeoffButton = document.getElementById('takeoff');
     const landButton = document.getElementById('land');
-    const testAudioButton = document.getElementById('testAudio');
+    const testAudioButton = document.getElementById('testAudioBtn');
     const fullscreenBtn = document.getElementById('fullscreenBtn');
     const randomizeAllButton = document.getElementById('randomizeAll');
     const toggleUIButton = document.getElementById('toggleUI');
@@ -4042,10 +4042,12 @@
             land();
         });
 
-        testAudioButton.addEventListener('click', () => {
-            logDebug('INPUT', 'Test Audio button clicked');
-            testAudio();
-        });
+        if (testAudioButton) {
+            testAudioButton.addEventListener('click', () => {
+                logDebug('INPUT', 'Test Audio button clicked');
+                testAudio();
+            });
+        }
 
         fullscreenBtn.addEventListener('click', () => {
             logDebug('INPUT', 'Fullscreen button clicked');
@@ -6390,7 +6392,7 @@ function testAudio() {
         if (!audioContext) {
             initializeAudio();
         }
-        
+
         // Resume audio context if suspended
         if (audioContext && audioContext.state === 'suspended') {
             audioContext.resume().then(() => {
@@ -6408,6 +6410,8 @@ function testAudio() {
         showStatus('Test audio error: ' + error.message);
     }
 }
+// Ensure function is accessible via window object
+window.testAudio = testAudio;
 
 // Play a test tone
 function playTestTone() {
@@ -8350,7 +8354,7 @@ function updateGradientColors() {
 
     // Get current audio state
     const filterCutoff = filterNode ? parseFloat(filterCutoffControl?.value || 20000) : 20000;
-    const reverbMix = reverbToggle ? (reverbToggle.checked ? parseFloat(reverbControl?.value || 0.5) : 0) : 0;
+    const reverbMix = parseFloat(reverbControl?.value || 0.3);
     const altitude = parseFloat(altitudeControl?.value || 0.5);
 
     // Select palette based on destination
@@ -8390,7 +8394,7 @@ function drawGradientBackground() {
     landscapeCtx.fillRect(0, 0, width, height);
 
     // Optional: Add subtle texture/noise for Rothko effect
-    const reverbMix = reverbToggle ? (reverbToggle.checked ? parseFloat(reverbControl?.value || 0.5) : 0) : 0;
+    const reverbMix = parseFloat(reverbControl?.value || 0.3);
     if (reverbMix > 0.3) {
         landscapeCtx.globalAlpha = 0.02 * reverbMix;
         for (let i = 0; i < 50; i++) {
