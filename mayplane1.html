@@ -4572,8 +4572,50 @@
                     break;
             }
         });
+
+        // ===== INTERACTIVE MAP CLICKING - Play notes based on click position =====
+        function handleMapClick(e) {
+            // Only allow when flying
+            if (!isFlying || !audioContext) return;
+
+            // Get click position relative to canvas
+            const rect = flightCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // Normalize to 0-1 range
+            const normalizedX = x / rect.width;
+            const normalizedY = y / rect.height;
+
+            // Play a note based on click position
+            playInteractiveNote(normalizedX, normalizedY);
+
+            // Visual feedback - create a ripple effect at click position
+            createClickRipple(x, y);
+        }
+
+        // Add click listener to flight canvas
+        if (flightCanvas) {
+            flightCanvas.addEventListener('click', handleMapClick);
+
+            // Also handle touch events for mobile
+            flightCanvas.addEventListener('touchstart', function(e) {
+                e.preventDefault(); // Prevent scrolling
+                const touch = e.touches[0];
+                const rect = flightCanvas.getBoundingClientRect();
+                const x = touch.clientX - rect.left;
+                const y = touch.clientY - rect.top;
+                const normalizedX = x / rect.width;
+                const normalizedY = y / rect.height;
+
+                playInteractiveNote(normalizedX, normalizedY);
+                createClickRipple(x, y);
+            }, { passive: false });
+
+            logDebug('UI', 'Interactive map clicking enabled');
+        }
     }
-    
+
     // Toggle cockpit display
     function toggleCockpit() {
         const isCollapsed = cockpitContainer.classList.contains('collapsed');
@@ -6617,6 +6659,112 @@ function emergencyEject() {
     } catch (error) {
         console.error('Error in emergency eject:', error);
     }
+}
+
+// ============================================================================
+// INTERACTIVE MAP NOTE PLAYING
+// ============================================================================
+
+// Play a note based on click/tap position on the map
+function playInteractiveNote(normalizedX, normalizedY) {
+    try {
+        if (!audioContext || audioContext.state !== 'running') {
+            console.warn('AudioContext not available for interactive note');
+            return;
+        }
+
+        // Get current pattern from sequencer1 if available, otherwise use a default scale
+        let pattern = sequencer1 && sequencer1.currentPattern
+            ? sequencer1.currentPattern
+            : [0, 2, 4, 5, 7, 9, 11, 12]; // Default to major scale
+
+        // Map Y position (top to bottom) to note index in pattern
+        // Top = highest note, bottom = lowest note
+        const noteIndex = Math.floor((1 - normalizedY) * pattern.length);
+        const clampedIndex = Math.max(0, Math.min(pattern.length - 1, noteIndex));
+        const noteValue = pattern[clampedIndex];
+
+        // Map X position to base frequency
+        // Left = lower octave, right = higher octave
+        const baseFreqMultiplier = 0.5 + (normalizedX * 1.5); // Range from 0.5x to 2x
+        const altitude = parseFloat(altitudeControl?.value || 1);
+        const baseFreq = 261.63 * altitude * baseFreqMultiplier; // Middle C adjusted
+
+        // Calculate final frequency
+        let frequency;
+        if (typeof noteValue === 'number' && noteValue < 100) {
+            // It's a semitone interval - convert to frequency
+            frequency = baseFreq * Math.pow(2, noteValue / 12);
+        } else {
+            // It's already a frequency
+            frequency = noteValue * baseFreqMultiplier;
+        }
+
+        // Clamp to safe range
+        frequency = Math.min(20000, Math.max(safeLowFreq, frequency));
+
+        // Get settings from controls
+        const decayTime = parseFloat(decayControl?.value || 3);
+        const volume = parseFloat(volumeControl?.value || 0.15) * 1.2; // Slightly louder for interactive notes
+
+        // Create oscillator for the note
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        // Use a pleasant waveform
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+
+        // Quick attack, long decay
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + decayTime);
+
+        // Connect to master gain (includes all effects)
+        oscillator.connect(gainNode);
+        gainNode.connect(masterGainNode);
+
+        // Play the note
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + decayTime);
+
+        // Flash plane lights in response
+        flashPlaneLights(frequency);
+
+        logDebug('INTERACTIVE', `Played note at ${frequency.toFixed(2)}Hz from position (${(normalizedX * 100).toFixed(0)}%, ${(normalizedY * 100).toFixed(0)}%)`);
+
+    } catch (error) {
+        console.error('Error playing interactive note:', error);
+    }
+}
+
+// Create visual ripple effect at click position
+function createClickRipple(x, y) {
+    if (!noteCircles) return;
+
+    // Map click position to note color
+    const normalizedX = x / flightCanvas.width;
+    const colorIndex = Math.floor(normalizedX * colors.notes.length) % colors.notes.length;
+    const rippleColor = colors.notes[colorIndex];
+
+    // Create multiple expanding circles for ripple effect
+    for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+            const circle = {
+                x: x,
+                y: y,
+                radius: 5,
+                maxRadius: 40 + (i * 15),
+                color: rippleColor,
+                opacity: 0.8 - (i * 0.2),
+                growRate: 1.2 + (i * 0.3),
+                sequencerId: 0 // Special ID for interactive notes
+            };
+            noteCircles.push(circle);
+        }, i * 50); // Stagger the ripples
+    }
+
+    logDebug('INTERACTIVE', `Created click ripple at (${x}, ${y})`);
 }
 
 // Test audio with a simple note
@@ -9471,7 +9619,7 @@ class AmbientSequencer {
             }
             
             // Generate announcements based on note interaction
-            if (this.id === 1 && Math.random() < 0.03) { // Only first sequencer generates announcements
+            if (this.id === 1 && Math.random() < 0.08) { // Only first sequencer generates announcements (8% chance)
                 generateAnnouncement();
             }
             
