@@ -2094,9 +2094,6 @@
             <button class="close-btn" id="helpCloseBtn">×</button>
             <h2>📖 Flight Manual</h2>
 
-            <h3>🎭 The Aviation Theme</h3>
-            <p>Everything is "in theme" - the cockpit controls aren't just UI, they're your flight deck. Altitude changes the sound's thinness (cabin pressure), speed creates wind noise, the engine hums beneath you. When you land, you arrive at real spaces with unique acoustics. Flight becomes a journey through sound itself.</p>
-
             <h3>🎵 How The Music Works</h3>
             <p><strong>Dual Sequencers:</strong> Two independent generative sequencers create interlocking melodic patterns.</p>
             <p><strong>Scale Systems:</strong> Choose from 8 flight routes with authentic musical scales - Japanese pentatonic, Arabic maqam, Indian raga, and more.</p>
@@ -10750,6 +10747,29 @@ if (document.readyState === 'loading') {
 } else {
     setTimeout(initAllEnhancements, 100);
 }
+
+// =============================================================================
+// CONSOLIDATED GLOBAL FUNCTION ASSIGNMENTS
+// Assign all critical functions to window object in one place
+// =============================================================================
+window.takeOff = takeOff;
+window.land = land;
+window.testAudio = testAudio;
+window.changeDestination = changeDestination;
+window.hideWelcomeOverlay = hideWelcomeOverlay;
+window.hideFlightLog = hideFlightLog;
+window.downloadFlightLog = downloadFlightLog;
+window.playInteractiveNote = playInteractiveNote;
+window.createClickRipple = createClickRipple;
+window.flashPlaneLights = flashPlaneLights;
+window.syncAnimationToBPM = syncAnimationToBPM;
+window.startBPMSync = startBPMSync;
+window.stopBPMSync = stopBPMSync;
+window.drawRainEffect = drawRainEffect;
+window.drawLightningFlash = drawLightningFlash;
+window.makeCitiesReactToNote = makeCitiesReactToNote;
+
+console.log('[INIT] All critical functions assigned to window object');
 
 // =============================================================================
 // GLOBAL FUNCTION SAFETY CHECK
