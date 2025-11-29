@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- VERSION: 3.0-IFE-REDESIGN-2025-11-29 -->
+<!-- VERSION: 3.1-IFE-ENHANCED-2025-11-29 -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -52,6 +52,385 @@
             --panel-overlay: rgba(15, 15, 30, 0.95);
             --map-ocean: #1a2332;
         }
+
+        /* === CALMING THEME VARIATIONS === */
+        /* Theme 1: Classic IFE (default - already set in :root) */
+        
+        /* Theme 2: Dawn Flight */
+        .theme-dawn {
+            --ife-blue: #4A3B47;
+            --ife-accent: #E8A598;
+            --ife-cyan: #F4C2B8;
+            --map-land: #D4A59A;
+            --map-ocean: #F5E6E8;
+            --route-red: #D97B6C;
+            --panel-dark: #3A2E34;
+            --panel-overlay: rgba(58, 46, 52, 0.92);
+            --text-light: #FFF5F0;
+            --text-muted: #E8C4BC;
+            --success: #9BA882;
+            --warning: #E8A598;
+            --danger: #D97B6C;
+        }
+
+        /* Theme 3: Ocean Crossing */
+        .theme-ocean {
+            --ife-blue: #1A4D5E;
+            --ife-accent: #4A9DB5;
+            --ife-cyan: #7BC4DB;
+            --map-land: #5A8FA0;
+            --map-ocean: #0D2A35;
+            --route-red: #D97B6C;
+            --panel-dark: #0A1F28;
+            --panel-overlay: rgba(10, 31, 40, 0.92);
+            --text-light: #E8F4F8;
+            --text-muted: #9BC4D4;
+            --success: #5AB09D;
+            --warning: #E8B45A;
+            --danger: #D97B6C;
+        }
+
+        /* Theme 4: Northern Lights */
+        .theme-northern {
+            --ife-blue: #2A1A3E;
+            --ife-accent: #8B7AB8;
+            --ife-cyan: #A89DC9;
+            --map-land: #6B5B8A;
+            --map-ocean: #1A0F2E;
+            --route-red: #B87A9F;
+            --panel-dark: #1A0F2E;
+            --panel-overlay: rgba(26, 15, 46, 0.92);
+            --text-light: #F0E8FF;
+            --text-muted: #C4B8D9;
+            --success: #7AB89F;
+            --warning: #D9A87A;
+            --danger: #B87A9F;
+        }
+
+        /* Theme 5: Desert Sky */
+        .theme-desert {
+            --ife-blue: #3E2A1A;
+            --ife-accent: #D9A574;
+            --ife-cyan: #E8C4A4;
+            --map-land: #B8946A;
+            --map-ocean: #4A3528;
+            --route-red: #C97A5A;
+            --panel-dark: #2A1A0F;
+            --panel-overlay: rgba(42, 26, 15, 0.92);
+            --text-light: #FFF4E8;
+            --text-muted: #D9C4B0;
+            --success: #9BA874;
+            --warning: #E8B574;
+            --danger: #C97A5A;
+        }
+
+        /* Smooth theme transitions */
+        body, .map-view, .control-panel, .control-section, .tab-nav, .panel-header {
+            transition: background-color 0.6s ease, color 0.6s ease;
+        }
+
+
+        /* === ENHANCED PLANE ANIMATIONS === */
+        @keyframes planeBobbing {
+            0%, 100% { transform: translateY(0px) rotate(var(--plane-rotation, 0deg)); }
+            50% { transform: translateY(-4px) rotate(var(--plane-rotation, 0deg)); }
+        }
+
+        @keyframes planeBanking {
+            0%, 100% { transform: rotate(var(--plane-rotation, 0deg)) rotateY(0deg); }
+            50% { transform: rotate(var(--plane-rotation, 0deg)) rotateY(5deg); }
+        }
+
+        .plane.flying {
+            animation: planeBobbing 3s ease-in-out infinite, planePulse 3s ease-in-out infinite;
+        }
+
+        /* Contrail effect */
+        .plane-contrail {
+            position: absolute;
+            width: 3px;
+            height: 30px;
+            background: linear-gradient(to top, transparent, rgba(255, 255, 255, 0.4), transparent);
+            left: 50%;
+            top: 100%;
+            transform: translateX(-50%);
+            opacity: 0.6;
+            pointer-events: none;
+            animation: contrailFade 2s ease-out infinite;
+        }
+
+        @keyframes contrailFade {
+            0% { opacity: 0.6; height: 0px; }
+            50% { opacity: 0.4; height: 30px; }
+            100% { opacity: 0; height: 50px; }
+        }
+
+        /* === MAP INTERACTIVITY ENHANCEMENTS === */
+        .city-label.active-scale {
+            animation: cityGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes cityGlow {
+            0%, 100% { 
+                text-shadow: 0 0 8px rgba(0, 0, 0, 0.9), 0 0 15px rgba(0, 0, 0, 0.7);
+                transform: scale(1);
+            }
+            50% { 
+                text-shadow: 0 0 15px currentColor, 0 0 25px currentColor, 0 0 35px currentColor;
+                transform: scale(1.1);
+            }
+        }
+
+        .destination-marker {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--ife-accent);
+            border-radius: 50%;
+            animation: markerPulse 2s ease-in-out infinite;
+            box-shadow: 0 0 10px var(--ife-accent);
+        }
+
+        @keyframes markerPulse {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.3); opacity: 1; }
+        }
+
+        /* Flight path drawing */
+        .flight-path-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--ife-cyan), transparent);
+            opacity: 0.6;
+            animation: pathDraw 1s ease-out;
+        }
+
+        @keyframes pathDraw {
+            from { width: 0; opacity: 0; }
+            to { width: 100%; opacity: 0.6; }
+        }
+
+        /* === AUDIO-REACTIVE ENHANCEMENTS === */
+        .volume-meter {
+            width: 100%;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .volume-meter-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--success), var(--warning), var(--danger));
+            transition: width 0.1s ease;
+            border-radius: 3px;
+        }
+
+        .led-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--led-off);
+            transition: all 0.2s ease;
+        }
+
+        .led-indicator.active {
+            background: var(--led-green);
+            box-shadow: 0 0 8px var(--led-green);
+            animation: ledPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes ledPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* === CONTROL PANEL ENHANCEMENTS === */
+        .tab-content {
+            animation: tabSlideIn 0.3s ease-out;
+        }
+
+        @keyframes tabSlideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .control-section.collapsible .control-section-title {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            padding-right: 30px;
+        }
+
+        .control-section.collapsible .control-section-title::after {
+            content: '▼';
+            position: absolute;
+            right: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .control-section.collapsible.collapsed .control-section-title::after {
+            transform: rotate(-90deg);
+        }
+
+        .control-section.collapsible.collapsed > *:not(.control-section-title) {
+            display: none;
+        }
+
+        /* Button haptic-style feedback */
+        .btn:active {
+            transform: translateY(0) scale(0.98);
+            box-shadow: none;
+        }
+
+        /* === ARTFUL DETAILS === */
+        /* Aviation map grid lines */
+        .map-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 49px, rgba(52, 152, 219, 0.1) 49px, rgba(52, 152, 219, 0.1) 50px),
+                repeating-linear-gradient(90deg, transparent, transparent 49px, rgba(52, 152, 219, 0.1) 49px, rgba(52, 152, 219, 0.1) 50px);
+            pointer-events: none;
+            opacity: 0.3;
+            z-index: 0;
+        }
+
+        /* Time-of-day lighting tint */
+        .map-view.time-dawn { filter: sepia(0.2) brightness(1.1); }
+        .map-view.time-day { filter: brightness(1.15); }
+        .map-view.time-dusk { filter: sepia(0.3) brightness(0.9) hue-rotate(-10deg); }
+        .map-view.time-night { filter: brightness(0.7) contrast(1.2); }
+
+        /* Vignette effect when controls collapsed */
+        .map-view::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: 5;
+        }
+
+        .control-panel.collapsed ~ .map-view::after {
+            opacity: 1;
+        }
+
+        /* Floating particles/clouds */
+        .ambient-particle {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFloat 20s linear infinite;
+        }
+
+        @keyframes particleFloat {
+            from { transform: translate(0, 0) scale(1); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            to { transform: translate(100vw, -50vh) scale(1.5); opacity: 0; }
+        }
+
+
+        /* === MOBILE OPTIMIZATIONS === */
+        @media (max-width: 768px) {
+            /* Prevent zoom on double-tap */
+            * {
+                touch-action: manipulation;
+            }
+
+            /* Larger touch targets */
+            .btn {
+                min-height: 48px;
+                min-width: 48px;
+                padding: 14px 22px;
+                font-size: 1rem;
+            }
+
+            .tab-button {
+                min-height: 48px;
+                font-size: 0.9rem;
+            }
+
+            .slider {
+                height: 40px;
+                -webkit-appearance: none;
+                appearance: none;
+            }
+
+            .slider::-webkit-slider-thumb {
+                width: 24px;
+                height: 24px;
+                -webkit-appearance: none;
+                appearance: none;
+            }
+
+            .slider::-moz-range-thumb {
+                width: 24px;
+                height: 24px;
+            }
+
+            /* Better scrolling in panels */
+            .tab-content {
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior: contain;
+            }
+
+            /* Swipe gesture indicator */
+            .panel-header::before {
+                content: '';
+                position: absolute;
+                top: 8px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 40px;
+                height: 4px;
+                background: var(--text-muted);
+                border-radius: 2px;
+                opacity: 0.5;
+            }
+
+            /* Optimize city labels for mobile */
+            .city-label {
+                font-size: 0.75rem;
+                text-shadow: 0 0 4px rgba(0, 0, 0, 1), 0 0 8px rgba(0, 0, 0, 0.8);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .control-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-stat-label {
+                font-size: 0.55rem;
+            }
+
+            .header-stat-value {
+                font-size: 0.8rem;
+            }
+
+            .tab-button {
+                min-width: 80px;
+                padding: 10px 12px;
+                font-size: 0.75rem;
+                gap: 4px;
+            }
+        }
+
 
         /* === RESET & BASE === */
         *, *::before, *::after {
@@ -1624,6 +2003,12 @@
                 <!-- Sky Gradient -->
                 <div id="skyGradientTop"></div>
                 <div id="skyGradientBottom"></div>
+                <!-- Map Grid Overlay -->
+                <div class="map-grid"></div>
+
+                <!-- Ambient Particles Container -->
+                <div id="ambientParticles"></div>
+
 
                 <!-- Filter Indicator -->
                 <div class="filter-active-indicator" id="filterIndicator"></div>
@@ -1642,6 +2027,7 @@
                     <div class="plane-tail"></div>
                     <div class="plane-windows"></div>
                     <div class="plane-engine left"></div>
+                    <div class="plane-contrail"></div>
                     <div class="plane-engine right"></div>
                     <div class="plane-exhaust"></div>
                     <div class="plane-trail"></div>
@@ -2049,6 +2435,18 @@
                             <option value="smoothLanding">Smooth Landing</option>
                             <option value="turbulenceControl">Turbulence Control</option>
                             <option value="nightMode">Night Mode</option>
+                        </select>
+                    </div>
+
+                    <!-- Theme Selection -->
+                    <div class="control-section">
+                        <div class="control-section-title">Cabin Ambiance Theme</div>
+                        <select id="themeSelector" class="custom-select">
+                            <option value="classic">Classic IFE (Blue/Gray)</option>
+                            <option value="dawn">Dawn Flight (Warm Pastels)</option>
+                            <option value="ocean">Ocean Crossing (Deep Blues)</option>
+                            <option value="northern">Northern Lights (Purples/Greens)</option>
+                            <option value="desert">Desert Sky (Warm Amber)</option>
                         </select>
                     </div>
 
@@ -8839,10 +9237,6 @@ if (document.readyState === 'interactive' || document.readyState === 'complete')
     console.log('Document already loaded, initializing immediately');
     init();
 }
-</script>
-    </body>
-    </html>
-
 // =============================================================================
 // NEW IFE UI CONTROLS
 // =============================================================================
@@ -9175,6 +9569,371 @@ if (musicalParticlesToggleControl && musicalParticlesPanel) {
 
 logInfo('UI', 'IFE-style UI controls initialized');
 
+// =============================================================================
+// THEME SYSTEM
+// =============================================================================
+
+function initThemeSystem() {
+    const themeSelector = document.getElementById('themeSelector');
+    const body = document.body;
+    
+    // Load saved theme
+    const savedTheme = localStorage.getItem('cabin-theme') || 'classic';
+    if (themeSelector) {
+        themeSelector.value = savedTheme;
+        applyTheme(savedTheme);
+    }
+    
+    // Theme change handler
+    if (themeSelector) {
+        themeSelector.addEventListener('change', function() {
+            const theme = this.value;
+            applyTheme(theme);
+            localStorage.setItem('cabin-theme', theme);
+            logInfo('THEME', 'Theme changed to: ' + theme);
+        });
+    }
+    
+    function applyTheme(theme) {
+        // Remove all theme classes
+        body.classList.remove('theme-dawn', 'theme-ocean', 'theme-northern', 'theme-desert');
+        
+        // Apply selected theme
+        if (theme !== 'classic') {
+            body.classList.add('theme-' + theme);
+        }
+    }
+}
+
+// =============================================================================
+// ENHANCED PLANE ANIMATIONS
+// =============================================================================
+
+function initPlaneAnimations() {
+    const plane = document.getElementById('plane');
+    if (!plane) return;
+    
+    let planeRotation = 0;
+    let targetRotation = 0;
+    
+    function updatePlaneAnimation() {
+        if (!isFlying) return;
+        
+        // Add flying class for bobbing animation
+        plane.classList.add('flying');
+        
+        // Smooth rotation based on direction
+        const dx = planeDirection.x;
+        const dy = planeDirection.y;
+        targetRotation = Math.atan2(dy, dx) * (180 / Math.PI);
+        
+        // Smooth interpolation
+        planeRotation += (targetRotation - planeRotation) * 0.1;
+        plane.style.setProperty('--plane-rotation', planeRotation + 'deg');
+        
+        requestAnimationFrame(updatePlaneAnimation);
+    }
+    
+    // Start animation when flying
+    if (isFlying) {
+        updatePlaneAnimation();
+    }
+}
+
+// =============================================================================
+// MAP INTERACTIVITY ENHANCEMENTS
+// =============================================================================
+
+function initMapInteractivity() {
+    const cityLabels = document.querySelectorAll('.city-label');
+    
+    // Make city markers glow when their scale/region is active
+    function updateCityGlow(activeRegion) {
+        cityLabels.forEach(label => {
+            if (label.classList.contains('region-' + activeRegion)) {
+                label.classList.add('active-scale');
+            } else {
+                label.classList.remove('active-scale');
+            }
+        });
+    }
+    
+    // Create destination markers (pulsing circles)
+    function createDestinationMarker(x, y) {
+        const marker = document.createElement('div');
+        marker.className = 'destination-marker';
+        marker.style.left = x + 'px';
+        marker.style.top = y + 'px';
+        marker.style.zIndex = '8';
+        document.getElementById('flightContainer').appendChild(marker);
+        return marker;
+    }
+    
+    window.updateCityGlow = updateCityGlow;
+    window.createDestinationMarker = createDestinationMarker;
+}
+
+// =============================================================================
+// AUDIO-REACTIVE POLISH
+// =============================================================================
+
+function initAudioReactive() {
+    const audioMeter = document.getElementById('audioMeter');
+    const audioLevelLabel = document.getElementById('audioLevelLabel');
+    
+    // Create volume meter fill element
+    if (audioMeter && !audioMeter.querySelector('.volume-meter-fill')) {
+        const fill = document.createElement('div');
+        fill.className = 'volume-meter-fill';
+        fill.style.width = '0%';
+        audioMeter.appendChild(fill);
+    }
+    
+    // Update volume meter with smooth easing
+    let currentVolume = 0;
+    function updateVolumeMeter(level) {
+        const fill = audioMeter ? audioMeter.querySelector('.volume-meter-fill') : null;
+        if (!fill) return;
+        
+        // Smooth easing
+        currentVolume += (level - currentVolume) * 0.3;
+        const percentage = Math.min(100, currentVolume * 100);
+        fill.style.width = percentage + '%';
+        
+        // Update dB label
+        if (audioLevelLabel) {
+            const db = currentVolume > 0 ? (20 * Math.log10(currentVolume)).toFixed(1) : '-∞';
+            audioLevelLabel.textContent = db + ' dB';
+        }
+    }
+    
+    window.updateVolumeMeter = updateVolumeMeter;
+    
+    // LED indicators pulse with beat
+    function pulseLEDIndicators() {
+        const leds = document.querySelectorAll('.led-indicator');
+        leds.forEach(led => {
+            if (isFlying) {
+                led.classList.add('active');
+            } else {
+                led.classList.remove('active');
+            }
+        });
+    }
+    
+    setInterval(pulseLEDIndicators, 1000);
+}
+
+// =============================================================================
+// CONTROL PANEL ENHANCEMENTS
+// =============================================================================
+
+function initControlPanelEnhancements() {
+    // Collapsible sections
+    const collapsibleSections = document.querySelectorAll('.control-section.collapsible');
+    collapsibleSections.forEach(section => {
+        const title = section.querySelector('.control-section-title');
+        if (title) {
+            title.addEventListener('click', () => {
+                section.classList.toggle('collapsed');
+            });
+        }
+    });
+    
+    // Swipe gesture for mobile panel toggle
+    let touchStartY = 0;
+    let touchEndY = 0;
+    const panelHeader = document.getElementById('panelHeader');
+    const controlPanel = document.getElementById('controlPanel');
+    
+    if (panelHeader && controlPanel) {
+        panelHeader.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+        
+        panelHeader.addEventListener('touchend', (e) => {
+            touchEndY = e.changedTouches[0].clientY;
+            handleSwipe();
+        }, { passive: true });
+        
+        function handleSwipe() {
+            const swipeDistance = touchStartY - touchEndY;
+            if (Math.abs(swipeDistance) > 50) {
+                if (swipeDistance > 0) {
+                    // Swipe up - expand
+                    if (controlPanel.classList.contains('collapsed')) {
+                        togglePanel();
+                    }
+                } else {
+                    // Swipe down - collapse
+                    if (controlPanel.classList.contains('expanded')) {
+                        togglePanel();
+                    }
+                }
+            }
+        }
+    }
+}
+
+// =============================================================================
+// ARTFUL DETAILS
+// =============================================================================
+
+function initArtfulDetails() {
+    // Time-of-day lighting tint (cycles through day)
+    let timeOfDay = 0; // 0-24 hour simulation
+    const mapView = document.querySelector('.map-view');
+    
+    function updateTimeOfDay() {
+        if (!isFlying) return;
+        
+        timeOfDay += 0.01; // Slowly advance time
+        if (timeOfDay >= 24) timeOfDay = 0;
+        
+        // Remove all time classes
+        mapView.classList.remove('time-dawn', 'time-day', 'time-dusk', 'time-night');
+        
+        // Apply appropriate class
+        if (timeOfDay < 6) {
+            mapView.classList.add('time-night');
+        } else if (timeOfDay < 8) {
+            mapView.classList.add('time-dawn');
+        } else if (timeOfDay < 17) {
+            mapView.classList.add('time-day');
+        } else if (timeOfDay < 20) {
+            mapView.classList.add('time-dusk');
+        } else {
+            mapView.classList.add('time-night');
+        }
+    }
+    
+    setInterval(updateTimeOfDay, 1000);
+    
+    // Floating ambient particles
+    function createAmbientParticles() {
+        const particlesContainer = document.getElementById('ambientParticles');
+        if (!particlesContainer) return;
+        
+        for (let i = 0; i < 5; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'ambient-particle';
+            particle.style.left = (Math.random() * 100) + '%';
+            particle.style.top = (Math.random() * 100) + '%';
+            particle.style.animationDelay = (Math.random() * 20) + 's';
+            particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+            particlesContainer.appendChild(particle);
+        }
+    }
+    
+    createAmbientParticles();
+}
+
+// =============================================================================
+// MOBILE OPTIMIZATIONS
+// =============================================================================
+
+function initMobileOptimizations() {
+    // Prevent zoom on double-tap (already in CSS, but reinforce)
+    document.addEventListener('dblclick', (e) => {
+        e.preventDefault();
+    }, { passive: false });
+    
+    // Improve scrolling performance
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(content => {
+        let isScrolling = false;
+        content.addEventListener('scroll', () => {
+            isScrolling = true;
+        }, { passive: true });
+        
+        // Optimize rendering during scroll
+        setInterval(() => {
+            if (isScrolling) {
+                isScrolling = false;
+            }
+        }, 100);
+    });
+    
+    // Haptic feedback simulation (visual only)
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(button => {
+        button.addEventListener('touchstart', function() {
+            this.style.transform = 'scale(0.95)';
+        }, { passive: true });
+        
+        button.addEventListener('touchend', function() {
+            this.style.transform = '';
+        }, { passive: true });
+    });
+}
+
+// =============================================================================
+// INITIALIZE ALL ENHANCEMENTS
+// =============================================================================
+
+function initAllEnhancements() {
+    try {
+        initThemeSystem();
+        logInfo('ENHANCEMENTS', 'Theme system initialized');
+    } catch (e) {
+        logError('ENHANCEMENTS', 'Theme system failed', e);
+    }
+    
+    try {
+        initPlaneAnimations();
+        logInfo('ENHANCEMENTS', 'Plane animations initialized');
+    } catch (e) {
+        logError('ENHANCEMENTS', 'Plane animations failed', e);
+    }
+    
+    try {
+        initMapInteractivity();
+        logInfo('ENHANCEMENTS', 'Map interactivity initialized');
+    } catch (e) {
+        logError('ENHANCEMENTS', 'Map interactivity failed', e);
+    }
+    
+    try {
+        initAudioReactive();
+        logInfo('ENHANCEMENTS', 'Audio-reactive features initialized');
+    } catch (e) {
+        logError('ENHANCEMENTS', 'Audio-reactive failed', e);
+    }
+    
+    try {
+        initControlPanelEnhancements();
+        logInfo('ENHANCEMENTS', 'Control panel enhancements initialized');
+    } catch (e) {
+        logError('ENHANCEMENTS', 'Control panel enhancements failed', e);
+    }
+    
+    try {
+        initArtfulDetails();
+        logInfo('ENHANCEMENTS', 'Artful details initialized');
+    } catch (e) {
+        logError('ENHANCEMENTS', 'Artful details failed', e);
+    }
+    
+    try {
+        initMobileOptimizations();
+        logInfo('ENHANCEMENTS', 'Mobile optimizations initialized');
+    } catch (e) {
+        logError('ENHANCEMENTS', 'Mobile optimizations failed', e);
+    }
+    
+    logInfo('ENHANCEMENTS', '=== All enhancements initialized successfully ===');
+}
+
+// Call after DOMContentLoaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(initAllEnhancements, 100);
+    });
+} else {
+    setTimeout(initAllEnhancements, 100);
+}
+
+
 </script>
-</body>
+    </body>
 </html>
