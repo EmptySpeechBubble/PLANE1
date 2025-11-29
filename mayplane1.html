@@ -6602,8 +6602,10 @@ function changeDestination(destId) {
     // Show status message
     showStatus(`Flight route changed to ${currentDestinationName}.`);
 }
-// Ensure function is accessible via window object
-window.changeDestination = changeDestination;
+// Ensure immediately accessible
+if (typeof window.changeDestination !== 'function') {
+    window.changeDestination = changeDestination;
+}
 
 // Emergency eject function
 function emergencyEject() {
@@ -6775,6 +6777,10 @@ function playInteractiveNote(normalizedX, normalizedY) {
         console.error('Error playing interactive note:', error);
     }
 }
+// Ensure immediately accessible
+if (typeof window.playInteractiveNote !== 'function') {
+    window.playInteractiveNote = playInteractiveNote;
+}
 
 // Create visual ripple effect at click position
 function createClickRipple(x, y) {
@@ -6804,10 +6810,10 @@ function createClickRipple(x, y) {
 
     logDebug('INTERACTIVE', `Created click ripple at (${x}, ${y})`);
 }
-
-// Ensure interactive functions are globally accessible
-window.playInteractiveNote = playInteractiveNote;
-window.createClickRipple = createClickRipple;
+// Ensure immediately accessible
+if (typeof window.createClickRipple !== 'function') {
+    window.createClickRipple = createClickRipple;
+}
 
 // Test audio with a simple note
 function testAudio() {
@@ -6834,8 +6840,10 @@ function testAudio() {
         showStatus('Test audio error: ' + error.message);
     }
 }
-// Ensure function is accessible via window object
-window.testAudio = testAudio;
+// Ensure immediately accessible
+if (typeof window.testAudio !== 'function') {
+    window.testAudio = testAudio;
+}
 
 // Play a test tone
 function playTestTone() {
@@ -6964,8 +6972,10 @@ function takeOff() {
         endTimer('takeoff_sequence');
     }
 }
-// Ensure function is accessible via window object
-window.takeOff = takeOff;
+// Ensure immediately accessible
+if (typeof window.takeOff !== 'function') {
+    window.takeOff = takeOff;
+}
 
 // Continue with takeoff after audio context is ready
 function continueWithTakeoff() {
@@ -10764,6 +10774,7 @@ if (document.readyState === 'loading') {
         'takeOff',
         'land',
         'testAudio',
+        'changeDestination',
         'hideWelcomeOverlay',
         'hideFlightLog',
         'downloadFlightLog',
