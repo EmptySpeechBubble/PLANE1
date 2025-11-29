@@ -141,30 +141,6 @@
             50% { transform: rotate(var(--plane-rotation, 0deg)) rotateY(5deg); }
         }
 
-        .plane.flying {
-            animation: planeBobbing 3s ease-in-out infinite, planePulse 3s ease-in-out infinite;
-        }
-
-        /* Contrail effect */
-        .plane-contrail {
-            position: absolute;
-            width: 3px;
-            height: 30px;
-            background: linear-gradient(to top, transparent, rgba(255, 255, 255, 0.4), transparent);
-            left: 50%;
-            top: 100%;
-            transform: translateX(-50%);
-            opacity: 0.6;
-            pointer-events: none;
-            animation: contrailFade 2s ease-out infinite;
-        }
-
-        @keyframes contrailFade {
-            0% { opacity: 0.6; height: 0px; }
-            50% { opacity: 0.4; height: 30px; }
-            100% { opacity: 0; height: 50px; }
-        }
-
         /* === MAP INTERACTIVITY ENHANCEMENTS === */
         .city-label.active-scale {
             animation: cityGlow 2s ease-in-out infinite;
@@ -522,70 +498,320 @@
             background: rgb(110, 160, 200);
         }
 
-        /* Minimalist Geometric Plane Design */
+        /* Realistic Commercial Airliner Design (Top-Down View) */
         .plane {
             position: absolute;
-            width: 60px;
-            height: 60px;
+            width: 80px;
+            height: 100px;
             z-index: 10;
             transform-origin: center;
-            transition: transform 0.3s ease;
-            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
         }
 
+        /* Fuselage (Main Body) */
         .plane-body {
             position: absolute;
-            width: 0;
-            height: 0;
-            border-left: 20px solid transparent;
-            border-right: 20px solid transparent;
-            border-bottom: 50px solid rgba(255, 255, 255, 0.9);
-            left: 10px;
-            top: 5px;
-            transform: rotate(90deg);
-            z-index: 2;
+            width: 16px;
+            height: 70px;
+            background: linear-gradient(to right,
+                rgba(200, 200, 210, 0.3),
+                rgba(255, 255, 255, 0.95) 30%,
+                rgba(255, 255, 255, 0.95) 70%,
+                rgba(200, 200, 210, 0.3)
+            );
+            left: 50%;
+            top: 10px;
+            transform: translateX(-50%);
+            border-radius: 8px 8px 4px 4px;
+            z-index: 5;
+            box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.4);
         }
 
+        /* Cockpit/Nose */
+        .plane-body::before {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 14px;
+            background: linear-gradient(135deg,
+                rgba(100, 180, 255, 0.4),
+                rgba(180, 220, 255, 0.6)
+            );
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 50% 50% 0 0;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        /* Main Wings */
         .plane-wings {
             position: absolute;
-            width: 50px;
-            height: 2px;
-            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.6), transparent);
-            left: 5px;
-            top: 29px;
-            z-index: 1;
+            width: 80px;
+            height: 20px;
+            background: linear-gradient(to bottom,
+                rgba(255, 255, 255, 0.5),
+                rgba(255, 255, 255, 0.85) 40%,
+                rgba(255, 255, 255, 0.85) 60%,
+                rgba(255, 255, 255, 0.4)
+            );
+            left: 0;
+            top: 38px;
+            z-index: 3;
+            border-radius: 40% 40% 50% 50%;
+            box-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.3),
+                inset 0 1px 2px rgba(255, 255, 255, 0.5);
         }
 
+        /* Wing Details - Ailerons */
+        .plane-wings::before {
+            content: '';
+            position: absolute;
+            width: 90%;
+            height: 2px;
+            background: rgba(200, 200, 220, 0.6);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 2px;
+        }
+
+        /* Tail Section Container */
         .plane-tail {
+            position: absolute;
+            width: 100%;
+            height: 30px;
+            left: 0;
+            bottom: 5px;
+            z-index: 4;
+        }
+
+        /* Horizontal Stabilizer */
+        .plane-tail::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 8px;
+            background: linear-gradient(to bottom,
+                rgba(255, 255, 255, 0.4),
+                rgba(255, 255, 255, 0.75),
+                rgba(255, 255, 255, 0.4)
+            );
+            left: 50%;
+            bottom: 8px;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Vertical Stabilizer */
+        .plane-tail::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 18px;
+            background: linear-gradient(to right,
+                rgba(255, 255, 255, 0.5),
+                rgba(255, 255, 255, 0.85),
+                rgba(255, 255, 255, 0.5)
+            );
+            left: 50%;
+            bottom: 0;
+            transform: translateX(-50%);
+            border-radius: 4px 4px 0 0;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Cabin Windows */
+        .plane-windows {
+            position: absolute;
+            width: 8px;
+            height: 50px;
+            left: 50%;
+            top: 18px;
+            transform: translateX(-50%);
+            z-index: 6;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .plane-windows::before,
+        .plane-windows::after {
+            content: '';
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent,
+                transparent 3px,
+                rgba(100, 180, 255, 0.4) 3px,
+                rgba(100, 180, 255, 0.4) 5px
+            );
+        }
+
+        /* Engines on Wings */
+        .plane-engine {
+            position: absolute;
+            width: 10px;
+            height: 16px;
+            background: linear-gradient(to bottom,
+                rgba(220, 220, 230, 0.7),
+                rgba(255, 255, 255, 0.9),
+                rgba(240, 240, 250, 0.8)
+            );
+            top: 35px;
+            border-radius: 40%;
+            z-index: 4;
+            box-shadow:
+                0 2px 6px rgba(0, 0, 0, 0.4),
+                inset 0 1px 1px rgba(255, 255, 255, 0.5);
+            display: block;
+        }
+
+        .plane-engine.left {
+            left: 8px;
+        }
+
+        .plane-engine.right {
+            right: 8px;
+        }
+
+        /* Engine Glow (when active) */
+        .plane-engine::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 8px;
+            background: radial-gradient(circle,
+                rgba(255, 200, 100, 0.8),
+                rgba(255, 150, 50, 0.4),
+                transparent
+            );
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            opacity: 0;
+            animation: engineGlow 2s ease-in-out infinite;
+        }
+
+        /* Navigation Lights */
+        .plane-body::after {
+            content: '';
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #fff;
+            top: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+            animation: blinkWhite 1.5s ease-in-out infinite;
+        }
+
+        /* Wing Lights */
+        .plane-wings::after {
+            content: '';
             position: absolute;
             width: 4px;
             height: 4px;
-            background-color: rgba(255, 255, 255, 1);
+            background: #ff4444;
+            left: 2px;
+            top: 50%;
+            transform: translateY(-50%);
             border-radius: 50%;
-            right: 2px;
-            top: 28px;
-            z-index: 3;
-            box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+            box-shadow:
+                0 0 8px rgba(255, 68, 68, 0.9),
+                76px 0 0 0 #44ff44,
+                76px 0 0 0 rgba(68, 255, 68, 0) inset,
+                76px 0 8px 0 rgba(68, 255, 68, 0.9);
+            animation: blinkNav 2s ease-in-out infinite;
         }
 
-        .plane-windows,
-        .plane-engine,
+        /* Contrails */
+        .plane-contrail {
+            display: block;
+            position: absolute;
+            width: 4px;
+            height: 0;
+            background: linear-gradient(to top,
+                rgba(255, 255, 255, 0.6),
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            left: 50%;
+            bottom: 0;
+            transform: translateX(-50%);
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .plane.flying .plane-contrail {
+            opacity: 1;
+            animation: contrailFlow 3s linear infinite;
+        }
+
+        /* Animations */
+        @keyframes planePulse {
+            0%, 100% {
+                filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+            }
+            50% {
+                filter: drop-shadow(0 4px 16px rgba(255, 255, 255, 0.3));
+            }
+        }
+
+        @keyframes engineGlow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes blinkWhite {
+            0%, 40%, 100% { opacity: 1; }
+            20%, 60% { opacity: 0.3; }
+        }
+
+        @keyframes blinkNav {
+            0%, 40%, 100% { opacity: 1; }
+            20%, 60% { opacity: 0.2; }
+        }
+
+        @keyframes contrailFlow {
+            0% { height: 0; opacity: 0; }
+            20% { opacity: 0.6; }
+            100% { height: 100px; opacity: 0; }
+        }
+
+        .plane.flying {
+            animation: planePulse 3s ease-in-out infinite;
+        }
+
+        .plane.flying .plane-engine::after {
+            opacity: 1;
+        }
+
+        /* Banking animation */
+        .plane.banking-left {
+            transform: perspective(200px) rotateY(-15deg);
+        }
+
+        .plane.banking-right {
+            transform: perspective(200px) rotateY(15deg);
+        }
+
         .plane-exhaust,
         .plane-trail {
             display: none;
-        }
-
-        @keyframes planePulse {
-            0%, 100% {
-                filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
-            }
-            50% {
-                filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.5));
-            }
-        }
-
-        .plane {
-            animation: planePulse 3s ease-in-out infinite;
         }
 
         /* Filter indicator */
@@ -4034,18 +4260,18 @@
         // Basic flight controls
         takeoffButton.addEventListener('click', () => {
             logDebug('INPUT', 'Take Off button clicked');
-            takeOff();
+            window.takeOff();
         });
 
         landButton.addEventListener('click', () => {
             logDebug('INPUT', 'Land button clicked');
-            land();
+            window.land();
         });
 
         if (testAudioButton) {
             testAudioButton.addEventListener('click', () => {
                 logDebug('INPUT', 'Test Audio button clicked');
-                testAudio();
+                window.testAudio();
             });
         }
 
@@ -4302,9 +4528,9 @@
                 case ' ':
                     e.preventDefault();
                     if (isFlying) {
-                        land();
+                        window.land();
                     } else {
-                        takeOff();
+                        window.takeOff();
                     }
                     break;
                 case 'c':
@@ -5376,13 +5602,18 @@
         const tempoValue = parseInt(tempoControl.value);
         document.getElementById('tempoValue').textContent = tempoValue;
         document.getElementById('tempoBPM').textContent = tempoValue + ' BPM';
-        
+
         // Update tempo needle in gauge
         const tempoDegrees = ((tempoValue - 40) / 160) * 360; // Map 40-200 to 0-360
         tempoNeedle.style.transform = `translateX(-50%) rotate(${tempoDegrees}deg)`;
-        
+
         // Update LFO with tempo
         updateLfoFrequencyWithTempo();
+
+        // Update BPM-synced animations if flying
+        if (isFlying) {
+            syncAnimationToBPM();
+        }
     }
     
     function updateAltitude() {
@@ -6347,7 +6578,10 @@ function emergencyEject() {
         
         // Stop flight
         isFlying = false;
-        
+
+        // Stop BPM sync
+        stopBPMSync();
+
         // Reset UI
         takeoffButton.disabled = false;
         landButton.disabled = true;
@@ -6574,6 +6808,10 @@ function continueWithTakeoff() {
     logDebug('FLIGHT', 'Starting flight visualization');
     startFlightVisualization();
 
+    // Start BPM-synced animations
+    logDebug('FLIGHT', 'Starting BPM-synced animations');
+    startBPMSync();
+
     // Fade in master volume over 1 second
     if (masterGainNode && audioContext) {
         const targetVolume = parseFloat(volumeControl.value);
@@ -6706,6 +6944,9 @@ function completeLanding(spaceKey) {
         isFlying = false;
         isLanded = true;
         currentLandingSpace = spaceKey;
+
+        // Stop BPM sync
+        stopBPMSync();
 
         logStateChange('FLIGHT', 'isFlying', previousFlyingState, isFlying);
         logStateChange('FLIGHT', 'isLanded', previousLandedState, isLanded);
@@ -7753,15 +7994,42 @@ function animatePlane() {
         const dx = path.next && pathProgress > 0.5 ? path.next.x - path.end.x : path.end.x - path.start.x;
         const dy = path.next && pathProgress > 0.5 ? path.next.y - path.end.y : path.end.y - path.start.y;
         const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-        
+
         // Position the plane element
         if (plane && flightCanvas) {
             const left = (planePosition.x / 100) * flightCanvas.width;
             const top = (planePosition.y / 100) * flightCanvas.height;
-            
+
             plane.style.left = `${left - (plane.offsetWidth / 2)}px`;
             plane.style.top = `${top - (plane.offsetHeight / 2)}px`;
             plane.style.transform = `rotate(${angle}deg)`;
+
+            // Add banking effect based on turn direction
+            // Calculate angular velocity to detect turns
+            const currentAngle = angle;
+            const prevAngle = parseFloat(plane.dataset.prevAngle || angle);
+            let angleDiff = currentAngle - prevAngle;
+
+            // Normalize angle difference to -180 to 180
+            if (angleDiff > 180) angleDiff -= 360;
+            if (angleDiff < -180) angleDiff += 360;
+
+            // Apply banking classes based on turn rate
+            if (Math.abs(angleDiff) > 2) { // Threshold for banking
+                if (angleDiff > 0) {
+                    plane.classList.add('banking-right');
+                    plane.classList.remove('banking-left');
+                } else {
+                    plane.classList.add('banking-left');
+                    plane.classList.remove('banking-right');
+                }
+            } else {
+                // Remove banking if flying straight
+                plane.classList.remove('banking-left', 'banking-right');
+            }
+
+            // Store current angle for next frame
+            plane.dataset.prevAngle = currentAngle;
         }
     }
     
@@ -8935,6 +9203,117 @@ function drawNoteVisualization() {
     });
 }
 
+// ============================================================================
+// PLANE VISUAL EFFECTS - Note-Reactive Lights & BPM Sync
+// ============================================================================
+
+// Flash plane lights when notes are played
+function flashPlaneLights(frequency) {
+    if (!plane) return;
+
+    // Map frequency to a color hue (lower freq = red, higher = blue)
+    const normalizedFreq = Math.min(1, Math.max(0, (frequency - 100) / 1500));
+    const hue = 180 + (normalizedFreq * 180); // Range from cyan to magenta
+
+    // Create a temporary light flash element
+    const flash = document.createElement('div');
+    flash.style.position = 'absolute';
+    flash.style.width = '6px';
+    flash.style.height = '6px';
+    flash.style.borderRadius = '50%';
+    flash.style.pointerEvents = 'none';
+    flash.style.zIndex = '12';
+    flash.style.transition = 'opacity 0.3s ease-out';
+
+    // Randomly flash one of the positions (nose, left wing, right wing, or tail)
+    const positions = [
+        { left: '50%', top: '10px', transform: 'translateX(-50%)' }, // Nose
+        { left: '8px', top: '45px', transform: 'none' }, // Left wing
+        { right: '8px', top: '45px', transform: 'none' }, // Right wing
+        { left: '50%', bottom: '15px', transform: 'translateX(-50%)' } // Tail
+    ];
+
+    const pos = positions[Math.floor(Math.random() * positions.length)];
+    Object.assign(flash.style, pos);
+
+    flash.style.background = `hsl(${hue}, 100%, 60%)`;
+    flash.style.boxShadow = `0 0 12px hsl(${hue}, 100%, 60%), 0 0 20px hsl(${hue}, 100%, 60%)`;
+    flash.style.opacity = '1';
+
+    plane.appendChild(flash);
+
+    // Fade out and remove
+    setTimeout(() => {
+        flash.style.opacity = '0';
+        setTimeout(() => flash.remove(), 300);
+    }, 50);
+}
+
+// Update BPM-synced animation speed
+let bpmSyncInterval = null;
+
+function syncAnimationToBPM() {
+    const bpm = parseFloat(tempoControl?.value) || 90;
+    const beatDuration = 60 / bpm; // Duration of one beat in seconds
+
+    // Update CSS animation durations dynamically
+    if (plane) {
+        plane.style.setProperty('--pulse-duration', `${beatDuration * 2}s`);
+        plane.style.setProperty('--blink-duration', `${beatDuration * 1.5}s`);
+    }
+
+    // Update planePulse animation timing
+    const styleSheet = Array.from(document.styleSheets).find(sheet => {
+        try {
+            return sheet.href === null || sheet.href.includes(window.location.hostname);
+        } catch (e) {
+            return false;
+        }
+    });
+
+    if (styleSheet) {
+        try {
+            const rules = styleSheet.cssRules || styleSheet.rules;
+            for (let i = 0; i < rules.length; i++) {
+                const rule = rules[i];
+                if (rule.selectorText === '.plane.flying') {
+                    rule.style.animationDuration = `${beatDuration * 4}s, ${beatDuration * 2}s`;
+                } else if (rule.selectorText === '.plane-engine::after') {
+                    rule.style.animationDuration = `${beatDuration * 2}s`;
+                }
+            }
+        } catch (e) {
+            // Ignore CORS errors for external stylesheets
+        }
+    }
+}
+
+// Start BPM sync on tempo change
+function startBPMSync() {
+    syncAnimationToBPM();
+
+    // Clear existing interval
+    if (bpmSyncInterval) {
+        clearInterval(bpmSyncInterval);
+    }
+
+    // Update every 100ms when flying
+    bpmSyncInterval = setInterval(() => {
+        if (isFlying) {
+            syncAnimationToBPM();
+        }
+    }, 100);
+}
+
+// Stop BPM sync
+function stopBPMSync() {
+    if (bpmSyncInterval) {
+        clearInterval(bpmSyncInterval);
+        bpmSyncInterval = null;
+    }
+}
+
+// ============================================================================
 // Sequencer class for ambient note generation
 class AmbientSequencer {
     constructor(id) {
@@ -9188,8 +9567,11 @@ class AmbientSequencer {
                 smoothedTrail.shift();
             }
         }
+
+        // Trigger note-reactive lights
+        flashPlaneLights(frequency);
     }
-    
+
     affectPlaneMovement(frequency) {
         // Change plane direction based on frequency
         const normalizedFreq = (frequency - 100) / 500;
