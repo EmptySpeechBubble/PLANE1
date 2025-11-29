@@ -10748,28 +10748,8 @@ if (document.readyState === 'loading') {
     setTimeout(initAllEnhancements, 100);
 }
 
-// =============================================================================
-// CONSOLIDATED GLOBAL FUNCTION ASSIGNMENTS
-// Assign all critical functions to window object in one place
-// =============================================================================
-window.takeOff = takeOff;
-window.land = land;
-window.testAudio = testAudio;
-window.changeDestination = changeDestination;
-window.hideWelcomeOverlay = hideWelcomeOverlay;
-window.hideFlightLog = hideFlightLog;
-window.downloadFlightLog = downloadFlightLog;
-window.playInteractiveNote = playInteractiveNote;
-window.createClickRipple = createClickRipple;
-window.flashPlaneLights = flashPlaneLights;
-window.syncAnimationToBPM = syncAnimationToBPM;
-window.startBPMSync = startBPMSync;
-window.stopBPMSync = stopBPMSync;
-window.drawRainEffect = drawRainEffect;
-window.drawLightningFlash = drawLightningFlash;
-window.makeCitiesReactToNote = makeCitiesReactToNote;
-
-console.log('[INIT] All critical functions assigned to window object');
+// Note: All critical functions are assigned to window object immediately after their definitions
+// This ensures they are available globally without reference errors
 
 // =============================================================================
 // GLOBAL FUNCTION SAFETY CHECK
