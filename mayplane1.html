@@ -6614,8 +6614,13 @@ function changeDestination(destId) {
     // Show status message
     showStatus(`Flight route changed to ${currentDestinationName}.`);
 }
-// Assign to window immediately - NO conditions
-window.changeDestination = changeDestination;
+// Assign to window immediately with error handling
+try {
+    window.changeDestination = changeDestination;
+    console.log('[ASSIGN] ✓ window.changeDestination assigned');
+} catch(e) {
+    console.error('[ASSIGN] ✗ Failed to assign window.changeDestination:', e);
+}
 
 // Emergency eject function
 function emergencyEject() {
@@ -6787,8 +6792,13 @@ function playInteractiveNote(normalizedX, normalizedY) {
         console.error('Error playing interactive note:', error);
     }
 }
-// Assign to window immediately - NO conditions
-window.playInteractiveNote = playInteractiveNote;
+// Assign to window immediately with error handling
+try {
+    window.playInteractiveNote = playInteractiveNote;
+    console.log('[ASSIGN] ✓ window.playInteractiveNote assigned');
+} catch(e) {
+    console.error('[ASSIGN] ✗ Failed to assign window.playInteractiveNote:', e);
+}
 
 // Create visual ripple effect at click position
 function createClickRipple(x, y) {
@@ -6818,8 +6828,13 @@ function createClickRipple(x, y) {
 
     logDebug('INTERACTIVE', `Created click ripple at (${x}, ${y})`);
 }
-// Assign to window immediately - NO conditions
-window.createClickRipple = createClickRipple;
+// Assign to window immediately with error handling
+try {
+    window.createClickRipple = createClickRipple;
+    console.log('[ASSIGN] ✓ window.createClickRipple assigned');
+} catch(e) {
+    console.error('[ASSIGN] ✗ Failed to assign window.createClickRipple:', e);
+}
 
 // Test audio with a simple note
 function testAudio() {
@@ -6846,8 +6861,13 @@ function testAudio() {
         showStatus('Test audio error: ' + error.message);
     }
 }
-// Assign to window immediately - NO conditions
-window.testAudio = testAudio;
+// Assign to window immediately with error handling
+try {
+    window.testAudio = testAudio;
+    console.log('[ASSIGN] ✓ window.testAudio assigned');
+} catch(e) {
+    console.error('[ASSIGN] ✗ Failed to assign window.testAudio:', e);
+}
 
 // Play a test tone
 function playTestTone() {
@@ -6976,8 +6996,13 @@ function takeOff() {
         endTimer('takeoff_sequence');
     }
 }
-// Assign to window immediately - NO conditions
-window.takeOff = takeOff;
+// Assign to window immediately with error handling
+try {
+    window.takeOff = takeOff;
+    console.log('[ASSIGN] ✓ window.takeOff assigned');
+} catch(e) {
+    console.error('[ASSIGN] ✗ Failed to assign window.takeOff:', e);
+}
 
 // Continue with takeoff after audio context is ready
 function continueWithTakeoff() {
