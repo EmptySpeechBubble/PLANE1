@@ -10740,10 +10740,31 @@ if (document.readyState === 'loading') {
 // =============================================================================
 // CONSOLIDATED GLOBAL FUNCTION ASSIGNMENTS
 // Assign ALL critical functions to window object here to ensure availability
+// This ensures they execute even if there are errors elsewhere in the script
 // =============================================================================
-// Ensure all critical functions are globally accessible
+// Core flight functions
+if (typeof takeOff !== 'undefined') window.takeOff = takeOff;
+if (typeof land !== 'undefined') window.land = land;
+if (typeof testAudio !== 'undefined') window.testAudio = testAudio;
+if (typeof changeDestination !== 'undefined') window.changeDestination = changeDestination;
+
+// UI functions
+if (typeof hideWelcomeOverlay !== 'undefined') window.hideWelcomeOverlay = hideWelcomeOverlay;
 if (typeof hideFlightLog !== 'undefined') window.hideFlightLog = hideFlightLog;
 if (typeof downloadFlightLog !== 'undefined') window.downloadFlightLog = downloadFlightLog;
+
+// Interactive functions
+if (typeof playInteractiveNote !== 'undefined') window.playInteractiveNote = playInteractiveNote;
+if (typeof createClickRipple !== 'undefined') window.createClickRipple = createClickRipple;
+
+// Animation functions
+if (typeof flashPlaneLights !== 'undefined') window.flashPlaneLights = flashPlaneLights;
+if (typeof syncAnimationToBPM !== 'undefined') window.syncAnimationToBPM = syncAnimationToBPM;
+if (typeof startBPMSync !== 'undefined') window.startBPMSync = startBPMSync;
+if (typeof stopBPMSync !== 'undefined') window.stopBPMSync = stopBPMSync;
+if (typeof drawRainEffect !== 'undefined') window.drawRainEffect = drawRainEffect;
+if (typeof drawLightningFlash !== 'undefined') window.drawLightningFlash = drawLightningFlash;
+if (typeof makeCitiesReactToNote !== 'undefined') window.makeCitiesReactToNote = makeCitiesReactToNote;
 
 // =============================================================================
 // GLOBAL FUNCTION SAFETY CHECK
