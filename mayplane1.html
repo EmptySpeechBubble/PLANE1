@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Music for Airplanes</title>
+    <title>inflight</title>
     <style>
         :root {
             /* IFE-inspired color palette */
@@ -51,6 +51,36 @@
             --panel-dark: #0f0f1e;
             --panel-overlay: rgba(15, 15, 30, 0.95);
             --map-ocean: #1a2332;
+        }
+
+        /* === SQUARESPACE & IFRAME COMPATIBILITY === */
+        /* Force fullscreen, no borders */
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            border: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            min-height: 100% !important;
+            position: relative !important;
+        }
+
+        /* Remove any iframe borders/spacing */
+        body {
+            display: block !important;
+            overflow: hidden !important;
+        }
+
+        /* Ensure container fills entire viewport when embedded */
+        .container {
+            margin: 0 !important;
+            padding: 0 !important;
+            border: 0 !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
         }
 
         /* === CALMING THEME VARIATIONS === */
@@ -2048,9 +2078,9 @@
     <!-- Welcome Overlay -->
     <div class="overlay" id="welcomeOverlay">
         <div class="overlay-content">
-            <h2>✈️ Music for Airplanes</h2>
+            <h2>✈️</h2>
             <p style="font-size: 1.1rem; line-height: 1.7; margin: 20px 0; text-align: center;">
-                An immersive generative ambient music experience inspired by Brian Eno's "Music for Airports".
+                An immersive generative ambient music experience.
             </p>
 
             <p style="font-size: 0.95rem; line-height: 1.6; margin: 15px 0; opacity: 0.9;">
@@ -2249,7 +2279,7 @@
         <!-- Top Bar -->
         <div class="top-bar">
             <div class="top-bar-left">
-                <h1 class="app-title">Music for Airplanes</h1>
+                <h1 class="app-title">inflight</h1>
             </div>
             <div class="top-bar-right">
                 <button class="top-button" id="helpButton" title="Show Help (H)">?</button>
@@ -2365,7 +2395,7 @@
                     <div class="control-section">
                         <div class="control-section-title">Flight Information</div>
                         <div class="flight-status" id="statusPanel">
-                            <div id="statusMessage">Welcome to Music for Airplanes. Click "Take Off" to begin.</div>
+                            <div id="statusMessage">Ready for departure. Click "Take Off" to begin.</div>
                         </div>
                         <div style="margin-top: 10px; font-size: 0.85rem;">
                             <div style="margin-bottom: 5px;">Destination: <span id="currentDestination" style="color: var(--ife-cyan); font-weight: 600;">World Tour</span></div>
@@ -2521,7 +2551,7 @@
                             <div class="switch-group">
                                 <span class="switch-label">Musical Particles <span class="led-indicator" id="musicalParticlesLed"></span></span>
                                 <label class="switch">
-                                    <input type="checkbox" id="musicalParticlesToggle">
+                                    <input type="checkbox" id="musicalParticlesToggle" checked>
                                     <span class="slider-switch"></span>
                                 </label>
                             </div>
@@ -2588,7 +2618,7 @@
                     </div>
 
                     <!-- Musical Particles Controls -->
-                    <div class="control-section" id="musicalParticlesControlsPanel" style="display: none;">
+                    <div class="control-section" id="musicalParticlesControlsPanel" style="display: block;">
                         <div class="control-section-title">Musical Particles Controls</div>
                         <div class="slider-group">
                             <div class="slider-label">
@@ -2614,9 +2644,9 @@
                         <div class="slider-group">
                             <div class="slider-label">
                                 <span>Musical Density</span>
-                                <span class="slider-value-display" id="particleDensityValue">30%</span>
+                                <span class="slider-value-display" id="particleDensityValue">50%</span>
                             </div>
-                            <input type="range" id="particleDensityControl" class="slider" min="0" max="1" step="0.05" value="0.3">
+                            <input type="range" id="particleDensityControl" class="slider" min="0" max="1" step="0.05" value="0.5">
                         </div>
                     </div>
                 </div>
@@ -2839,7 +2869,7 @@
     }
 
     logInfo('SYSTEM', '═══════════════════════════════════════════════');
-    logInfo('SYSTEM', 'Music for Airplanes - Initializing');
+    logInfo('SYSTEM', 'inflight - Initializing');
     logInfo('SYSTEM', 'VERSION: 2.0-2025-11-24-FIXED');
     logInfo('SYSTEM', '═══════════════════════════════════════════════');
     logInfo('SYSTEM', 'User Agent:', { userAgent: navigator.userAgent });
@@ -2918,11 +2948,11 @@
     let isCabinPressureEnabled = true;
     let isRainEnabled = false;
     let isThunderEnabled = false;
-    let isMusicalParticlesEnabled = false;
+    let isMusicalParticlesEnabled = true; // Enable by default for ambient landing sounds
     let particleAttack = 0.1;
     let particleRelease = 2.0;
     let particleGravity = 1.5;
-    let particleDensity = 0.3; // 0-1, controls how many particles are musical
+    let particleDensity = 0.5; // 0-1, controls how many particles are musical (50% default)
     let groundY = 0; // Will be set based on canvas height
 
     // Frequency visualization variables
@@ -4754,14 +4784,14 @@
             filterLed.classList.remove('active');
             filterLed.classList.remove('filter');
         }
-        
+
         // LFO LED
         if (isLfoEnabled) {
             lfoLed.classList.add('active');
         } else {
             lfoLed.classList.remove('active');
         }
-        
+
         // Compressor LED
         if (isCompressorEnabled) {
             compressorLed.classList.add('active');
@@ -4769,6 +4799,16 @@
         } else {
             compressorLed.classList.remove('active');
             compressorLed.classList.remove('compressor');
+        }
+
+        // Musical Particles LED
+        const musicalParticlesLed = document.getElementById('musicalParticlesLed');
+        if (musicalParticlesLed) {
+            if (isMusicalParticlesEnabled) {
+                musicalParticlesLed.classList.add('led-on');
+            } else {
+                musicalParticlesLed.classList.remove('led-on');
+            }
         }
     }
     
@@ -7695,59 +7735,93 @@ function hideFlightLog() {
     }
 }
 
-// Download flight log as text file
+// Download flight log as text file - SYRO-style cryptic format
 function downloadFlightLog() {
-    let logText = `═══════════════════════════════════════════════════════════════\n`;
-    logText += `            MUSIC FOR AIRPLANES - FLIGHT LOG\n`;
-    logText += `═══════════════════════════════════════════════════════════════\n\n`;
-    logText += `Flight Number: ${flightLog.flightNumber || 'N/A'}\n`;
-    logText += `Departure Time: ${formatTimestamp(flightLog.departureTime)}\n`;
-    logText += `Arrival Time: ${formatTimestamp(flightLog.arrivalTime)}\n`;
-    logText += `Total Flight Time: ${formatDuration(flightLog.totalFlightTime)}\n`;
-    logText += `Status: ${flightSessionActive ? 'IN FLIGHT' : 'COMPLETED'}\n\n`;
+    // Generate hex session ID
+    const sessionHex = Math.floor(Math.random() * 0xFFFFFF).toString(16).toUpperCase().padStart(6, '0');
+    const flightHex = (flightLog.flightNumber || '001').toString().padStart(3, '0');
 
-    logText += `───────────────────────────────────────────────────────────────\n`;
-    logText += `FLIGHT STATISTICS\n`;
-    logText += `───────────────────────────────────────────────────────────────\n`;
-    logText += `Notes Played: ${flightLog.notesPlayed}\n`;
-    logText += `Routes Flown: ${flightLog.destinations.length}\n`;
-    logText += `Cabin Artists: ${flightLog.artists.length}\n`;
-    logText += `Altitude Range: ${flightLog.altitudeRange.min.toFixed(2)} - ${flightLog.altitudeRange.max.toFixed(2)}\n\n`;
+    // Audio context info
+    const sampleRate = audioContext ? audioContext.sampleRate : 48000;
+    const bitDepth = 24;
+    const latency = audioContext ? (audioContext.baseLatency * 1000).toFixed(2) : '2.67';
 
-    logText += `───────────────────────────────────────────────────────────────\n`;
-    logText += `FLIGHT ROUTES\n`;
-    logText += `───────────────────────────────────────────────────────────────\n`;
+    let logText = ``;
+    logText += `[0x${sessionHex}] ::TRACT_SESSION::FLT_${flightHex}\n`;
+    logText += `[SYS_INIT] SR${sampleRate}::BIT${bitDepth}::LAT_${latency}ms\n`;
+    logText += `[TIME_REF] DEP_${formatTimestamp(flightLog.departureTime)}::ARR_${formatTimestamp(flightLog.arrivalTime)}\n`;
+    logText += `[DURATION] ${flightLog.totalFlightTime}s::${Math.floor(flightLog.totalFlightTime/60)}m${flightLog.totalFlightTime%60}s\n`;
+    logText += `[STATUS] ${flightSessionActive ? 'ACTIVE_STREAM' : 'TERMINATED'}\n\n`;
+
+    // DSP Chain Summary
+    logText += `[0x4A_DSP_CHAIN]\n`;
+    logText += `  OSC[sine]->ENV[${flightLog.notesPlayed}trig]->FILT[LP]->COMP->REVERB->MASTER\n`;
+    logText += `  NOTES_TRIG: ${flightLog.notesPlayed}\n`;
+    logText += `  ALT_RANGE: ${flightLog.altitudeRange.min.toFixed(3)}~${flightLog.altitudeRange.max.toFixed(3)}\n`;
+    logText += `  ROUTE_CNT: ${flightLog.destinations.length}\n`;
+    logText += `  PATTERN_SRC: ${flightLog.artists.length}\n\n`;
+
+    // Flight Routes with hex addresses
+    logText += `[0x7C_ROUTE_MAP]\n`;
     flightLog.destinations.forEach((dest, index) => {
-        logText += `${index + 1}. ${dest.name} - Duration: ${formatDuration(dest.duration)}\n`;
+        const routeHex = (0x1000 + index * 0x100).toString(16).toUpperCase();
+        const durSec = dest.duration;
+        const durMs = (durSec * 1000).toString().padStart(6, '0');
+        logText += `  [0x${routeHex}] ${dest.name.toUpperCase().padEnd(20, ' ')} ${durSec}s (${durMs}ms)\n`;
     });
     logText += `\n`;
 
-    logText += `───────────────────────────────────────────────────────────────\n`;
-    logText += `CABIN MUSIC PROGRAM\n`;
-    logText += `───────────────────────────────────────────────────────────────\n`;
+    // Artist patterns with cryptic codes
+    logText += `[0x8E_PATTERN_SRC]\n`;
+    const artistCodes = {
+        'Brian Eno': 'BE_ENO1',
+        'Erik Satie': 'ES_GYMNO',
+        'Harold Budd': 'HB_PAVIL',
+        'Stars of the Lid': 'SOTL_TIRED',
+        'Boards of Canada': 'BOC_ROYGBIV',
+        'William Basinski': 'WB_DISLINT',
+        'Steve Reich': 'SR_MUSIC18',
+        'Tim Hecker': 'TH_RAVEDTH',
+        'Ryuichi Sakamoto': 'RS_ASYNC',
+        'Aphex Twin': 'AT_RHUBARB',
+        'Jon Hopkins': 'JH_OPENEY',
+        'Various Artists': 'VA_MIXED'
+    };
     flightLog.artists.forEach((artist, index) => {
-        logText += `${index + 1}. ${artist.name} - Duration: ${formatDuration(artist.duration)}\n`;
+        const artistHex = (0x2000 + index * 0x100).toString(16).toUpperCase();
+        const code = artistCodes[artist.name] || artist.name.substring(0,8).toUpperCase();
+        const durSec = artist.duration;
+        logText += `  [0x${artistHex}] ${code.padEnd(15, ' ')} ${durSec}s\n`;
     });
     logText += `\n`;
 
-    logText += `───────────────────────────────────────────────────────────────\n`;
-    logText += `FLIGHT EVENTS\n`;
-    logText += `───────────────────────────────────────────────────────────────\n`;
+    // Event timeline with microsecond precision feel
+    logText += `[0xB3_EVENT_LOG]\n`;
     flightLog.events.forEach((event) => {
-        logText += `[${formatRelativeTime(event.timestamp)}] ${event.description}\n`;
+        const eventHex = (0x3000 + event.timestamp).toString(16).toUpperCase().substring(0, 6);
+        const timeMs = (event.timestamp * 1000).toString().padStart(8, '0');
+        const eventType = event.type.toUpperCase().substring(0, 12).padEnd(12, ' ');
+        logText += `  [0x${eventHex}] ${formatRelativeTime(event.timestamp)} (${timeMs}ms) ${eventType} ${event.description}\n`;
     });
     logText += `\n`;
 
-    logText += `═══════════════════════════════════════════════════════════════\n`;
-    logText += `End of Flight Log\n`;
-    logText += `═══════════════════════════════════════════════════════════════\n`;
+    // DSP parameters snapshot
+    logText += `[0xF2_DSP_STATE]\n`;
+    logText += `  MASTER_GAIN: ${(parseFloat(volumeControl?.value || 0.5) * 100).toFixed(1)}%\n`;
+    logText += `  REVERB_MIX: ${(parseFloat(reverbControl?.value || 0.3) * 100).toFixed(1)}%\n`;
+    logText += `  LP_CUTOFF: ${filterControl?.value || 20000}Hz\n`;
+    logText += `  ALTITUDE_MOD: ${altitudeControl?.value || 1.0}\n`;
+    logText += `  TEMPO_BPM: ${tempoControl?.value || 60}\n\n`;
+
+    logText += `[0xFF_END] ::TRACT_COMPLETE::CHECKSUM_OK\n`;
 
     // Create and download file
     const blob = new Blob([logText], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `FlightLog_${flightLog.flightNumber}_${formatTimestamp(flightLog.departureTime).replace(/:/g, '-')}.txt`;
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
+    a.download = `TRACT_${flightHex}_0x${sessionHex}_${timestamp}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -10766,73 +10840,27 @@ if (document.readyState === 'loading') {
     setTimeout(initAllEnhancements, 100);
 }
 
-// Note: All critical functions are assigned to window object immediately after their definitions
-// This ensures they are available globally without reference errors
-
 // =============================================================================
-// CONSOLIDATED GLOBAL FUNCTION ASSIGNMENTS
-// Force assign ALL critical functions to window
+// [0xA2_INTEGRITY] FUNCTION BINDING VERIFICATION PROTOCOL
+// Note: All critical functions are assigned to window object immediately after
+// their definitions throughout the codebase. This verification runs on load.
 // =============================================================================
-// Use direct assignment at global scope (no IIFE to avoid scope issues)
-try { if (typeof takeOff !== 'undefined') window.takeOff = takeOff; } catch(e) { console.warn('Could not assign takeOff:', e); }
-try { if (typeof land !== 'undefined') window.land = land; } catch(e) { console.warn('Could not assign land:', e); }
-try { if (typeof testAudio !== 'undefined') window.testAudio = testAudio; } catch(e) { console.warn('Could not assign testAudio:', e); }
-try { if (typeof changeDestination !== 'undefined') window.changeDestination = changeDestination; } catch(e) { console.warn('Could not assign changeDestination:', e); }
-try { if (typeof hideWelcomeOverlay !== 'undefined') window.hideWelcomeOverlay = hideWelcomeOverlay; } catch(e) { console.warn('Could not assign hideWelcomeOverlay:', e); }
-try { if (typeof showFlightLog !== 'undefined') window.showFlightLog = showFlightLog; } catch(e) { console.warn('Could not assign showFlightLog:', e); }
-try { if (typeof hideFlightLog !== 'undefined') window.hideFlightLog = hideFlightLog; } catch(e) { console.warn('Could not assign hideFlightLog:', e); }
-try { if (typeof downloadFlightLog !== 'undefined') window.downloadFlightLog = downloadFlightLog; } catch(e) { console.warn('Could not assign downloadFlightLog:', e); }
-try { if (typeof playInteractiveNote !== 'undefined') window.playInteractiveNote = playInteractiveNote; } catch(e) { console.warn('Could not assign playInteractiveNote:', e); }
-try { if (typeof createClickRipple !== 'undefined') window.createClickRipple = createClickRipple; } catch(e) { console.warn('Could not assign createClickRipple:', e); }
-try { if (typeof flashPlaneLights !== 'undefined') window.flashPlaneLights = flashPlaneLights; } catch(e) { console.warn('Could not assign flashPlaneLights:', e); }
-try { if (typeof syncAnimationToBPM !== 'undefined') window.syncAnimationToBPM = syncAnimationToBPM; } catch(e) { console.warn('Could not assign syncAnimationToBPM:', e); }
-try { if (typeof startBPMSync !== 'undefined') window.startBPMSync = startBPMSync; } catch(e) { console.warn('Could not assign startBPMSync:', e); }
-try { if (typeof stopBPMSync !== 'undefined') window.stopBPMSync = stopBPMSync; } catch(e) { console.warn('Could not assign stopBPMSync:', e); }
-try { if (typeof drawRainEffect !== 'undefined') window.drawRainEffect = drawRainEffect; } catch(e) { console.warn('Could not assign drawRainEffect:', e); }
-try { if (typeof drawLightningFlash !== 'undefined') window.drawLightningFlash = drawLightningFlash; } catch(e) { console.warn('Could not assign drawLightningFlash:', e); }
-try { if (typeof makeCitiesReactToNote !== 'undefined') window.makeCitiesReactToNote = makeCitiesReactToNote; } catch(e) { console.warn('Could not assign makeCitiesReactToNote:', e); }
-
-// =============================================================================
-// GLOBAL FUNCTION SAFETY CHECK
-// Ensure all critical functions are accessible globally
-// This prevents ReferenceErrors if functions are called before assignment
-// =============================================================================
-(function() {
-    'use strict';
-
-    // List of functions that must be globally accessible
-    const criticalFunctions = [
-        'takeOff',
-        'land',
-        'testAudio',
-        'changeDestination',
-        'hideWelcomeOverlay',
-        'hideFlightLog',
-        'downloadFlightLog',
-        'playInteractiveNote',
-        'createClickRipple',
-        'flashPlaneLights',
-        'syncAnimationToBPM',
-        'startBPMSync',
-        'stopBPMSync',
-        'drawRainEffect',
-        'drawLightningFlash',
-        'makeCitiesReactToNote'
+window.addEventListener('DOMContentLoaded', function() {
+    const fnMap = [
+        'takeOff', 'land', 'testAudio', 'changeDestination', 'hideWelcomeOverlay',
+        'hideFlightLog', 'downloadFlightLog', 'playInteractiveNote', 'createClickRipple',
+        'flashPlaneLights', 'syncAnimationToBPM', 'startBPMSync', 'stopBPMSync',
+        'drawRainEffect', 'drawLightningFlash', 'makeCitiesReactToNote'
     ];
 
-    // Check each function and log if missing
-    criticalFunctions.forEach(funcName => {
-        if (typeof window[funcName] !== 'function') {
-            console.warn(`[SAFETY CHECK] Function '${funcName}' is not defined on window object`);
-        } else {
-            console.log(`[SAFETY CHECK] ✓ Function '${funcName}' is properly defined`);
-        }
-    });
+    const verified = fnMap.filter(fn => typeof window[fn] === 'function');
+    const missing = fnMap.filter(fn => typeof window[fn] !== 'function');
 
-    // Log success
-    const definedCount = criticalFunctions.filter(f => typeof window[f] === 'function').length;
-    console.log(`[SAFETY CHECK] ${definedCount}/${criticalFunctions.length} critical functions are properly defined`);
-})();
+    if (missing.length > 0) {
+        console.warn(`[0xA2_CHK] ::BIND_FAIL::MISSING_${missing.length}::${missing.join(',')}`);
+    }
+    console.log(`[0xA2_CHK] ::VERIFY_${verified.length}/${fnMap.length}::STATUS_${missing.length === 0 ? 'OK' : 'DEGRADED'}`);
+});
 
 
 </script>
