@@ -2551,7 +2551,7 @@
                             <div class="switch-group">
                                 <span class="switch-label">Musical Particles <span class="led-indicator" id="musicalParticlesLed"></span></span>
                                 <label class="switch">
-                                    <input type="checkbox" id="musicalParticlesToggle">
+                                    <input type="checkbox" id="musicalParticlesToggle" checked>
                                     <span class="slider-switch"></span>
                                 </label>
                             </div>
@@ -2618,7 +2618,7 @@
                     </div>
 
                     <!-- Musical Particles Controls -->
-                    <div class="control-section" id="musicalParticlesControlsPanel" style="display: none;">
+                    <div class="control-section" id="musicalParticlesControlsPanel" style="display: block;">
                         <div class="control-section-title">Musical Particles Controls</div>
                         <div class="slider-group">
                             <div class="slider-label">
@@ -2644,9 +2644,9 @@
                         <div class="slider-group">
                             <div class="slider-label">
                                 <span>Musical Density</span>
-                                <span class="slider-value-display" id="particleDensityValue">30%</span>
+                                <span class="slider-value-display" id="particleDensityValue">50%</span>
                             </div>
-                            <input type="range" id="particleDensityControl" class="slider" min="0" max="1" step="0.05" value="0.3">
+                            <input type="range" id="particleDensityControl" class="slider" min="0" max="1" step="0.05" value="0.5">
                         </div>
                     </div>
                 </div>
@@ -2948,11 +2948,11 @@
     let isCabinPressureEnabled = true;
     let isRainEnabled = false;
     let isThunderEnabled = false;
-    let isMusicalParticlesEnabled = false;
+    let isMusicalParticlesEnabled = true; // Enable by default for ambient landing sounds
     let particleAttack = 0.1;
     let particleRelease = 2.0;
     let particleGravity = 1.5;
-    let particleDensity = 0.3; // 0-1, controls how many particles are musical
+    let particleDensity = 0.5; // 0-1, controls how many particles are musical (50% default)
     let groundY = 0; // Will be set based on canvas height
 
     // Frequency visualization variables
@@ -4784,14 +4784,14 @@
             filterLed.classList.remove('active');
             filterLed.classList.remove('filter');
         }
-        
+
         // LFO LED
         if (isLfoEnabled) {
             lfoLed.classList.add('active');
         } else {
             lfoLed.classList.remove('active');
         }
-        
+
         // Compressor LED
         if (isCompressorEnabled) {
             compressorLed.classList.add('active');
@@ -4799,6 +4799,16 @@
         } else {
             compressorLed.classList.remove('active');
             compressorLed.classList.remove('compressor');
+        }
+
+        // Musical Particles LED
+        const musicalParticlesLed = document.getElementById('musicalParticlesLed');
+        if (musicalParticlesLed) {
+            if (isMusicalParticlesEnabled) {
+                musicalParticlesLed.classList.add('led-on');
+            } else {
+                musicalParticlesLed.classList.remove('led-on');
+            }
         }
     }
     
