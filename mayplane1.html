@@ -3298,12 +3298,12 @@
     let cityMovementSpeed = 0.3;
     let planeMovementSpeed = 0.002;
     
-    // Predefined flight paths
+    // Predefined flight paths - slowed down by 70% (durations increased by 3.33x)
     let movieFlightPaths = [
-        { start: { x: 10, y: 50 }, end: { x: 90, y: 50 }, duration: 30000 }, // Straight path (visible)
-        { start: { x: 10, y: 30 }, end: { x: 90, y: 70 }, duration: 35000 }, // Diagonal path
-        { start: { x: 10, y: 70 }, end: { x: 90, y: 30 }, duration: 35000 }, // Reverse diagonal
-        { start: { x: 10, y: 60 }, end: { x: 50, y: 40 }, next: { x: 90, y: 60 }, duration: 40000 } // Path with turn
+        { start: { x: 10, y: 50 }, end: { x: 90, y: 50 }, duration: 100000 }, // Straight path (100s)
+        { start: { x: 10, y: 30 }, end: { x: 90, y: 70 }, duration: 116000 }, // Diagonal path (116s)
+        { start: { x: 10, y: 70 }, end: { x: 90, y: 30 }, duration: 116000 }, // Reverse diagonal (116s)
+        { start: { x: 10, y: 60 }, end: { x: 50, y: 40 }, next: { x: 90, y: 60 }, duration: 133000 } // Path with turn (133s)
     ];
     
     // Movie-style flight path animation variables
@@ -4012,67 +4012,80 @@
         "navigation beacons", "communication signals", "satellite trajectories", "ionospheric fluctuations"
     ];
     
-    // Flight announcements templates with Oblique Strategies influences
+    // Flight announcements - varied and atmospheric
     const announcements = [
-        "Ladies and gentlemen, we're currently flying at {altitude} feet above sea level. Outside temperature is {temp}°C.",
-        "This is your flight attendant speaking. We're experiencing some {turbulence} turbulence as we fly over {terrain}.",
-        "Cabin crew, prepare for {phase}. We expect to reach our cruising altitude shortly.",
-        "Passengers, please note the beautiful {view} you can see below us as we pass over {terrain}.",
-        "We're currently experiencing a slight {change} in our flight path to navigate around {obstacle}.",
-        "This is your captain speaking. We're expecting {weather} conditions for the remainder of our journey.",
-        "Ladies and gentlemen, we're beginning our {phase} phase. Please remain seated with your seatbelts fastened.",
-        "We're pleased to inform you that we're making excellent {progress} and expect to arrive on schedule.",
-        "Cabin crew, prepare the cabin for {phase}. We'll be reaching our destination in approximately {time} minutes.",
-        "This is your co-pilot speaking. We're currently flying through a {atmosphere} air current at {altitude} feet.",
-        // Oblique Strategies inspired announcements
-        "Ladies and gentlemen, we invite you to honor your errors as hidden intentions as we fly over {terrain} at {altitude} feet.",
-        "This is your captain speaking. We've discovered a new perspective at {altitude} feet, where we can observe {terrain} from an entirely different angle.",
-        "Cabin announcement: We're taking a moment to appreciate the edges of this {atmosphere} atmosphere as we cross into {terrain}.",
-        "Passengers, as we travel at {altitude} feet, remember that repetition is a form of change. We'll be flying over {terrain} for the next {time} minutes.",
-        "This is your flight crew inviting you to look at the {view} from a different perspective as we consider the quiet needs of our journey over {terrain}.",
-        "Ladies and gentlemen, as we traverse these {terrain}, consider how different this landscape would be if approached from another direction.",
-        "Cabin announcement: We're embracing the quality of simplicity as we navigate through this {atmosphere} atmosphere at {altitude} feet.",
-        "This is your captain speaking. Rather than solving the problem of altitude adjustments, we're changing the problem as we approach these {obstacle}.",
-        "Passengers, as we observe the {view} below, remember that not all places need to be filled with something - the beauty sometimes lies in the spaces between.",
-        "This is your captain inviting you to consider the remarkable {terrain} below as a landscape of pure possibility and transformation.",
-        "Ladies and gentlemen, consider this flight as a metaphor—we are moving through {atmosphere} conditions while being perfectly still within our vessel.",
-        "Cabin crew has noted that the {weather} conditions outside create a perfect balance of opposites as we pass over {terrain}.",
-        "This is your co-pilot speaking. We invite you to trust in the increasing simplicity of this journey as we follow invisible currents over {terrain}.",
-        "Passengers, we're currently experiencing what we might call 'the most easily forgotten thing' as we witness this {view} from {altitude} feet.",
-        "Your flight attendants suggest taking a moment to look away from the {view} and then look back, to see it with fresh eyes as we continue our journey.",
-        "Ladies and gentlemen, we are deliberately flying through this {atmosphere} atmosphere to remind ourselves of the value of the overlooked."
+        // Simple, direct observations
+        "Currently {altitude} feet. Temperature {temp}°C.",
+        "Passing over {terrain} now.",
+        "{weather} conditions ahead.",
+        "Altitude {altitude} feet, heading into {atmosphere} air.",
+
+        // Poetic, brief moments
+        "Look down—{view} spreading beneath us.",
+        "The {terrain} scrolls by like memory.",
+        "Suspended between earth and {atmosphere}.",
+        "Notice the {view} folding into distance.",
+        "Light catches the {terrain} differently from up here.",
+
+        // Atmospheric observations
+        "A moment of {turbulence} turbulence, like breath.",
+        "The cabin settles into {atmosphere} quiet.",
+        "We're crossing into softer air now.",
+        "Everything below rendered in miniature—{terrain}, small and still.",
+        "Sky opens wider at {altitude} feet.",
+
+        // Abstract, contemplative
+        "Time moves differently up here.",
+        "The {terrain} becomes pattern, becomes rhythm.",
+        "We're following paths traced by earlier flights, by birds, by wind.",
+        "Distance makes everything gentle.",
+        "Floating through {atmosphere} currents like thought.",
+
+        // Slightly surreal
+        "The clouds remember other flights.",
+        "If you listen carefully, the {terrain} is humming.",
+        "We're inside the weather now.",
+        "The air tastes like {altitude} feet.",
+        "Below us: {terrain}, dreaming.",
+
+        // Grounded, procedural (for contrast)
+        "Adjusting course slightly. You won't feel it.",
+        "Cabin pressure optimal.",
+        "Navigation proceeding as planned over {terrain}.",
+        "Seventeen minutes to next waypoint.",
+        "All instruments nominal at {altitude} feet."
     ];
     
-    // Artist-specific announcements
+    // Artist-specific announcements - shorter and more evocative
     const artistAnnouncements = {
-        // Brian Eno announcements
+        // Brian Eno inspired
         brianeno: [
-            "Ladies and gentlemen, we're creating an ambient environment at {altitude} feet as we fly over {terrain}.",
-            "This is your captain speaking. We're entering a space where process takes precedence over product.",
-            "Cabin announcement: As we fly over {terrain}, remember that ambient music must be as ignorable as it is interesting.",
-            "Passengers, we're now following one of the Oblique Strategies: '{view} over {terrain}'.",
-            "We invite you to appreciate how the landscape below provides us with discreet music at {altitude} feet.",
-            "This is your co-pilot speaking. We're currently in a space between melody and texture, flying through {atmosphere} air currents."
+            "As ignorable as it is interesting—{altitude} feet over {terrain}.",
+            "Process, not product. {atmosphere} air ahead.",
+            "The landscape composes itself below.",
+            "Discreet music: {terrain} at {altitude} feet.",
+            "Everything and nothing. We're between states.",
+            "Treat the cabin as an instrument."
         ],
-        
-        // Erik Satie announcements
+
+        // Erik Satie inspired
         eriksatie: [
-            "Ladies and gentlemen, we've entered what Satie would call 'furniture music' as we drift over {terrain}.",
-            "This is your captain speaking. We're approaching Gymnopédie airspace at {altitude} feet.",
-            "Cabin announcement: Please note the beautiful {view} below, inspiring our slow, atmospheric descent.",
-            "Passengers, prepare for a gentle entrance of the Gnossiennes as we navigate around {obstacle}.",
-            "We're experiencing what Satie called a 'necessary pause' as we fly through {atmosphere} conditions above {terrain}.",
-            "This is your co-pilot speaking. We're maintaining a gentle tempo of {time} beats per minute above the {terrain}."
+            "Furniture music drifting over {terrain}.",
+            "Gymnopédie airspace. Slow and pale.",
+            "A necessary pause at {altitude} feet.",
+            "The {view} moves like a gentle étude.",
+            "Satie's tempo: patient, unrushed.",
+            "Everything very soft, very slow."
         ],
-        
-        // Harold Budd announcements
+
+        // Harold Budd inspired
         haroldbudd: [
-            "Ladies and gentlemen, we're floating through reverb-soaked atmosphere at {altitude} feet above {terrain}.",
-            "This is your captain speaking. We're encountering sustained piano tones as we pass over {terrain}.",
-            "Cabin announcement: The {view} below is reflected in our soft pedal navigation through {atmosphere} air.",
-            "Passengers, note how the reverb extends our flight path as we navigate around {obstacle}.",
-            "We're experiencing the spacious echoes of our journey over {terrain}, continuing for the next {time} minutes.",
-            "This is your co-pilot speaking. We're in a state of suspended motion over {terrain}, drifting like sustained piano notes."
+            "Reverb-soaked: {altitude} feet over {terrain}.",
+            "Sustained tones. The landscape holds.",
+            "Soft pedal over {atmosphere} air.",
+            "The {view} dissolves into shimmer.",
+            "Motion suspended, drifting like harmony.",
+            "Everything echoes longer up here."
         ]
     };
     
@@ -7736,7 +7749,7 @@ function initializeLandingParticles(particleType, count) {
     groundY = (landscapeCanvas?.height || 600) * 0.85; // 85% down the screen
 
     // Get current scale notes for musical particles
-    const scaleNotes = destinations[currentDestination]?.harmonicNotes || destinations.worldTour.harmonicNotes;
+    const scaleNotes = musicalScales[currentDestination]?.harmonicNotes || musicalScales.worldTour.harmonicNotes;
 
     for (let i = 0; i < count; i++) {
         const isMusical = isMusicalParticlesEnabled && Math.random() < particleDensity;
@@ -8176,12 +8189,8 @@ function animatePlane() {
     planePosition.x = targetX;
     planePosition.y = targetY;
     
-    // Calculate direction for plane rotation
+    // Keep plane facing forward (0 degrees) at all times
     if (pathProgress < 1) {
-        const dx = path.next && pathProgress > 0.5 ? path.next.x - path.end.x : path.end.x - path.start.x;
-        const dy = path.next && pathProgress > 0.5 ? path.next.y - path.end.y : path.end.y - path.start.y;
-        const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-
         // Position the plane element
         if (plane && flightCanvas) {
             const left = (planePosition.x / 100) * flightCanvas.width;
@@ -8189,34 +8198,11 @@ function animatePlane() {
 
             plane.style.left = `${left - (plane.offsetWidth / 2)}px`;
             plane.style.top = `${top - (plane.offsetHeight / 2)}px`;
-            plane.style.transform = `rotate(${angle}deg)`;
+            // Always face forward (0 degrees)
+            plane.style.transform = `rotate(0deg)`;
 
-            // Add banking effect based on turn direction
-            // Calculate angular velocity to detect turns
-            const currentAngle = angle;
-            const prevAngle = parseFloat(plane.dataset.prevAngle || angle);
-            let angleDiff = currentAngle - prevAngle;
-
-            // Normalize angle difference to -180 to 180
-            if (angleDiff > 180) angleDiff -= 360;
-            if (angleDiff < -180) angleDiff += 360;
-
-            // Apply banking classes based on turn rate
-            if (Math.abs(angleDiff) > 2) { // Threshold for banking
-                if (angleDiff > 0) {
-                    plane.classList.add('banking-right');
-                    plane.classList.remove('banking-left');
-                } else {
-                    plane.classList.add('banking-left');
-                    plane.classList.remove('banking-right');
-                }
-            } else {
-                // Remove banking if flying straight
-                plane.classList.remove('banking-left', 'banking-right');
-            }
-
-            // Store current angle for next frame
-            plane.dataset.prevAngle = currentAngle;
+            // Remove any banking effects
+            plane.classList.remove('banking-left', 'banking-right');
         }
     }
     
@@ -9896,8 +9882,8 @@ class AmbientSequencer {
                 createLandscapeElement(frequency);
             }
             
-            // Generate announcements based on note interaction
-            if (this.id === 1 && Math.random() < 0.08) { // Only first sequencer generates announcements (8% chance)
+            // Generate announcements based on note interaction (reduced frequency)
+            if (this.id === 1 && Math.random() < 0.015) { // Only first sequencer generates announcements (1.5% chance)
                 generateAnnouncement();
             }
             
@@ -10750,6 +10736,14 @@ if (document.readyState === 'loading') {
 
 // Note: All critical functions are assigned to window object immediately after their definitions
 // This ensures they are available globally without reference errors
+
+// =============================================================================
+// CONSOLIDATED GLOBAL FUNCTION ASSIGNMENTS
+// Assign ALL critical functions to window object here to ensure availability
+// =============================================================================
+// Ensure all critical functions are globally accessible
+if (typeof hideFlightLog !== 'undefined') window.hideFlightLog = hideFlightLog;
+if (typeof downloadFlightLog !== 'undefined') window.downloadFlightLog = downloadFlightLog;
 
 // =============================================================================
 // GLOBAL FUNCTION SAFETY CHECK
