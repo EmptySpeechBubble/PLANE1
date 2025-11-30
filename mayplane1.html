@@ -10830,37 +10830,12 @@ if (document.readyState === 'loading') {
     setTimeout(initAllEnhancements, 100);
 }
 
-// Note: All critical functions are assigned to window object immediately after their definitions
-// This ensures they are available globally without reference errors
-
-// =============================================================================
-// [0x7F_GLOB_ASSIGN] CONSOLIDATED WINDOW BINDINGS
-// Direct assignment protocol - no conditional gates
-// =============================================================================
-window.takeOff = takeOff;
-window.land = land;
-window.testAudio = testAudio;
-window.changeDestination = changeDestination;
-window.hideWelcomeOverlay = hideWelcomeOverlay;
-window.showFlightLog = showFlightLog;
-window.hideFlightLog = hideFlightLog;
-window.downloadFlightLog = downloadFlightLog;
-window.playInteractiveNote = playInteractiveNote;
-window.createClickRipple = createClickRipple;
-window.flashPlaneLights = flashPlaneLights;
-window.syncAnimationToBPM = syncAnimationToBPM;
-window.startBPMSync = startBPMSync;
-window.stopBPMSync = stopBPMSync;
-window.drawRainEffect = drawRainEffect;
-window.drawLightningFlash = drawLightningFlash;
-window.makeCitiesReactToNote = makeCitiesReactToNote;
-console.log('[0x7F_GLOB] ::BIND_COMPLETE::FN_COUNT_17::EXEC_OK');
-
 // =============================================================================
 // [0xA2_INTEGRITY] FUNCTION BINDING VERIFICATION PROTOCOL
+// Note: All critical functions are assigned to window object immediately after
+// their definitions throughout the codebase. This verification runs on load.
 // =============================================================================
-(function() {
-    'use strict';
+window.addEventListener('DOMContentLoaded', function() {
     const fnMap = [
         'takeOff', 'land', 'testAudio', 'changeDestination', 'hideWelcomeOverlay',
         'hideFlightLog', 'downloadFlightLog', 'playInteractiveNote', 'createClickRipple',
@@ -10875,7 +10850,7 @@ console.log('[0x7F_GLOB] ::BIND_COMPLETE::FN_COUNT_17::EXEC_OK');
         console.warn(`[0xA2_CHK] ::BIND_FAIL::MISSING_${missing.length}::${missing.join(',')}`);
     }
     console.log(`[0xA2_CHK] ::VERIFY_${verified.length}/${fnMap.length}::STATUS_${missing.length === 0 ? 'OK' : 'DEGRADED'}`);
-})();
+});
 
 
 </script>
