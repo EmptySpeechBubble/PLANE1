@@ -7089,73 +7089,72 @@ function continueWithTakeoff() {
         logWarn('AUDIO', 'Master gain node not available for volume fade');
     }
 
-        // Initialize or restart immersive audio features
-        if (isEngineEnabled) {
-            if (!engineOscillator) {
-                setupEngineHum();
-            } else if (engineGain && audioContext) {
-                // Fade back in if already exists
-                engineGain.gain.setValueAtTime(0, audioContext.currentTime);
-                engineGain.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 1);
-            }
+    // Initialize or restart immersive audio features
+    if (isEngineEnabled) {
+        if (!engineOscillator) {
+            setupEngineHum();
+        } else if (engineGain && audioContext) {
+            // Fade back in if already exists
+            engineGain.gain.setValueAtTime(0, audioContext.currentTime);
+            engineGain.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 1);
         }
-        if (isWindEnabled) {
-            if (!windNoiseNode) {
-                setupWindNoise();
-            } else if (windNoiseGain && audioContext) {
-                // Wind starts at 0 and increases with velocity
-                windNoiseGain.gain.setValueAtTime(0, audioContext.currentTime);
-            }
-        }
-        if (isCabinPressureEnabled) {
-            if (!cabinPressureFilter) {
-                setupCabinPressureFilter();
-            } else if (audioContext) {
-                // Reset filter to open when taking off
-                cabinPressureFilter.frequency.setValueAtTime(22050, audioContext.currentTime);
-            }
-        }
-
-        // To ensure the plane starts with enough momentum
-        planeDirection.x = 0.02;
-        planeDirection.y = 0.01;
-
-        // Start flight log session
-        startFlightLog();
-
-        // Display initial announcement
-        const announcementElement = document.getElementById('announcement');
-        const announcementText = document.getElementById('announcementText');
-        if (announcementElement && announcementText) {
-            announcementText.textContent = `Welcome aboard our flight to ${currentDestinationName}, inspired by ${currentArtistName}. We're taking off into our ambient journey.`;
-            announcementElement.style.display = 'block';
-            announcementElement.style.opacity = '1';
-            
-            // Hide announcement after delay
-            setTimeout(() => {
-                fadeOutAnnouncement();
-            }, 7000);
-        }
-        
-        // Log final configuration
-        logInfo('FLIGHT', 'Flight configuration', {
-            destination: currentDestinationName,
-            artist: currentArtistName,
-            tempo: tempoControl.value,
-            altitude: altitudeControl.value,
-            volume: volumeControl.value
-        });
-
-        // Show takeoff message
-        showStatus('Taking off into ambient soundscape...');
-
-        // Start updating flight info
-        startFlightTimer();
-
-        const duration = endTimer('takeoff_sequence');
-        logInfo('FLIGHT', `✓ Takeoff complete in ${duration}ms`);
-        logInfo('FLIGHT', '═══════════════════════════════════════════════');
     }
+    if (isWindEnabled) {
+        if (!windNoiseNode) {
+            setupWindNoise();
+        } else if (windNoiseGain && audioContext) {
+            // Wind starts at 0 and increases with velocity
+            windNoiseGain.gain.setValueAtTime(0, audioContext.currentTime);
+        }
+    }
+    if (isCabinPressureEnabled) {
+        if (!cabinPressureFilter) {
+            setupCabinPressureFilter();
+        } else if (audioContext) {
+            // Reset filter to open when taking off
+            cabinPressureFilter.frequency.setValueAtTime(22050, audioContext.currentTime);
+        }
+    }
+
+    // To ensure the plane starts with enough momentum
+    planeDirection.x = 0.02;
+    planeDirection.y = 0.01;
+
+    // Start flight log session
+    startFlightLog();
+
+    // Display initial announcement
+    const announcementElement = document.getElementById('announcement');
+    const announcementText = document.getElementById('announcementText');
+    if (announcementElement && announcementText) {
+        announcementText.textContent = `Welcome aboard our flight to ${currentDestinationName}, inspired by ${currentArtistName}. We're taking off into our ambient journey.`;
+        announcementElement.style.display = 'block';
+        announcementElement.style.opacity = '1';
+
+        // Hide announcement after delay
+        setTimeout(() => {
+            fadeOutAnnouncement();
+        }, 7000);
+    }
+
+    // Log final configuration
+    logInfo('FLIGHT', 'Flight configuration', {
+        destination: currentDestinationName,
+        artist: currentArtistName,
+        tempo: tempoControl.value,
+        altitude: altitudeControl.value,
+        volume: volumeControl.value
+    });
+
+    // Show takeoff message
+    showStatus('Taking off into ambient soundscape...');
+
+    // Start updating flight info
+    startFlightTimer();
+
+    const duration = endTimer('takeoff_sequence');
+    logInfo('FLIGHT', `✓ Takeoff complete in ${duration}ms`);
+    logInfo('FLIGHT', '═══════════════════════════════════════════════');
 }
 
 // Land function - make globally accessible
@@ -7809,7 +7808,7 @@ function downloadFlightLog() {
     logText += `[0xF2_DSP_STATE]\n`;
     logText += `  MASTER_GAIN: ${(parseFloat(volumeControl?.value || 0.5) * 100).toFixed(1)}%\n`;
     logText += `  REVERB_MIX: ${(parseFloat(reverbControl?.value || 0.3) * 100).toFixed(1)}%\n`;
-    logText += `  LP_CUTOFF: ${filterControl?.value || 20000}Hz\n`;
+    logText += `  LP_CUTOFF: ${filterCutoffControl?.value || 20000}Hz\n`;
     logText += `  ALTITUDE_MOD: ${altitudeControl?.value || 1.0}\n`;
     logText += `  TEMPO_BPM: ${tempoControl?.value || 60}\n\n`;
 
@@ -7969,7 +7968,7 @@ function drawLandingParticles() {
             // Respawn particle when fully faded
             if (particle.opacity <= 0) {
                 // Reinitialize with new properties
-                const scaleNotes = destinations[currentDestination]?.harmonicNotes || destinations.worldTour.harmonicNotes;
+                const scaleNotes = musicalScales[currentDestination]?.harmonicNotes || musicalScales.worldTour.harmonicNotes;
                 const isMusical = isMusicalParticlesEnabled && Math.random() < particleDensity;
                 const note = isMusical ? scaleNotes[Math.floor(Math.random() * scaleNotes.length)][Math.floor(Math.random() * scaleNotes[0].length)] : null;
 
